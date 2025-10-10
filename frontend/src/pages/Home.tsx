@@ -1,8 +1,10 @@
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Map from '../components/Map';
 import L from 'leaflet';
 
 export default function Home() {
+  const navigate = useNavigate();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.CircleMarker | null>(null);
 
@@ -49,6 +51,10 @@ export default function Home() {
     }
   };
 
+  const handleQuickRegister = () => {
+    navigate('/register/location');
+  };
+
   return (
     <div className="h-screen w-full flex flex-col">
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
@@ -69,7 +75,10 @@ export default function Home() {
         <Map onMapReady={handleMapReady} />
       </main>
       
-      <button className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[1000]">
+      <button 
+        onClick={handleQuickRegister}
+        className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[1000]"
+      >
         ⚡ クイック登録
       </button>
     </div>
