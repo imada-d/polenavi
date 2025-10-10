@@ -1,0 +1,19 @@
+{
+  "name": "@polenavi/shared",
+  "version": "0.1.0",
+  "description": "Shared utilities and types for PoleNavi",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "tsx src/normalize.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
+  }
+}

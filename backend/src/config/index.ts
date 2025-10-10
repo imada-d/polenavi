@@ -34,31 +34,43 @@ export const config = {
   
   // ポイント設定（変更可能にする！）
   points: {
-    // 登録時
+    // 登録時（GPS自動）
     gpsWithPhoto: 10,
+    gpsWithFullPhoto: 12,      // 全体写真ボーナス込み
     gpsWithoutPhoto: 6,
-    manualWithPhoto: 5,
+    gpsWithoutPhotoBonus: 4,   // 写真追加 or 検証3人で満額
+    
+    // 登録時（手動指定）
+    manualWithPhoto: 3,
+    manualWithPhotoBonus: 2,   // 検証3人で満額
     manualWithoutPhoto: 0,
+    manualWithoutPhotoPhotoBonus: 2,   // 写真追加
+    manualWithoutPhotoVerifyBonus: 3,  // 検証3人
     
-    // ボーナス
-    fullPhotoBonus: 2,
-    autoIdPenalty: 4, // #NoID の場合 6pt (10 - 4)
+    // 番号札0枚（自動生成）
+    noIdAuto: 6,               // #NoID自動生成
+    noIdManual: 10,            // 手動で番号入力
     
-    // 検証時（検証する人）
+    // その他
+    photoAdd: 3,               // 既存電柱に写真追加
+    otherNumberAdd: 10,        // 共架柱の別番号追加
+    fullPhotoBonus: 2,         // 全体写真ボーナス
+    
+    // 検証ポイント（検証する人）
     verifyGpsWithPhoto: 2,
     verifyGpsWithoutPhoto: 3,
     verifyManualWithPhoto: 3,
     verifyManualWithoutPhoto: 4,
     
-    // 検証完了時（投稿者）
+    // 検証完了（投稿者がもらう）
     verifiedGpsWithoutPhoto: 4,
     verifiedManualWithPhoto: 2,
     verifiedManualWithoutPhoto: 3,
     
-    // 写真評価
-    photoLike: 1,
-    photoLikeGive: 1,
-    photoLikeDailyLimit: 10,
+    // いいね
+    likeReceived: 1,           // いいねをもらう
+    likeGiven: 1,              // いいねをする
+    likeDailyLimit: 10,        // いいね1日上限
     
     // 連続登録ボーナス
     consecutive3Days: 5,
