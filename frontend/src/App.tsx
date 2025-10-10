@@ -9,7 +9,7 @@ import Ranking from './pages/Ranking';
 export default function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 pb-16">
+      <div className="relative">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<Search />} />
