@@ -7,6 +7,7 @@ import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import RegisterLocation from './pages/RegisterLocation';
 import RegisterPoleType from './pages/RegisterPoleType';
+import RegisterPoleSubType from './pages/RegisterPoleSubType';
 
 function AppContent() {
   const location = useLocation();
@@ -24,6 +25,7 @@ function AppContent() {
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-type" element={<RegisterPoleType />} />
+        <Route path="/register/pole-subtype" element={<RegisterPoleSubType />} />
       </Routes>
       {!hideBottomNav && <BottomNav />}
     </div>
