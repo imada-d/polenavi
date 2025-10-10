@@ -93,11 +93,7 @@ export default function RegisterLocation() {
   // 次へ進むボタン
   const handleNext = () => {
     if (pinLocation) {
-      // TODO: 次の画面（柱の種類選択）へ遷移
-      // 位置情報を state で渡す
-      console.log('選択された位置:', pinLocation);
-      alert('次の画面（柱の種類選択）へ進みます\n位置: ' + pinLocation);
-      // navigate('/register/pole-type', { state: { location: pinLocation } });
+      navigate('/register/pole-type', { state: { location: pinLocation } });
     }
   };
 
