@@ -3,21 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "description": "電柱・照明柱の位置情報を共有するプラットフォーム",
-  "workspaces": [
-    "backend",
-    "frontend",
-    "shared"
-  ],
   "scripts": {
-    "dev:backend": "npm run dev --workspace=backend",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "build:backend": "npm run build --workspace=backend",
-    "build:frontend": "npm run build --workspace=frontend",
-    "build": "npm run build:backend && npm run build:frontend"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build"
   },
   "engines": {
     "node": ">=18.0.0",
