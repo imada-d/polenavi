@@ -1,73 +1,70 @@
 import { useState } from 'react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 import imageCompression from 'browser-image-compression';
 
 interface PhotoCaptureProps {
-  onPhotoCapture: (dataUrl: string) => void; // 撮影した写真のBase64データを親に渡す
-  buttonText?: string; // ボタンのテキスト（デフォルト: "写真を撮影"）
-  allowGallery?: boolean; // ギャラリー選択を許可するか（デフォルト: true）
+  onPhotoCapture: (dataUrl: string) => void; // 1枚撮影時のコールバック
+  onMultiplePhotoCapture?: (dataUrls: string[]) => void; // 複数選択時のコールバック
+  buttonText?: string;
+  allowGallery?: boolean;
+  allowMultiple?: boolean; // 複数選択を許可するか
 }
 
 export default function PhotoCapture({ 
   onPhotoCapture, 
+  onMultiplePhotoCapture,
   buttonText = '写真を撮影',
-  allowGallery = true 
+  allowGallery = true,
+  allowMultiple = false
 }: PhotoCaptureProps) {
-  const [preview, setPreview] = useState<string | null>(null); // プレビュー画像
-  const [isProcessing, setIsProcessing] = useState(false); // 処理中かどうか
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // カメラで撮影
+  // カメラで撮影（1枚）
   const handleTakePhoto = async () => {
     try {
       setIsProcessing(true);
       
-      // Capacitorのカメラを起動
       const photo = await Camera.getPhoto({
-        resultType: CameraResultType.DataUrl, // Base64形式で取得
-        source: CameraSource.Camera, // カメラから撮影
-        quality: 80, // 画質80%（サイズとのバランス）
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        quality: 80,
       });
 
       if (photo.dataUrl) {
-        // プレビュー表示
         setPreview(photo.dataUrl);
-        // 親コンポーネントに通知
         onPhotoCapture(photo.dataUrl);
       }
     } catch (error) {
       console.error('カメラ撮影エラー:', error);
-      alert('カメラの起動に失敗しました。設定を確認してください。');
+      alert('カメラの起動に失敗しました。');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // ギャラリーから選択
+  // ギャラリーから選択（1枚）
   const handleSelectFromGallery = async () => {
     try {
       setIsProcessing(true);
       
-      // Capacitorのカメラ（ギャラリーモード）を起動
       const photo = await Camera.getPhoto({
         resultType: CameraResultType.DataUrl,
-        source: CameraSource.Photos, // ギャラリーから選択
-        quality: 90, // ギャラリーは高画質
+        source: CameraSource.Photos,
+        quality: 90,
       });
 
       if (photo.dataUrl) {
-        // Base64をBlobに変換（圧縮のため）
         const blob = await fetch(photo.dataUrl).then(r => r.blob());
         
-        // 5MB超えていたら圧縮
         if (blob.size > 5 * 1024 * 1024) {
-          console.log('画像が5MBを超えているため圧縮します...');
           const compressedBlob = await imageCompression(blob as File, {
-            maxSizeMB: 5, // 最大5MB
-            maxWidthOrHeight: 1920, // 最大解像度
-            useWebWorker: true, // Web Workerで高速化
+            maxSizeMB: 5,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
           });
           
-          // 圧縮後のBlobをBase64に変換
           const reader = new FileReader();
           reader.onloadend = () => {
             const compressedDataUrl = reader.result as string;
@@ -76,15 +73,92 @@ export default function PhotoCapture({
           };
           reader.readAsDataURL(compressedBlob);
         } else {
-          // 5MB以下ならそのまま使用
           setPreview(photo.dataUrl);
           onPhotoCapture(photo.dataUrl);
         }
       }
     } catch (error) {
       console.error('ギャラリー選択エラー:', error);
-      alert('ギャラリーから画像を選択できませんでした。');
     } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 複数選択（ネイティブ: pickImages / Web: input file）
+  const handleSelectMultiple = async () => {
+    try {
+      setIsProcessing(true);
+      
+      if (Capacitor.isNativePlatform()) {
+        // ネイティブアプリ → CapacitorのpickImages
+        const photos = await Camera.pickImages({
+          quality: 90,
+        });
+        
+        if (photos.photos && photos.photos.length > 0) {
+          const dataUrls = photos.photos
+            .map(p => p.webPath ? `data:image/jpeg;base64,${p.webPath}` : null)
+            .filter((url): url is string => url !== null);
+          
+          if (onMultiplePhotoCapture) {
+            onMultiplePhotoCapture(dataUrls);
+          }
+        }
+      } else {
+        // Webブラウザ → HTML input file
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.multiple = true;
+        
+        input.onchange = async (e) => {
+          const files = (e.target as HTMLInputElement).files;
+          if (!files || files.length === 0){
+            setIsProcessing(false);
+            return;
+          }
+          
+          const dataUrls: string[] = [];
+          
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // 5MB超えは圧縮
+            let processedFile = file;
+            if (file.size > 5 * 1024 * 1024) {
+              processedFile = await imageCompression(file, {
+                maxSizeMB: 5,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+              });
+            }
+            
+            // Base64に変換
+            const dataUrl = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(processedFile);
+            });
+            
+            dataUrls.push(dataUrl);
+          }
+          
+          if (onMultiplePhotoCapture) {
+            onMultiplePhotoCapture(dataUrls);
+          }
+          
+          setIsProcessing(false);
+        };
+        input.oncancel = () => {
+          setIsProcessing(false);
+        };
+
+        
+        input.click();
+      }
+    } catch (error) {
+      console.error('複数選択エラー:', error);
+      alert('写真の選択に失敗しました。');
       setIsProcessing(false);
     }
   };
@@ -96,7 +170,6 @@ export default function PhotoCapture({
 
   return (
     <div className="space-y-4">
-      {/* プレビュー表示 */}
       {preview ? (
         <div className="space-y-3">
           <img 
@@ -106,7 +179,7 @@ export default function PhotoCapture({
           />
           <button
             onClick={handleRetake}
-            className="w-full py-3 bg-gray-500 text-white rounded-lg font-bold hover:bg-gray-600"
+            className="w-full py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-bold hover:border-gray-400"
           >
             📸 撮り直す
           </button>
@@ -117,27 +190,42 @@ export default function PhotoCapture({
           <button
             onClick={handleTakePhoto}
             disabled={isProcessing}
-            className={`w-full py-4 rounded-lg font-bold text-lg transition-all ${
+            className={`w-full py-4 rounded-lg font-bold text-lg transition-all border-2 ${
               isProcessing
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
             }`}
           >
             {isProcessing ? '処理中...' : `📷 ${buttonText}`}
           </button>
 
-          {/* ギャラリーから選択ボタン（allowGalleryがtrueの場合のみ） */}
+          {/* ギャラリーから選択ボタン（1枚） */}
           {allowGallery && (
             <button
               onClick={handleSelectFromGallery}
               disabled={isProcessing}
-              className={`w-full py-4 rounded-lg font-bold text-lg transition-all ${
+              className={`w-full py-4 rounded-lg font-bold text-lg transition-all border-2 ${
                 isProcessing
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-400'
+                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
               }`}
             >
               {isProcessing ? '処理中...' : '🖼️ ギャラリーから選択'}
+            </button>
+          )}
+
+          {/* 複数選択ボタン */}
+          {allowMultiple && onMultiplePhotoCapture && (
+            <button
+              onClick={handleSelectMultiple}
+              disabled={isProcessing}
+              className={`w-full py-4 rounded-lg font-bold text-lg transition-all border-2 ${
+                isProcessing
+                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              {isProcessing ? '処理中...' : '📸 複数選択（まとめて）'}
             </button>
           )}
         </div>

@@ -37,23 +37,16 @@ export default function RegisterPoleInfo() {
       return;
     }
 
-
-    // 次の画面へ（写真撮影）
-    if (plateCount === 0) {
-    // 0枚 → 全体写真撮影
-    navigate('/register/photo-full', { 
-        state: { 
+    // 次の画面へ（写真分類）
+    // 0枚でも1枚以上でも同じ画面を使う
+    navigate('/register/photo-classify', { 
+      state: { 
         location: pinLocation,  // 位置情報
         poleType,               // 柱の種類
-        poleSubType,            // その他の詳細
+        poleSubType,            // その他の詳細（poleType='other'の場合のみ）
         plateCount              // 番号札の枚数
-        } 
+      } 
     });
-    } else {
-        // 1枚以上 → 番号札撮影（未実装）
-        alert(`番号札撮影へ（${plateCount}枚）（未実装）`);
-        // TODO: navigate('/register/photo-plate', { state: { ... } });
-    }
 };
 
 

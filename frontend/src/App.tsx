@@ -6,8 +6,11 @@ import Stats from './pages/Stats';
 import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import RegisterLocation from './pages/RegisterLocation';
-import RegisterPoleInfo from './pages/RegisterPoleInfo'; // 👈 新しい画面
-import RegisterPhotoFull from './pages/RegisterPhotoFull';
+import RegisterPoleInfo from './pages/RegisterPoleInfo'; 
+import RegisterPhotoClassify from './pages/RegisterPhotoClassify';
+import RegisterNumberInput from './pages/RegisterNumberInput';
+
+
 
 function AppContent() {
   const location = useLocation();
@@ -25,7 +28,8 @@ function AppContent() {
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-info" element={<RegisterPoleInfo />} /> {/* 👈 新しいルート */}
-        <Route path="/register/photo-full" element={<RegisterPhotoFull />} /> {/* 👈 追加 */}
+        <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} /> {/* 👈 新しいルート */}
+        <Route path="/register/number-input" element={<RegisterNumberInput />} /> {/* 👈 追加 */}
       </Routes>
       {!hideBottomNav && <BottomNav />}
     </div>
