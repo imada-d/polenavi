@@ -12,6 +12,7 @@ export default function RegisterLocation() {
   const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null);
   const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapType, setMapType] = useState<'street' | 'hybrid'>('street'); // 地図種類の切り替え
 
   // 画面表示時にGPS自動取得
   useEffect(() => {
@@ -66,11 +67,19 @@ export default function RegisterLocation() {
         draggable: true,
       }).addTo(map);
 
-      // ドラッグ時にピンの位置を更新
+      // ドラッグ時にピンの位置を更新し、地図の中心もピンに追従
       draggablePinRef.current.on('dragend', (event) => {
         const marker = event.target;
         const position = marker.getLatLng();
         setPinLocation([position.lat, position.lng]);
+        
+        // 地図の中心をピンの位置に移動（なめらかなアニメーション付き）
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.panTo(position, { 
+            animate: true, 
+            duration: 0.3  // 0.3秒でなめらかに移動
+          });
+        } 
       });
     }
   };
@@ -93,7 +102,7 @@ export default function RegisterLocation() {
   // 次へ進むボタン
   const handleNext = () => {
     if (pinLocation) {
-      navigate('/register/pole-type', { state: { location: pinLocation } });
+      navigate('/register/pole-info', { state: { location: pinLocation } });
     }
   };
 
@@ -127,15 +136,40 @@ export default function RegisterLocation() {
         {currentLocation && pinLocation && (
           <Map 
             center={currentLocation} 
-            zoom={18} 
+            zoom={18}
+            mapType={mapType}  // 地図種類を渡す
             onMapReady={handleMapReady}
           />
         )}
 
+        {/* 地図種類選択 */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
+          <button
+            onClick={() => setMapType('street')}
+            className={`px-4 py-2 rounded-lg shadow-lg font-bold transition-all ${
+              mapType === 'street'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            🗺️ 地図
+          </button>
+          <button
+            onClick={() => setMapType('hybrid')}
+            className={`px-4 py-2 rounded-lg shadow-lg font-bold transition-all ${
+              mapType === 'hybrid'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            🌐 航空写真
+          </button>
+        </div>
+
         {/* 現在地に戻すボタン */}
         <button
           onClick={handleResetToCurrentLocation}
-          className="absolute top-4 right-4 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 z-[1000]"
+          className="absolute top-32 right-4 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 z-[1000]"
           title="現在地に戻す"
         >
           📍

@@ -1,0 +1,8 @@
+<svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- 円形部分 -->
+  <circle cx="16" cy="12" r="11" fill="#4285F4" stroke="#fff" stroke-width="2"/>
+  <!-- 雷マーク -->
+  <path d="M17 6 L14 13 L16 13 L13 18 L18 12 L16 12 L19 6 Z" fill="#fff"/>
+  <!-- 下のピン -->
+  <path d="M14 22 L16 28 L18 22 Z" fill="#4285F4" stroke="#fff" stroke-width="1"/>
+</svg>

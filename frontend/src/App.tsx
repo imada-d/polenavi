@@ -6,8 +6,7 @@ import Stats from './pages/Stats';
 import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import RegisterLocation from './pages/RegisterLocation';
-import RegisterPoleType from './pages/RegisterPoleType';
-import RegisterPoleSubType from './pages/RegisterPoleSubType';
+import RegisterPoleInfo from './pages/RegisterPoleInfo'; // 👈 新しい画面
 
 function AppContent() {
   const location = useLocation();
@@ -24,8 +23,7 @@ function AppContent() {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/register/location" element={<RegisterLocation />} />
-        <Route path="/register/pole-type" element={<RegisterPoleType />} />
-        <Route path="/register/pole-subtype" element={<RegisterPoleSubType />} />
+        <Route path="/register/pole-info" element={<RegisterPoleInfo />} /> {/* 👈 新しいルート */}
       </Routes>
       {!hideBottomNav && <BottomNav />}
     </div>
