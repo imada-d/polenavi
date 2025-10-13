@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import PhotoCapture from '../components/PhotoCapture';
+import PhotoCapture from '../../components/mobile/PhotoCapture';
 
 // 写真の分類タイプ
 type PhotoType = 'plate' | 'full' | 'detail';

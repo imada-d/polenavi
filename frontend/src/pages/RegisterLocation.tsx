@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Map from '../components/Map';
+import Map from '../components/common/Map';
 import L from 'leaflet';
 
 export default function RegisterLocation() {

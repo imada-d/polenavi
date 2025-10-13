@@ -6,11 +6,11 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 // カスタムSVGアイコンをインポート
-import poleElectricIcon from '../assets/icons/pole-electric.svg';
-import poleLightIcon from '../assets/icons/pole-light.svg';
-import poleSignIcon from '../assets/icons/pole-sign.svg';
-import poleTrafficIcon from '../assets/icons/pole-traffic.svg';
-import poleOtherIcon from '../assets/icons/pole-other.svg';
+import poleElectricIcon from "../../assets/icons/pole-electric.svg";
+import poleLightIcon from "../../assets/icons/pole-light.svg";
+import poleSignIcon from "../../assets/icons/pole-sign.svg";
+import poleTrafficIcon from "../../assets/icons/pole-traffic.svg";
+import poleOtherIcon from "../../assets/icons/pole-other.svg";
 
 const DefaultIcon = L.icon({
   iconUrl: icon,

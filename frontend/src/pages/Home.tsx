@@ -1,9 +1,11 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Map from '../components/Map';
+import Map from '../components/common/Map';
+import RegisterPanel from './pc/RegisterPanel';
 import L from 'leaflet';
 
 export default function Home() {
+    console.log('🟢 Home がレンダリングされました');
   const navigate = useNavigate();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.CircleMarker | null>(null);
@@ -17,6 +19,10 @@ export default function Home() {
   // 住所検索
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+
+  // PC版：登録パネルの表示状態
+  const [showRegisterPanel, setShowRegisterPanel] = useState(false);
+  const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
 
   // 初回のみ現在地を取得して初期表示にする
   useEffect(() => {
@@ -121,8 +127,31 @@ export default function Home() {
     }
   };
 
+  // 新規登録ボタンのクリック処理（レスポンシブ対応）
+  // モバイル（768px未満）: 画面遷移、PC（768px以上）: 右パネル表示
   const handleQuickRegister = () => {
-    navigate('/register/location');
+    console.log('🟡 handleQuickRegister が呼ばれました');
+    if (window.innerWidth < 768) {
+      // モバイル：既存の画面遷移
+      navigate('/register/location');
+    } else {
+      // PC：現在地を取得して RegisterPanel を表示
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            setPinLocation([latitude, longitude]);
+            setShowRegisterPanel(true);
+          },
+          (error) => {
+            console.error('位置情報の取得に失敗しました:', error);
+            alert('位置情報の取得に失敗しました。設定を確認してください。');
+          }
+        );
+      } else {
+        alert('お使いのブラウザは位置情報に対応していません。');
+      }
+    }
   };
 
   return (
@@ -165,7 +194,9 @@ export default function Home() {
         </div>
         
         {/* 右側のコントロールエリア */}
-        <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-2">
+        <div className={`absolute top-4 z-[1000] flex flex-col gap-2 transition-all duration-300 ${
+          showRegisterPanel ? 'right-[420px]' : 'right-4'
+        }`}>
           {/* 地図タイプ選択ボタン */}
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <button
@@ -197,16 +228,25 @@ export default function Home() {
             className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
             title="現在地を表示"
           >
-            <span className="text-2xl">現在地</span>
+            <span className="text-2xl">📍</span>
           </button>
         </div>
+
+        {/* PC版：登録パネル（768px以上で表示） */}
+        {showRegisterPanel && pinLocation && (
+          <RegisterPanel
+            pinLocation={pinLocation}
+            onClose={() => setShowRegisterPanel(false)}
+          />
+        )}
       </main>
       
+      {/* 新規登録ボタン */}
       <button 
         onClick={handleQuickRegister}
         className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[1000]"
       >
-        ⚡ クイック登録
+        ＋ 新規登録
       </button>
     </div>
   );

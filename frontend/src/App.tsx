@@ -1,18 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import BottomNav from './components/BottomNav';
+import BottomNav from './components/mobile/BottomNav';
 import Home from './pages/Home';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
 import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import RegisterLocation from './pages/RegisterLocation';
-import RegisterPoleInfo from './pages/RegisterPoleInfo'; 
-import RegisterPhotoClassify from './pages/RegisterPhotoClassify';
-import RegisterNumberInput from './pages/RegisterNumberInput';
+import RegisterPoleInfo from './pages/mobile/RegisterPoleInfo'; 
+import RegisterPhotoClassify from './pages/mobile/RegisterPhotoClassify';
+import RegisterNumberInput from './pages/mobile/RegisterNumberInput';
 
 
 
 function AppContent() {
+  console.log('🔵 AppContent がレンダリングされました');
   const location = useLocation();
   
   // 登録画面ではボトムナビを非表示

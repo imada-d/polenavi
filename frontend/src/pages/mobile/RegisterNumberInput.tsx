@@ -26,11 +26,11 @@ export default function RegisterNumberInput() {
   
   // 前の画面から受け取ったデータ
   const { 
-    location: pinLocation, 
+    //location: pinLocation, 
     poleType, 
     poleSubType, 
     plateCount,
-    photos 
+    //photos 
   } = location.state || {};
   
   // 入力された番号の配列
