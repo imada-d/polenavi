@@ -7,6 +7,7 @@ import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import RegisterLocation from './pages/RegisterLocation';
 import RegisterPoleInfo from './pages/RegisterPoleInfo'; // 👈 新しい画面
+import RegisterPhotoFull from './pages/RegisterPhotoFull';
 
 function AppContent() {
   const location = useLocation();
@@ -24,6 +25,7 @@ function AppContent() {
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-info" element={<RegisterPoleInfo />} /> {/* 👈 新しいルート */}
+        <Route path="/register/photo-full" element={<RegisterPhotoFull />} /> {/* 👈 追加 */}
       </Routes>
       {!hideBottomNav && <BottomNav />}
     </div>
