@@ -20,9 +20,6 @@ export default function PoleInfoSection({
   setPlateCount,
 }: PoleInfoSectionProps) {
 
-    // デバッグ用
-  console.log('🔴 PoleInfoSection がレンダリングされました');
-  console.log('🔴 このファイルのパス:', import.meta.url);  // ← 追加
   
   return (
     <>

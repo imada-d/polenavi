@@ -6,10 +6,13 @@ import MapPinRegister from '../components/pc/register/MapPinRegister';
 import L from 'leaflet';
 
 export default function Home() {
-  console.log('🟢 Home がレンダリングされました');
   const navigate = useNavigate();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.CircleMarker | null>(null);
+  
+  // 何を: パネル表示中の固定ピン用のref
+  // なぜ: 位置調整モード以外でもピンを表示し続けるため
+  const fixedPinRef = useRef<L.Marker | null>(null);
   
   // 地図タイプの状態を管理（2モード）
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street');
@@ -44,6 +47,43 @@ export default function Home() {
       );
     }
   }, []);
+
+  // 何を: パネルが開いたら固定ピンを表示、閉じたら削除
+  // なぜ: パネル表示中は常にピンを表示するため
+  useEffect(() => {
+    if (showRegisterPanel && pinLocation && mapInstanceRef.current) {
+      // 固定ピンを作成（ドラッグ不可）
+      if (fixedPinRef.current) {
+        mapInstanceRef.current.removeLayer(fixedPinRef.current);
+      }
+
+      fixedPinRef.current = L.marker(pinLocation, {
+        draggable: false,
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(mapInstanceRef.current);
+    } else {
+      // パネルが閉じたら固定ピンを削除
+      if (fixedPinRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(fixedPinRef.current);
+        fixedPinRef.current = null;
+      }
+    }
+
+    // クリーンアップ
+    return () => {
+      if (fixedPinRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(fixedPinRef.current);
+        fixedPinRef.current = null;
+      }
+    };
+  }, [showRegisterPanel, pinLocation]);
 
   // handleMapReady をメモ化（再実行を防ぐ）
   const handleMapReady = useCallback((map: L.Map) => {
@@ -261,9 +301,13 @@ export default function Home() {
         {showRegisterPanel && pinLocation && (
           <RegisterPanel
             pinLocation={pinLocation}
-            onClose={() => setShowRegisterPanel(false)}
+            onClose={() => {
+              setShowRegisterPanel(false);
+              setPinLocation(null); // ピンもリセット
+            }}
             map={mapInstanceRef.current}
             onLocationChange={setPinLocation}
+            fixedPinRef={fixedPinRef}
           />
         )}
       </main>

@@ -15,11 +15,7 @@ export default function NumberSection({
   numbers,
   setNumbers,
 }: NumberSectionProps) {
-  
-  // デバッグ用
-  console.log('🟢 NumberSection がレンダリングされました');
-  console.log('🟢 このファイルのパス:', import.meta.url);
-  
+    
   // 番号を更新する関数
   // 何を: 指定されたインデックスの番号を更新
   // なぜ: 複数の入力欄を管理するため

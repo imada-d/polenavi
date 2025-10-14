@@ -11,9 +11,10 @@ interface RegisterPanelProps {
   onClose: () => void; // パネルを閉じる関数
   map: L.Map | null; // 地図インスタンス（位置調整用）
   onLocationChange: (location: [number, number]) => void; // 位置変更のコールバック
+  fixedPinRef: React.MutableRefObject<L.Marker | null>; // 固定ピンのref
 }
 
-function RegisterPanel({ pinLocation, onClose, map, onLocationChange }: RegisterPanelProps) {
+function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRef }: RegisterPanelProps) {
   // ステート管理
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
   const [poleSubType, setPoleSubType] = useState<'light' | 'sign' | 'traffic' | 'other' | null>(null);
@@ -24,12 +25,7 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange }: Register
   // 何を: 位置調整モードの状態管理
   // なぜ: ユーザーがパネル内から位置を再調整できるようにするため
   const [isAdjustingPosition, setIsAdjustingPosition] = useState(false);
-  const markerRef = useRef<L.Marker | null>(null);
-
-  // デバッグ用：何回レンダリングされているか確認
-  console.log('RegisterPanel がレンダリングされました');
-  console.log('poleType:', poleType);
-  console.log('plateCount:', plateCount);
+  const adjustMarkerRef = useRef<L.Marker | null>(null);
 
   // plateCountが変わったら、numbersを初期化
   // 何を: 番号札の枚数に応じて、入力欄の数を調整
@@ -62,7 +58,22 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange }: Register
 
     setIsAdjustingPosition(true);
 
-    // 既存のピンを削除して、ドラッグ可能なピンを作成
+    // 何を: 固定ピンを一時的に削除
+    // なぜ: ドラッグ可能なピンと重ならないようにするため
+    if (fixedPinRef.current) {
+      map.removeLayer(fixedPinRef.current);
+      fixedPinRef.current = null;
+    }
+
+    // 何を: 既存の調整用ピンがあれば削除
+    // なぜ: ピンが2個にならないようにするため
+    if (adjustMarkerRef.current) {
+      map.removeLayer(adjustMarkerRef.current);
+      adjustMarkerRef.current = null;
+    }
+
+    // 何を: ドラッグ可能なピンを作成
+    // なぜ: ユーザーが位置を微調整できるようにするため
     const marker = L.marker(pinLocation, {
       draggable: true,
       icon: L.icon({
@@ -75,13 +86,21 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange }: Register
       })
     }).addTo(map);
 
-    // ドラッグ終了時に位置を更新
+    // 何を: ドラッグ終了時に位置を更新し、地図を移動
+    // なぜ: ピンを置いた後に地図がピンを追うため
     marker.on('dragend', () => {
       const pos = marker.getLatLng();
       onLocationChange([pos.lat, pos.lng]);
+      
+      // 何を: ピンを置いた位置に地図を移動
+      // なぜ: ドラッグ中は追わず、置いてから追うため
+      map.panTo(pos, {
+        animate: true,
+        duration: 0.5
+      });
     });
 
-    markerRef.current = marker;
+    adjustMarkerRef.current = marker;
 
     // 地図をピンの位置に移動
     map.setView(pinLocation, 18, {
@@ -95,10 +114,27 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange }: Register
   const handleFinishAdjustPosition = () => {
     setIsAdjustingPosition(false);
 
-    // ドラッグ可能なピンを削除
-    if (markerRef.current && map) {
-      map.removeLayer(markerRef.current);
-      markerRef.current = null;
+    // 何を: ドラッグ可能なピンを削除
+    // なぜ: 固定ピンに戻すため
+    if (adjustMarkerRef.current && map) {
+      map.removeLayer(adjustMarkerRef.current);
+      adjustMarkerRef.current = null;
+    }
+
+    // 何を: 固定ピンを復活
+    // なぜ: 位置調整が終わっても位置を表示し続けるため
+    if (pinLocation && map) {
+      fixedPinRef.current = L.marker(pinLocation, {
+        draggable: false,
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(map);
     }
   };
 
@@ -198,7 +234,7 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange }: Register
           setPlateCount={setPlateCount}
         />
         
-        {/* 位置調整セクション（NEW!） */}
+        {/* 位置調整セクション */}
         <div>
           <h2 className="text-sm font-bold text-gray-700 mb-3">📍 位置</h2>
           

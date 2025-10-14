@@ -13,7 +13,6 @@ import RegisterNumberInput from './pages/mobile/RegisterNumberInput';
 
 
 function AppContent() {
-  console.log('🔵 AppContent がレンダリングされました');
   const location = useLocation();
   
   // 登録画面ではボトムナビを非表示
