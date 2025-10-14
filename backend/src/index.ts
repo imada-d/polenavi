@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { config } from './config';
+import polesRouter from './routes/poles';
 
 // 環境変数を読み込み
 dotenv.config();
@@ -32,6 +33,9 @@ app.get('/', (req, res) => {
     docs: '/api/docs'
   });
 });
+
+// APIルート（追加）
+app.use('/api/poles', polesRouter);
 
 // 404ハンドラー
 app.use((req, res) => {
