@@ -2,10 +2,11 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Map from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
+import MapPinRegister from '../components/pc/register/MapPinRegister';
 import L from 'leaflet';
 
 export default function Home() {
-    console.log('🟢 Home がレンダリングされました');
+  console.log('🟢 Home がレンダリングされました');
   const navigate = useNavigate();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.CircleMarker | null>(null);
@@ -23,6 +24,9 @@ export default function Home() {
   // PC版：登録パネルの表示状態
   const [showRegisterPanel, setShowRegisterPanel] = useState(false);
   const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
+  
+  // 登録モードの管理
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   // 初回のみ現在地を取得して初期表示にする
   useEffect(() => {
@@ -128,20 +132,18 @@ export default function Home() {
   };
 
   // 新規登録ボタンのクリック処理（レスポンシブ対応）
-  // モバイル（768px未満）: 画面遷移、PC（768px以上）: 右パネル表示
   const handleQuickRegister = () => {
-    console.log('🟡 handleQuickRegister が呼ばれました');
     if (window.innerWidth < 768) {
       // モバイル：既存の画面遷移
       navigate('/register/location');
     } else {
-      // PC：現在地を取得して RegisterPanel を表示
+      // PC：登録モードに入る
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
             setPinLocation([latitude, longitude]);
-            setShowRegisterPanel(true);
+            setIsRegisterMode(true);
           },
           (error) => {
             console.error('位置情報の取得に失敗しました:', error);
@@ -152,6 +154,18 @@ export default function Home() {
         alert('お使いのブラウザは位置情報に対応していません。');
       }
     }
+  };
+
+  // 位置確定
+  const handleConfirmLocation = () => {
+    setIsRegisterMode(false);
+    setShowRegisterPanel(true);
+  };
+
+  // キャンセル
+  const handleCancelRegister = () => {
+    setIsRegisterMode(false);
+    setPinLocation(null);
   };
 
   return (
@@ -232,22 +246,37 @@ export default function Home() {
           </button>
         </div>
 
+        {/* PC版：ピン登録モード */}
+        {isRegisterMode && (
+          <MapPinRegister
+            map={mapInstanceRef.current}
+            pinLocation={pinLocation}
+            setPinLocation={setPinLocation}
+            onConfirm={handleConfirmLocation}
+            onCancel={handleCancelRegister}
+          />
+        )}
+
         {/* PC版：登録パネル（768px以上で表示） */}
         {showRegisterPanel && pinLocation && (
           <RegisterPanel
             pinLocation={pinLocation}
             onClose={() => setShowRegisterPanel(false)}
+            map={mapInstanceRef.current}
+            onLocationChange={setPinLocation}
           />
         )}
       </main>
       
-      {/* 新規登録ボタン */}
-      <button 
-        onClick={handleQuickRegister}
-        className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[1000]"
-      >
-        ＋ 新規登録
-      </button>
+      {/* 新規登録ボタン（登録モード中とパネル表示中は非表示） */}
+      {!isRegisterMode && !showRegisterPanel && (
+        <button 
+          onClick={handleQuickRegister}
+          className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[1000]"
+        >
+          ＋ 新規登録
+        </button>
+      )}
     </div>
   );
 }
