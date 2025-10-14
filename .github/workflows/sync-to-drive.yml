@@ -1,0 +1,170 @@
+# GitHub ActionsでGoogle Driveにコードを自動同期
+# 目的: pushされたコードをAIが読み取れるようにGoogle Driveにアップロード
+name: Sync Code to Google Drive
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  sync-to-drive:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # リポジトリのコードをチェックアウト
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 全履歴を取得（コミット情報用）
+
+      # Node.jsのセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # Google Drive APIクライアントをインストール
+      - name: Install dependencies
+        run: |
+          npm install googleapis
+
+      # コミット情報を取得してファイルに保存
+      # 何がいつ変更されたかをAIが理解できるようにする
+      - name: Generate commit info
+        run: |
+          echo "最終更新日時: $(date '+%Y-%m-%d %H:%M:%S')" > commit-info.txt
+          echo "コミットハッシュ: ${{ github.sha }}" >> commit-info.txt
+          echo "コミットメッセージ: $(git log -1 --pretty=%B)" >> commit-info.txt
+          echo "変更されたファイル:" >> commit-info.txt
+          git diff-tree --no-commit-id --name-only -r ${{ github.sha }} >> commit-info.txt
+
+      # Google Driveに同期するスクリプトを作成・実行
+      - name: Sync to Google Drive
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+        run: |
+          # Google Drive同期スクリプトを作成
+          cat > sync-drive.js << 'EOF'
+          const { google } = require('googleapis');
+          const fs = require('fs');
+          const path = require('path');
+
+          // Google Drive APIクライアントを初期化
+          // シークレットから認証情報を読み込む
+          async function initializeDrive() {
+            const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+            const auth = new google.auth.GoogleAuth({
+              credentials,
+              scopes: ['https://www.googleapis.com/auth/drive.file'],
+            });
+            return google.drive({ version: 'v3', auth });
+          }
+
+          // ファイルをアップロード（既存ファイルは上書き）
+          // なぜ上書き: 常に最新のコードをAIが読めるようにするため
+          async function uploadFile(drive, filePath, parentFolderId) {
+            const fileName = path.basename(filePath);
+            const fileContent = fs.readFileSync(filePath);
+
+            // 既存ファイルを検索
+            const query = `name='${fileName}' and '${parentFolderId}' in parents and trashed=false`;
+            const existing = await drive.files.list({ q: query, fields: 'files(id)' });
+
+            const fileMetadata = { name: fileName, parents: [parentFolderId] };
+            const media = { mimeType: 'application/octet-stream', body: fs.createReadStream(filePath) };
+
+            if (existing.data.files.length > 0) {
+              // 既存ファイルを更新
+              await drive.files.update({
+                fileId: existing.data.files[0].id,
+                media,
+              });
+              console.log(`Updated: ${fileName}`);
+            } else {
+              // 新規ファイルを作成
+              await drive.files.create({
+                requestBody: fileMetadata,
+                media,
+              });
+              console.log(`Created: ${fileName}`);
+            }
+          }
+
+          // フォルダを作成または取得
+          // _latestフォルダ: 常に最新のコード（AIがここを見る）
+          async function getOrCreateFolder(drive, folderName, parentFolderId) {
+            const query = `name='${folderName}' and '${parentFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+            const existing = await drive.files.list({ q: query, fields: 'files(id)' });
+
+            if (existing.data.files.length > 0) {
+              return existing.data.files[0].id;
+            }
+
+            const folderMetadata = {
+              name: folderName,
+              mimeType: 'application/vnd.google-apps.folder',
+              parents: [parentFolderId],
+            };
+            const folder = await drive.files.create({
+              requestBody: folderMetadata,
+              fields: 'id',
+            });
+            return folder.data.id;
+          }
+
+          // ディレクトリを再帰的にアップロード
+          // node_modules等は除外してコードのみ同期
+          async function uploadDirectory(drive, dirPath, parentFolderId) {
+            const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+            for (const entry of entries) {
+              const fullPath = path.join(dirPath, entry.name);
+
+              // 除外するディレクトリ・ファイル
+              const excludes = ['node_modules', '.git', 'dist', 'build', '.env', '.DS_Store'];
+              if (excludes.some(ex => entry.name.includes(ex))) continue;
+
+              if (entry.isDirectory()) {
+                const folderId = await getOrCreateFolder(drive, entry.name, parentFolderId);
+                await uploadDirectory(drive, fullPath, folderId);
+              } else {
+                await uploadFile(drive, fullPath, parentFolderId);
+              }
+            }
+          }
+
+          // メイン処理
+          (async () => {
+            try {
+              const drive = await initializeDrive();
+              const rootFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
+              // _latestフォルダを作成（常に最新のコード用）
+              const latestFolderId = await getOrCreateFolder(drive, '_latest', rootFolderId);
+
+              // コミット情報をアップロード
+              await uploadFile(drive, 'commit-info.txt', latestFolderId);
+
+              // 各ディレクトリを同期
+              const dirs = ['backend', 'frontend', 'shared'];
+              for (const dir of dirs) {
+                if (fs.existsSync(dir)) {
+                  const dirFolderId = await getOrCreateFolder(drive, dir, latestFolderId);
+                  await uploadDirectory(drive, dir, dirFolderId);
+                }
+              }
+
+              console.log('✅ Sync completed successfully!');
+            } catch (error) {
+              console.error('❌ Error:', error.message);
+              process.exit(1);
+            }
+          })();
+          EOF
+
+          # スクリプトを実行
+          node sync-drive.js
