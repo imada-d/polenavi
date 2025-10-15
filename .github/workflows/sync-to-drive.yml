@@ -57,10 +57,14 @@ jobs:
           // シークレットから認証情報を読み込む
           async function initializeDrive() {
             const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-            const auth = new google.auth.GoogleAuth({
-              credentials,
+            
+            // JWT認証を使用（修正: 新しい認証方法）
+            const auth = new google.auth.JWT({
+              email: credentials.client_email,
+              key: credentials.private_key,
               scopes: ['https://www.googleapis.com/auth/drive.file'],
             });
+            
             return google.drive({ version: 'v3', auth });
           }
 
@@ -68,52 +72,84 @@ jobs:
           // なぜ上書き: 常に最新のコードをAIが読めるようにするため
           async function uploadFile(drive, filePath, parentFolderId) {
             const fileName = path.basename(filePath);
-            const fileContent = fs.readFileSync(filePath);
+            
+            // ファイルサイズチェック（5MB以上はスキップ）
+            const stats = fs.statSync(filePath);
+            if (stats.size > 5 * 1024 * 1024) {
+              console.log(`Skipped (too large): ${fileName}`);
+              return;
+            }
 
-            // 既存ファイルを検索
-            const query = `name='${fileName}' and '${parentFolderId}' in parents and trashed=false`;
-            const existing = await drive.files.list({ q: query, fields: 'files(id)' });
-
-            const fileMetadata = { name: fileName, parents: [parentFolderId] };
-            const media = { mimeType: 'application/octet-stream', body: fs.createReadStream(filePath) };
-
-            if (existing.data.files.length > 0) {
-              // 既存ファイルを更新
-              await drive.files.update({
-                fileId: existing.data.files[0].id,
-                media,
+            try {
+              // 既存ファイルを検索
+              const query = `name='${fileName}' and '${parentFolderId}' in parents and trashed=false`;
+              const existing = await drive.files.list({ 
+                q: query, 
+                fields: 'files(id)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true
               });
-              console.log(`Updated: ${fileName}`);
-            } else {
-              // 新規ファイルを作成
-              await drive.files.create({
-                requestBody: fileMetadata,
-                media,
-              });
-              console.log(`Created: ${fileName}`);
+
+              const fileMetadata = { name: fileName, parents: [parentFolderId] };
+              const media = { 
+                mimeType: 'application/octet-stream', 
+                body: fs.createReadStream(filePath) 
+              };
+
+              if (existing.data.files.length > 0) {
+                // 既存ファイルを更新
+                await drive.files.update({
+                  fileId: existing.data.files[0].id,
+                  media,
+                  supportsAllDrives: true
+                });
+                console.log(`Updated: ${fileName}`);
+              } else {
+                // 新規ファイルを作成
+                await drive.files.create({
+                  requestBody: fileMetadata,
+                  media,
+                  fields: 'id',
+                  supportsAllDrives: true
+                });
+                console.log(`Created: ${fileName}`);
+              }
+            } catch (error) {
+              console.error(`Error uploading ${fileName}:`, error.message);
             }
           }
 
           // フォルダを作成または取得
           // _latestフォルダ: 常に最新のコード（AIがここを見る）
           async function getOrCreateFolder(drive, folderName, parentFolderId) {
-            const query = `name='${folderName}' and '${parentFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-            const existing = await drive.files.list({ q: query, fields: 'files(id)' });
+            try {
+              const query = `name='${folderName}' and '${parentFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+              const existing = await drive.files.list({ 
+                q: query, 
+                fields: 'files(id)',
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true
+              });
 
-            if (existing.data.files.length > 0) {
-              return existing.data.files[0].id;
+              if (existing.data.files.length > 0) {
+                return existing.data.files[0].id;
+              }
+
+              const folderMetadata = {
+                name: folderName,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [parentFolderId],
+              };
+              const folder = await drive.files.create({
+                requestBody: folderMetadata,
+                fields: 'id',
+                supportsAllDrives: true
+              });
+              return folder.data.id;
+            } catch (error) {
+              console.error(`Error creating folder ${folderName}:`, error.message);
+              throw error;
             }
-
-            const folderMetadata = {
-              name: folderName,
-              mimeType: 'application/vnd.google-apps.folder',
-              parents: [parentFolderId],
-            };
-            const folder = await drive.files.create({
-              requestBody: folderMetadata,
-              fields: 'id',
-            });
-            return folder.data.id;
           }
 
           // ディレクトリを再帰的にアップロード
@@ -140,19 +176,24 @@ jobs:
           // メイン処理
           (async () => {
             try {
+              console.log('🚀 Starting sync to Google Drive...');
               const drive = await initializeDrive();
               const rootFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
 
+              console.log('📁 Creating _latest folder...');
               // _latestフォルダを作成（常に最新のコード用）
               const latestFolderId = await getOrCreateFolder(drive, '_latest', rootFolderId);
 
+              console.log('📝 Uploading commit info...');
               // コミット情報をアップロード
               await uploadFile(drive, 'commit-info.txt', latestFolderId);
 
+              console.log('📂 Uploading directories...');
               // 各ディレクトリを同期
               const dirs = ['backend', 'frontend', 'shared'];
               for (const dir of dirs) {
                 if (fs.existsSync(dir)) {
+                  console.log(`  Syncing ${dir}/...`);
                   const dirFolderId = await getOrCreateFolder(drive, dir, latestFolderId);
                   await uploadDirectory(drive, dir, dirFolderId);
                 }
@@ -161,6 +202,7 @@ jobs:
               console.log('✅ Sync completed successfully!');
             } catch (error) {
               console.error('❌ Error:', error.message);
+              console.error('Stack:', error.stack);
               process.exit(1);
             }
           })();
