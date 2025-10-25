@@ -7,5 +7,7 @@ export default defineConfig({
   server: {
     port: 5174,  // ECMと被らないように5174に変更（ECMは5173を使用中）
     host: '0.0.0.0'  // 外部からアクセス可能にする（本番サーバー用）
+// Cloudflare Tunnel経由のアクセスを許可（polenavi.comドメイン）
+    allowedHosts: ['polenavi.com', 'localhost']
   }
 })
