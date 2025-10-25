@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
@@ -7,6 +7,7 @@ import L from 'leaflet';
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.Marker | null>(null);
   
@@ -84,6 +85,39 @@ export default function Home() {
       }
     };
   }, [showRegisterPanel, pinLocation]);
+
+  // 検索結果から地図の位置を変更
+  useEffect(() => {
+    const state = location.state as { center?: [number, number]; zoom?: number };
+    if (state?.center && mapInstanceRef.current) {
+      mapInstanceRef.current.setView(state.center, state.zoom || 18, {
+        animate: true,
+        duration: 1,
+      });
+
+      // 検索結果の位置にマーカーを追加
+      const searchMarker = L.marker(state.center, {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+        }),
+      }).addTo(mapInstanceRef.current);
+
+      // location.stateをクリア（次回のために）
+      navigate('/', { replace: true, state: {} });
+
+      // マーカーを10秒後に削除
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.removeLayer(searchMarker);
+        }
+      }, 10000);
+    }
+  }, [location.state, navigate]);
 
   // handleMapReady をメモ化（再実行を防ぐ）
   const handleMapReady = useCallback((map: L.Map) => {

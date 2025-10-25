@@ -48,3 +48,25 @@ export const registerPole = async (data: RegisterPoleData): Promise<any> => {
     throw new Error(errorMessage);
   }
 };
+
+// 何を: 番号から電柱を検索する関数
+// なぜ: ユーザーが番号札の番号で電柱を検索できるようにするため
+export const searchPoleByNumber = async (number: string): Promise<any> => {
+  try {
+    const response = await apiClient.get('/poles/search', {
+      params: { number },
+    });
+
+    console.log('✅ 検索成功:', response.data);
+    return response.data.data.poleNumber;
+  } catch (error: any) {
+    console.error('❌ 検索エラー:', error);
+
+    if (error.response?.status === 404) {
+      throw new Error('番号が見つかりませんでした');
+    }
+
+    const errorMessage = error.response?.data?.error?.message || '検索に失敗しました';
+    throw new Error(errorMessage);
+  }
+};
