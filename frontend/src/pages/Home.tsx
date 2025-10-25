@@ -312,11 +312,11 @@ export default function Home() {
         )}
       </main>
       
-      {/* 新規登録ボタン（登録モード中とパネル表示中は非表示） */}
+      {/* 新規登録ボタン（登録モード中とパネル表示中は非表示、モバイルのみ表示） */}
       {!isRegisterMode && !showRegisterPanel && (
         <button
           onClick={handleQuickRegister}
-          className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[2001]"
+          className="md:hidden absolute bottom-28 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[2001]"
         >
           ＋ 新規登録
         </button>

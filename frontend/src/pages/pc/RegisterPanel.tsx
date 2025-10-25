@@ -211,7 +211,7 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRe
     !isSubmitting;
 
   return (
-    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[400px] bg-white border-l shadow-lg z-[1000] flex-col">
+    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[400px] bg-white border-l shadow-lg z-[1500] flex-col">
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center">
         <button 
