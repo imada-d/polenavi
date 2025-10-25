@@ -185,7 +185,7 @@ export default function RegisterLocation() {
       </main>
 
       {/* 次へボタン */}
-      <div className="bg-white border-t px-4 py-4">
+      <div className="bg-white border-t px-4 py-4 relative z-[1001]">
         <button
           onClick={handleNext}
           className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700"
