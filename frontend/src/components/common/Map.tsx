@@ -65,8 +65,10 @@ export default function Map({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    // 地図の初期化
-    const map = L.map(containerRef.current).setView(center, zoom);
+    // 地図の初期化（デフォルトのズームコントロールを無効化）
+    const map = L.map(containerRef.current, {
+      zoomControl: false,  // デフォルトのズームコントロールを無効化
+    }).setView(center, zoom);
 
     // OpenStreetMap タイル（道路地図）
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

@@ -2,7 +2,10 @@ import axios from 'axios';
 
 // APIクライアントの設定
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  // 環境変数が設定されていない場合は相対パス（/api）を使用
+  // 開発環境: vite.config.tsのproxyで localhost:3000 に転送
+  // 本番環境: 同じドメインの /api に接続
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

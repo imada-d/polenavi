@@ -42,15 +42,17 @@ export default function RegisterLocation() {
     mapInstanceRef.current = map;
     
     if (currentLocation && pinLocation) {
-      // 現在地の薄い青い円を追加
-      currentLocationCircleRef.current = L.circle(currentLocation, {
-        radius: 10,
-        fillColor: '#4285F4',
-        color: '#4285F4',
-        weight: 1,
-        opacity: 0.3,
-        fillOpacity: 0.1,
-      }).addTo(map);
+      // 現在地を「現在地」というテキストで表示
+      const currentLocationIcon = L.divIcon({
+        html: '<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍 現在地</div>',
+        className: 'current-location-label',
+        iconSize: [60, 24],
+        iconAnchor: [30, 12],
+      });
+
+      currentLocationCircleRef.current = L.marker(currentLocation, {
+        icon: currentLocationIcon,
+      }).addTo(map) as any;
 
       // 赤いピン（ドラッグ可能）を追加
       const redIcon = L.icon({
@@ -142,8 +144,14 @@ export default function RegisterLocation() {
           />
         )}
 
-        {/* 地図種類選択 */}
+        {/* 説明文（上部中央） */}
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-lg shadow-lg z-[1000]">
+          <p className="text-sm font-bold">赤いピンをドラッグして調整</p>
+        </div>
+
+        {/* 右側のコントロールパネル */}
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
+          {/* 地図種類選択 */}
           <button
             onClick={() => setMapType('street')}
             className={`px-4 py-2 rounded-lg shadow-lg font-bold transition-all ${
@@ -164,20 +172,31 @@ export default function RegisterLocation() {
           >
             🌐 航空写真
           </button>
-        </div>
 
-        {/* 現在地に戻すボタン */}
-        <button
-          onClick={handleResetToCurrentLocation}
-          className="absolute top-32 right-4 bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 z-[1000]"
-          title="現在地に戻す"
-        >
-          📍
-        </button>
+          {/* ズームボタン */}
+          <button
+            onClick={() => mapInstanceRef.current?.zoomIn()}
+            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 font-bold text-lg"
+            title="拡大"
+          >
+            +
+          </button>
+          <button
+            onClick={() => mapInstanceRef.current?.zoomOut()}
+            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 font-bold text-lg"
+            title="縮小"
+          >
+            −
+          </button>
 
-        {/* 説明文 */}
-        <div className="absolute top-4 left-4 bg-white px-4 py-2 rounded-lg shadow-lg z-[1000]">
-          <p className="text-sm font-bold">赤いピンをドラッグして調整</p>
+          {/* 現在地に戻すボタン */}
+          <button
+            onClick={handleResetToCurrentLocation}
+            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50"
+            title="現在地に戻す"
+          >
+            📍
+          </button>
         </div>
       </main>
 
