@@ -245,6 +245,34 @@ export default function Home() {
     setPinLocation(null);
   };
 
+  // 何を: 登録成功時に地図上にマーカーを作成
+  // なぜ: 登録した電柱がすぐに地図に表示されるようにするため
+  const handleRegisterSuccess = (location: [number, number], poleType: string) => {
+    if (!mapInstanceRef.current) return;
+
+    // 何を: 電柱の種類に応じてマーカーの色を変える
+    // なぜ: 視覚的に電柱と他の柱を区別するため
+    const markerColor = poleType === 'electric' ? 'blue' : 'orange';
+
+    // マーカーを作成
+    const marker = L.marker(location, {
+      icon: L.icon({
+        iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
+    }).addTo(mapInstanceRef.current);
+
+    // 地図を登録した位置に移動
+    mapInstanceRef.current.setView(location, 18, {
+      animate: true,
+      duration: 1,
+    });
+  };
+
   return (
     <div className="h-screen w-full flex flex-col">
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
@@ -322,6 +350,16 @@ export default function Home() {
             <span className="text-2xl">📍</span>
           </button>
 
+          {/* PC版：検索ボタン */}
+          <button
+            onClick={() => navigate('/search')}
+            className="hidden md:flex bg-white px-4 py-3 rounded-lg shadow-lg hover:bg-gray-50 transition-colors items-center gap-2"
+            title="検索"
+          >
+            <span className="text-xl">🔍</span>
+            <span>検索</span>
+          </button>
+
           {/* PC版：新規登録ボタン（登録モード中は非表示） */}
           {!isRegisterMode && !showRegisterPanel && (
             <button
@@ -357,6 +395,7 @@ export default function Home() {
             map={mapInstanceRef.current}
             onLocationChange={setPinLocation}
             fixedPinRef={fixedPinRef}
+            onRegisterSuccess={handleRegisterSuccess}
           />
         )}
       </main>

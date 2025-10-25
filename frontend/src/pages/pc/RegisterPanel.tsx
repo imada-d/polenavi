@@ -12,9 +12,10 @@ interface RegisterPanelProps {
   map: L.Map | null; // 地図インスタンス（位置調整用）
   onLocationChange: (location: [number, number]) => void; // 位置変更のコールバック
   fixedPinRef: React.MutableRefObject<L.Marker | null>; // 固定ピンのref
+  onRegisterSuccess?: (location: [number, number], poleType: string) => void; // 登録成功時のコールバック
 }
 
-function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRef }: RegisterPanelProps) {
+function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRef, onRegisterSuccess }: RegisterPanelProps) {
   // ステート管理
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
   const [poleSubType, setPoleSubType] = useState<'light' | 'sign' | 'traffic' | 'other' | null>(null);
@@ -188,9 +189,16 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRe
         plateCount,
         numbers: finalNumbers,
       });
-      
+
       // 成功したら閉じる
       alert('登録成功！');
+
+      // 何を: 登録成功時のコールバックを呼び出し
+      // なぜ: 親コンポーネント（Home）でマップにマーカーを追加するため
+      if (onRegisterSuccess) {
+        onRegisterSuccess(pinLocation, poleType);
+      }
+
       onClose();
     } catch (error) {
       alert('登録に失敗しました');

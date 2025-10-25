@@ -184,8 +184,8 @@ export default function RegisterLocation() {
         </div>
       </main>
 
-      {/* 次へボタン */}
-      <div className="bg-white border-t px-4 py-4 relative z-[1001]">
+      {/* 次へボタン - z-indexをBottomNav(2000)より高く設定 */}
+      <div className="bg-white border-t px-4 py-4 relative z-[2001]">
         <button
           onClick={handleNext}
           className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700"
