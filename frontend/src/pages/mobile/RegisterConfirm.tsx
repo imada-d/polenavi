@@ -34,7 +34,7 @@ export default function RegisterConfirm() {
   // 登録実行
   const handleRegister = async () => {
     try {
-      await register({
+      const result = await register({
         location: pinLocation,
         poleType,
         poleSubType,
@@ -45,8 +45,8 @@ export default function RegisterConfirm() {
       // 登録完了画面へ
       navigate('/register/complete', {
         state: {
-          poleId: 123, // TODO: APIレスポンスから取得
-          points: 10, // TODO: APIレスポンスから取得
+          poleId: result.poleId,
+          points: 10, // TODO: バックエンドからポイント情報を返すように実装
         },
       });
     } catch (error) {

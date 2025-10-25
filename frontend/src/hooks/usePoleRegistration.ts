@@ -49,14 +49,17 @@ export function usePoleRegistration() {
         numbers: data.numbers,
       });
 
+      // バックエンドのレスポンス形式: { success: true, message: "...", data: {...} }
+      const responseData = response.data.data;
+
       setState({
         loading: false,
         error: null,
         success: true,
-        data: response.data,
+        data: responseData,
       });
 
-      return response.data;
+      return responseData;
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.error?.message || '登録に失敗しました';

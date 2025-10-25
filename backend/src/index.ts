@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { config } from './config';
 import polesRouter from './routes/poles';
+import { errorHandler } from './middlewares/errorHandler';
 
 // 環境変数を読み込み
 dotenv.config();
@@ -39,20 +40,18 @@ app.use('/api/poles', polesRouter);
 
 // 404ハンドラー
 app.use((req, res) => {
-  res.status(404).json({ 
-    error: 'Not Found',
-    path: req.path
+  res.status(404).json({
+    success: false,
+    error: {
+      code: 'NOT_FOUND',
+      message: 'リクエストされたリソースが見つかりません',
+      path: req.path
+    }
   });
 });
 
-// エラーハンドラー
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({ 
-    error: 'Internal Server Error',
-    message: config.nodeEnv === 'development' ? err.message : undefined
-  });
-});
+// エラーハンドラー（統一されたエラーレスポンス）
+app.use(errorHandler);
 
 // サーバー起動
 const PORT = config.port;
