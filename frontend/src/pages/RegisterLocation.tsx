@@ -173,22 +173,6 @@ export default function RegisterLocation() {
             🌐 航空写真
           </button>
 
-          {/* ズームボタン */}
-          <button
-            onClick={() => mapInstanceRef.current?.zoomIn()}
-            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 font-bold text-lg"
-            title="拡大"
-          >
-            +
-          </button>
-          <button
-            onClick={() => mapInstanceRef.current?.zoomOut()}
-            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 font-bold text-lg"
-            title="縮小"
-          >
-            −
-          </button>
-
           {/* 現在地に戻すボタン */}
           <button
             onClick={handleResetToCurrentLocation}
