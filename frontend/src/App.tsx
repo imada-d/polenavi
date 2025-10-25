@@ -6,9 +6,12 @@ import Stats from './pages/Stats';
 import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import RegisterLocation from './pages/RegisterLocation';
-import RegisterPoleInfo from './pages/mobile/RegisterPoleInfo'; 
+import RegisterPoleInfo from './pages/mobile/RegisterPoleInfo';
 import RegisterPhotoClassify from './pages/mobile/RegisterPhotoClassify';
 import RegisterNumberInput from './pages/mobile/RegisterNumberInput';
+import RegisterMemo from './pages/mobile/RegisterMemo';
+import RegisterConfirm from './pages/mobile/RegisterConfirm';
+import RegisterComplete from './pages/mobile/RegisterComplete';
 
 
 
@@ -27,9 +30,12 @@ function AppContent() {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/register/location" element={<RegisterLocation />} />
-        <Route path="/register/pole-info" element={<RegisterPoleInfo />} /> {/* 👈 新しいルート */}
-        <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} /> {/* 👈 新しいルート */}
-        <Route path="/register/number-input" element={<RegisterNumberInput />} /> {/* 👈 追加 */}
+        <Route path="/register/pole-info" element={<RegisterPoleInfo />} />
+        <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} />
+        <Route path="/register/number-input" element={<RegisterNumberInput />} />
+        <Route path="/register/memo" element={<RegisterMemo />} />
+        <Route path="/register/confirm" element={<RegisterConfirm />} />
+        <Route path="/register/complete" element={<RegisterComplete />} />
       </Routes>
       {!hideBottomNav && <BottomNav />}
     </div>
