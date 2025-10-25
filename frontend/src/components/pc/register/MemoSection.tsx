@@ -1,5 +1,5 @@
-// U�: PCHn����÷忰�����
-// j\: �g��h�÷忰���gM��FkY�_�
+// 何を: PC版のメモ・ハッシュタグ入力欄
+// なぜ: 任意でメモ・ハッシュタグを入力できるようにするため
 
 interface MemoSectionProps {
   hashtags: string;
@@ -16,50 +16,50 @@ export default function MemoSection({
 }: MemoSectionProps) {
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-bold mb-3">=� ���	</h2>
+      <h2 className="text-lg font-bold mb-3">📝 メモ・ハッシュタグ</h2>
 
-      {/* �÷忰e� */}
+      {/* ハッシュタグ入力欄 */}
       <div className="mb-4">
         <label className="block text-sm font-semibold mb-2 text-gray-700">
-          <� �÷忰
+          🏷️ ハッシュタグ
         </label>
         <input
           type="text"
           value={hashtags}
           onChange={(e) => onHashtagsChange(e.target.value)}
-          placeholder="#2�o #LED"
+          placeholder="#2連○ #LED"
           className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p className="text-xs text-gray-500 mt-1">
-          =� �������g:cfpe�gM~Y
+          📝 スペース区切りで複数入力できます
         </p>
       </div>
 
-      {/* ��e� */}
+      {/* メモ入力欄 */}
       <div className="mb-4">
         <label className="block text-sm font-semibold mb-2 text-gray-700">
-          =� ��,�
+          📝 メモ欄
         </label>
         <textarea
           value={memoText}
           onChange={(e) => onMemoTextChange(e.target.value)}
-          placeholder="2025/09/30 ��&#10;�j�: 123"
+          placeholder="2025/09/30 設置&#10;管理番号: 123"
           rows={4}
           className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
         <p className="text-xs text-gray-500 mt-1">
-          =� ��o�K���gM~Y
+          📝 自由にメモを入力できます
         </p>
       </div>
 
-      {/* ��� */}
+      {/* 注意事項 */}
       <div className="bg-blue-50 border border-blue-200 rounded p-3">
         <p className="text-xs text-gray-700">
-          <strong>=� ���</strong>
+          <strong>📝 任意項目</strong>
           <br />
-          ��÷忰g"W�YOj�~Y
+          メモ・ハッシュタグは省略可能です
           <br />
-          ���o��j�(kH~Y
+          後から編集することも可能です
         </p>
       </div>
     </div>

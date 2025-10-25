@@ -255,7 +255,7 @@ export default function Home() {
     const markerColor = poleType === 'electric' ? 'blue' : 'orange';
 
     // マーカーを作成
-    const marker = L.marker(location, {
+    L.marker(location, {
       icon: L.icon({
         iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',

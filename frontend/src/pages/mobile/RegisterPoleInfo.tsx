@@ -8,7 +8,6 @@ export default function RegisterPoleInfo() {
   // 前の画面（位置確認）から受け取ったデータ
   // pinLocation は [緯度, 経度] の配列
   const { location: pinLocation } = location.state || {};
-  const [latitude, longitude] = pinLocation || [null, null];
   
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);

@@ -9,7 +9,7 @@ export default function RegisterComplete() {
 
   // 前の画面から受け取ったデータ
   const state = location.state || {};
-  const { poleId, points } = state;
+  const { points } = state;
 
   // 地図に戻る
   const handleBackToMap = () => {
