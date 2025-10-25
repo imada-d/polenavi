@@ -8,7 +8,7 @@ import L from 'leaflet';
 export default function Home() {
   const navigate = useNavigate();
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const currentLocationMarkerRef = useRef<L.CircleMarker | null>(null);
+  const currentLocationMarkerRef = useRef<L.Marker | null>(null);
   
   // 何を: パネル表示中の固定ピン用のref
   // なぜ: 位置調整モード以外でもピンを表示し続けるため
@@ -106,13 +106,16 @@ export default function Home() {
               currentLocationMarkerRef.current.remove();
             }
 
-            currentLocationMarkerRef.current = L.circleMarker([latitude, longitude], {
-              radius: 8,
-              fillColor: '#4285F4',
-              color: '#ffffff',
-              weight: 2,
-              opacity: 1,
-              fillOpacity: 0.8,
+            // 現在地を「📍 現在地」というテキストで表示
+            const currentLocationIcon = L.divIcon({
+              html: '<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍 現在地</div>',
+              className: 'current-location-label',
+              iconSize: [60, 24],
+              iconAnchor: [30, 12],
+            });
+
+            currentLocationMarkerRef.current = L.marker([latitude, longitude], {
+              icon: currentLocationIcon,
             }).addTo(mapInstanceRef.current);
           }
         },
@@ -284,6 +287,18 @@ export default function Home() {
           >
             <span className="text-2xl">📍</span>
           </button>
+
+          {/* PC版：新規登録ボタン（登録モード中は非表示） */}
+          {!isRegisterMode && !showRegisterPanel && (
+            <button
+              onClick={handleQuickRegister}
+              className="hidden md:flex bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg hover:bg-blue-700 font-bold transition-colors items-center gap-2"
+              title="新規登録"
+            >
+              <span className="text-xl">＋</span>
+              <span>新規登録</span>
+            </button>
+          )}
         </div>
 
         {/* PC版：ピン登録モード */}
