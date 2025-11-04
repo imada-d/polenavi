@@ -137,12 +137,11 @@ export async function getPoleById(poleId: number) {
           deletedAt: null,
         },
       },
-      // TODO: マイグレーション後に有効化
-      // memos: {
-      //   orderBy: {
-      //     createdAt: 'desc',
-      //   },
-      // },
+      memos: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
     },
   });
 
