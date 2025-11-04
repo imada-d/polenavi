@@ -341,13 +341,14 @@ export default function Home() {
             </button>
           </div>
           
-          {/* 現在地ボタン（独立） */}
+          {/* 現在地ボタン */}
           <button
             onClick={handleCurrentLocation}
-            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+            className="bg-white px-4 py-3 rounded-lg shadow-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             title="現在地を表示"
           >
-            <span className="text-2xl">📍</span>
+            <span className="text-xl">📍</span>
+            <span>現在地</span>
           </button>
 
           {/* PC版：検索ボタン */}

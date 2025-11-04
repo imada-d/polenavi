@@ -176,10 +176,10 @@ export default function RegisterLocation() {
           {/* 現在地に戻すボタン */}
           <button
             onClick={handleResetToCurrentLocation}
-            className="bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50"
+            className="bg-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-50 font-bold"
             title="現在地に戻す"
           >
-            📍
+            📍 現在地
           </button>
         </div>
       </main>
