@@ -5,6 +5,9 @@ import RegisterPanel from './pc/RegisterPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
 import { getNearbyPoles } from '../api/poles';
 import L from 'leaflet';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // 何を: 電柱の種類名から適切なアイコンを取得する関数
 // なぜ: データベースの poleTypeName を正しいアイコンにマッピングするため
@@ -29,6 +32,10 @@ export default function Home() {
   // 何を: 登録済み電柱マーカーを保存するためのref
   // なぜ: ページリロード後も電柱を表示し続けるため
   const poleMarkersRef = useRef<L.Marker[]>([]);
+
+  // 何を: マーカークラスタグループのref
+  // なぜ: ズームレベルに応じて電柱を自動的にグループ化するため（Googleマップと同じ）
+  const markerClusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
   
   // 地図タイプの状態を管理（2モード）
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street');
@@ -151,12 +158,21 @@ export default function Home() {
       const poles = await getNearbyPoles(center.lat, center.lng, 50000);
       console.log('📦 取得した電柱データ:', poles);
 
-      // 既存のマーカーを削除
-      poleMarkersRef.current.forEach(marker => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.removeLayer(marker);
-        }
+      // 何を: 既存のクラスタグループをクリア
+      // なぜ: 古いマーカーを削除して新しいマーカーだけ表示するため
+      if (markerClusterGroupRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(markerClusterGroupRef.current);
+      }
+
+      // 何を: 新しいクラスタグループを作成
+      // なぜ: Googleマップのように電柱をグループ化して表示するため
+      markerClusterGroupRef.current = L.markerClusterGroup({
+        maxClusterRadius: 50, // 50px以内の電柱をグループ化
+        spiderfyOnMaxZoom: true, // 最大ズーム時にクモの巣状に展開
+        showCoverageOnHover: false, // ホバー時の範囲表示を無効化
+        zoomToBoundsOnClick: true, // クリックでズームイン
       });
+
       poleMarkersRef.current = [];
 
       // 取得した電柱をマップに表示
@@ -175,10 +191,12 @@ export default function Home() {
         const icon = getPoleIcon(pole.poleTypeName, pole.poleSubType);
         console.log(`🎨 使用するアイコン:`, icon);
 
+        // 何を: マーカーを作成（地図には直接追加せず、クラスタグループに追加）
+        // なぜ: ズームレベルに応じて自動的にグループ化するため
         const marker = L.marker([pole.latitude, pole.longitude], {
           icon: icon
-        }).addTo(mapInstanceRef.current);
-        console.log(`✅ マーカー${index + 1}を地図に追加しました`);
+        });
+        console.log(`✅ マーカー${index + 1}を作成しました`);
 
         // 何を: ホバー時に電柱番号を表示するツールチップ
         // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
@@ -210,10 +228,19 @@ export default function Home() {
           console.log('🖱️ マーカーがクリックされました:', pole.poleTypeName);
         });
 
+        // 何を: マーカーをクラスタグループに追加
+        // なぜ: Googleマップのように自動的にグループ化して表示するため
+        markerClusterGroupRef.current?.addLayer(marker);
         poleMarkersRef.current.push(marker);
       });
 
-      console.log(`✅ ${poles.length}件の電柱を表示しました`);
+      // 何を: クラスタグループを地図に追加
+      // なぜ: 全てのマーカーをまとめて地図に表示するため
+      if (markerClusterGroupRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.addLayer(markerClusterGroupRef.current);
+      }
+
+      console.log(`✅ ${poles.length}件の電柱を表示しました（クラスタリング有効）`);
     } catch (error) {
       console.error('❌ 電柱の取得に失敗:', error);
     }
