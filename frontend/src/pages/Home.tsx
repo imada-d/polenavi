@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Map, { poleIcons } from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
 import PoleDetailPanel from '../components/pc/PoleDetailPanel';
+import SearchPanel from '../components/pc/SearchPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
 import { getNearbyPoles, getPoleById } from '../api/poles';
 import L from 'leaflet';
@@ -59,6 +60,9 @@ export default function Home() {
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [selectedPoleId, setSelectedPoleId] = useState<number | null>(null);
   const [selectedPoleData, setSelectedPoleData] = useState<any | null>(null);
+
+  // PC版：検索パネルの表示状態
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
 
   // 初回のみ現在地を取得して初期表示にする
   useEffect(() => {
@@ -508,7 +512,7 @@ export default function Home() {
 
           {/* PC版：検索ボタン */}
           <button
-            onClick={() => navigate('/search')}
+            onClick={() => setShowSearchPanel(true)}
             className="hidden md:flex bg-white px-4 py-3 rounded-lg shadow-lg hover:bg-gray-50 transition-colors items-center gap-2"
             title="検索"
           >
@@ -564,6 +568,30 @@ export default function Home() {
               setShowDetailPanel(false);
               setSelectedPoleId(null);
               setSelectedPoleData(null);
+            }}
+          />
+        )}
+
+        {/* PC版：検索パネル（768px以上で表示） */}
+        {showSearchPanel && (
+          <SearchPanel
+            onClose={() => setShowSearchPanel(false)}
+            onShowOnMap={async (poleId, latitude, longitude) => {
+              // 検索結果の位置に地図を移動
+              if (mapInstanceRef.current) {
+                mapInstanceRef.current.setView([latitude, longitude], 18);
+              }
+
+              // 電柱詳細を取得して詳細パネルを表示
+              try {
+                const poleData = await getPoleById(poleId);
+                setSelectedPoleId(poleId);
+                setSelectedPoleData(poleData);
+                setShowDetailPanel(true);
+                setShowSearchPanel(false);
+              } catch (error) {
+                console.error('電柱詳細の取得に失敗:', error);
+              }
             }}
           />
         )}
