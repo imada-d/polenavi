@@ -137,6 +137,11 @@ export async function getPoleById(poleId: number) {
           deletedAt: null,
         },
       },
+      memos: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+      },
     },
   });
 

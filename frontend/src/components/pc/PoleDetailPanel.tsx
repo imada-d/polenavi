@@ -8,6 +8,7 @@ import Accordion from '../common/Accordion';
 import { FEATURES } from '../../config/features';
 import { calculateDistance } from '../../utils/distance';
 import { uploadPolePhoto, getPoleById } from '../../api/poles';
+import { createMemo, deleteMemo } from '../../api/memos';
 
 interface PoleDetailPanelProps {
   poleId: number;
@@ -27,6 +28,11 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+
+  // メモ関連のstate
+  const [newMemoText, setNewMemoText] = useState('');
+  const [newHashtags, setNewHashtags] = useState('');
+  const [isAddingMemo, setIsAddingMemo] = useState(false);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -179,6 +185,61 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
     setSelectedFile(null);
     setPreview(null);
     setPhotoType('full');
+  };
+
+  // 何を: メモを追加
+  // なぜ: ユーザーが電柱にメモとハッシュタグを追加できるようにするため
+  const handleAddMemo = async () => {
+    if (!newMemoText.trim() && newHashtags.trim().length === 0) {
+      alert('メモまたはハッシュタグを入力してください');
+      return;
+    }
+
+    setIsAddingMemo(true);
+
+    try {
+      const hashtags = newHashtags
+        .split(/[,\s　]+/)
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0)
+        .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`));
+
+      await createMemo(poleData.id, hashtags, newMemoText || undefined);
+
+      // データを再取得して表示を更新
+      const updatedData = await getPoleById(poleData.id);
+      setPoleData(updatedData);
+
+      // フォームをリセット
+      setNewMemoText('');
+      setNewHashtags('');
+
+      alert('✅ メモを追加しました');
+    } catch (error: any) {
+      console.error('メモ追加エラー:', error);
+      alert(`❌ ${error.message}`);
+    } finally {
+      setIsAddingMemo(false);
+    }
+  };
+
+  // 何を: メモを削除
+  // なぜ: 不要なメモを削除できるようにするため
+  const handleDeleteMemo = async (memoId: number) => {
+    if (!confirm('このメモを削除しますか？')) return;
+
+    try {
+      await deleteMemo(memoId);
+
+      // データを再取得して表示を更新
+      const updatedData = await getPoleById(poleData.id);
+      setPoleData(updatedData);
+
+      alert('✅ メモを削除しました');
+    } catch (error: any) {
+      console.error('メモ削除エラー:', error);
+      alert(`❌ ${error.message}`);
+    }
   };
 
   // 何を: 詳細パネル上部の小さい地図を初期化
@@ -428,31 +489,85 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
 
         {/* セクション3: メモ・ハッシュタグ */}
         <Accordion title="メモ・ハッシュタグ" icon="📝">
-          <div className="space-y-3">
-            {/* メモ */}
-            <div>
-              <p className="text-sm text-gray-600 mb-1">メモ</p>
-              {poleData.memo ? (
-                <p className="whitespace-pre-wrap">{poleData.memo}</p>
-              ) : (
-                <p className="text-gray-400">メモなし</p>
-              )}
-            </div>
+          <div className="space-y-4">
+            {/* 既存のメモ一覧 */}
+            {poleData.memos && poleData.memos.length > 0 ? (
+              <div className="space-y-3">
+                {poleData.memos.map((memo: any) => (
+                  <div key={memo.id} className="bg-gray-50 p-3 rounded-lg space-y-2">
+                    {/* ハッシュタグ */}
+                    {memo.hashtags && memo.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {memo.hashtags.map((tag: string, index: number) => (
+                          <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-semibold">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
-            {/* ハッシュタグ */}
-            <div>
-              <p className="text-sm text-gray-600 mb-1">ハッシュタグ</p>
-              {poleData.hashtag ? (
-                <div className="flex flex-wrap gap-2">
-                  {poleData.hashtag.split(/\s+/).map((tag: string, index: number) => (
-                    <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400">ハッシュタグなし</p>
-              )}
+                    {/* メモ本文 */}
+                    {memo.memoText && (
+                      <p className="text-sm whitespace-pre-wrap">{memo.memoText}</p>
+                    )}
+
+                    {/* メタ情報 */}
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{memo.createdByName} • {new Date(memo.createdAt).toLocaleString('ja-JP')}</span>
+                      <button
+                        onClick={() => handleDeleteMemo(memo.id)}
+                        className="text-red-600 hover:text-red-700 font-semibold"
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-center py-4">メモはまだありません</p>
+            )}
+
+            {/* メモ追加フォーム */}
+            <div className="space-y-3 pt-4 border-t border-gray-200">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  ハッシュタグ
+                </label>
+                <input
+                  type="text"
+                  value={newHashtags}
+                  onChange={(e) => setNewHashtags(e.target.value)}
+                  placeholder="例: #修理済み #LED"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isAddingMemo}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  カンマまたはスペースで区切って複数入力可能
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  メモ本文
+                </label>
+                <textarea
+                  value={newMemoText}
+                  onChange={(e) => setNewMemoText(e.target.value)}
+                  placeholder="詳細な情報やメモを入力..."
+                  rows={3}
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isAddingMemo}
+                />
+              </div>
+
+              <button
+                onClick={handleAddMemo}
+                disabled={isAddingMemo}
+                className="w-full py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isAddingMemo ? '追加中...' : '✅ メモを追加'}
+              </button>
             </div>
           </div>
         </Accordion>

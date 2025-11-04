@@ -6,6 +6,7 @@ import path from 'path';
 import { config } from './config';
 import polesRouter from './routes/poles';
 import photosRouter from './routes/photos';
+import memosRouter from './routes/memos';
 import { errorHandler } from './middlewares/errorHandler';
 
 // 環境変数を読み込み
@@ -43,6 +44,7 @@ app.get('/', (_req, res) => {
 // APIルート
 app.use('/api/poles', polesRouter);
 app.use('/api', photosRouter);
+app.use('/api', memosRouter);
 
 // 404ハンドラー
 app.use((req, res) => {
