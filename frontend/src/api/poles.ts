@@ -108,3 +108,27 @@ export const getPoleById = async (poleId: number): Promise<any> => {
     throw new Error(errorMessage);
   }
 };
+
+// 何を: 電柱に写真をアップロードする関数
+// なぜ: ユーザーが電柱の写真を追加できるようにするため
+export const uploadPolePhoto = async (poleId: number, file: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('photoType', 'full');
+
+    const response = await apiClient.post(`/poles/${poleId}/photos`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    console.log('✅ 写真アップロード成功:', response.data);
+    return response.data.data.photo;
+  } catch (error: any) {
+    console.error('❌ 写真アップロードエラー:', error);
+
+    const errorMessage = error.response?.data?.error?.message || '写真のアップロードに失敗しました';
+    throw new Error(errorMessage);
+  }
+};

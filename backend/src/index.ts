@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import { config } from './config';
 import polesRouter from './routes/poles';
+import photosRouter from './routes/photos';
 import { errorHandler } from './middlewares/errorHandler';
 
 // 環境変数を読み込み
@@ -17,26 +19,30 @@ app.use(cors({ origin: config.corsOrigin })); // CORS設定
 app.use(express.json()); // JSONパース
 app.use(express.urlencoded({ extended: true })); // URLエンコード
 
+// 静的ファイル配信（アップロード画像）
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 // ヘルスチェック
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     environment: config.nodeEnv
   });
 });
 
 // ルートエンドポイント
-app.get('/', (req, res) => {
-  res.json({ 
+app.get('/', (_req, res) => {
+  res.json({
     message: 'PoleNavi API',
     version: '0.1.0',
     docs: '/api/docs'
   });
 });
 
-// APIルート（追加）
+// APIルート
 app.use('/api/poles', polesRouter);
+app.use('/api', photosRouter);
 
 // 404ハンドラー
 app.use((req, res) => {

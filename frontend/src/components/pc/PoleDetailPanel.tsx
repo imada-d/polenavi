@@ -6,6 +6,7 @@ import L from 'leaflet';
 import Accordion from '../common/Accordion';
 import { FEATURES } from '../../config/features';
 import { calculateDistance } from '../../utils/distance';
+import { uploadPolePhoto } from '../../api/poles';
 
 interface PoleDetailPanelProps {
   poleId: number;
@@ -16,7 +17,9 @@ interface PoleDetailPanelProps {
 export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: PoleDetailPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -62,6 +65,50 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
     );
   };
 
+  // 何を: 写真アップロードボタンのクリックハンドラー
+  // なぜ: ファイル選択ダイアログを開くため
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // 何を: ファイル選択時のハンドラー
+  // なぜ: 選択された写真をアップロードするため
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // 画像ファイルかチェック
+    if (!file.type.startsWith('image/')) {
+      alert('画像ファイルを選択してください');
+      return;
+    }
+
+    // ファイルサイズチェック（10MB以下）
+    if (file.size > 10 * 1024 * 1024) {
+      alert('ファイルサイズは10MB以下にしてください');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      await uploadPolePhoto(poleData.id, file);
+      alert('✅ 写真をアップロードしました');
+
+      // ページをリロードして写真を表示
+      window.location.reload();
+    } catch (error: any) {
+      console.error('写真アップロードエラー:', error);
+      alert(`❌ ${error.message}`);
+    } finally {
+      setIsUploading(false);
+      // input valueをリセット（同じファイルを再選択できるように）
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  };
+
   // 何を: 詳細パネル上部の小さい地図を初期化
   // なぜ: 電柱の位置を視覚的に確認できるようにするため
   useEffect(() => {
@@ -104,6 +151,15 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
 
   return (
     <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">📍 電柱詳細</h1>
@@ -190,8 +246,16 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
             )}
 
             {FEATURES.PHOTO_UPLOAD_ENABLED && (
-              <button className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors">
-                + 写真を追加
+              <button
+                onClick={handlePhotoClick}
+                disabled={isUploading}
+                className={`w-full py-2 border-2 border-dashed rounded-lg transition-colors ${
+                  isUploading
+                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-500'
+                }`}
+              >
+                {isUploading ? '📤 アップロード中...' : '+ 写真を追加'}
               </button>
             )}
           </div>
@@ -268,8 +332,16 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
         {FEATURES.EDIT_ENABLED && (
           <Accordion title="この電柱を編集" icon="✏️">
             <div className="space-y-2">
-              <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-                📸 写真を追加
+              <button
+                onClick={handlePhotoClick}
+                disabled={isUploading}
+                className={`w-full py-2 rounded-lg transition-colors ${
+                  isUploading
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                }`}
+              >
+                {isUploading ? '📤 アップロード中...' : '📸 写真を追加'}
               </button>
               <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                 🔢 番号を追加

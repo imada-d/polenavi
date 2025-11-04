@@ -3,7 +3,6 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/AppError';
-import { Prisma } from '@prisma/client';
 
 /**
  * エラーハンドリングミドルウェア
@@ -12,9 +11,9 @@ import { Prisma } from '@prisma/client';
  */
 export function errorHandler(
   err: Error,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void {
   // AppErrorの場合
   if (err instanceof AppError) {
@@ -29,8 +28,8 @@ export function errorHandler(
   }
 
   // Prismaエラーの場合
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    handlePrismaError(err, res);
+  if ('code' in err && typeof (err as any).code === 'string') {
+    handlePrismaError(err as any, res);
     return;
   }
 
@@ -51,7 +50,7 @@ export function errorHandler(
 /**
  * Prismaエラーを適切なレスポンスに変換
  */
-function handlePrismaError(err: Prisma.PrismaClientKnownRequestError, res: Response): void {
+function handlePrismaError(err: any, res: Response): void {
   switch (err.code) {
     // 重複エラー
     case 'P2002':

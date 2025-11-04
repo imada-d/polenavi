@@ -2,7 +2,7 @@
 // なぜ: コントローラーから分離して再利用性を高めるため
 
 import { PrismaClient } from '@prisma/client';
-import { ValidationError, DuplicateError, NotFoundError } from '../utils/AppError';
+import { ValidationError, NotFoundError } from '../utils/AppError';
 import { normalizePoleNumber } from '../utils/normalize';
 import { CONSTANTS } from '../config/constants';
 
@@ -33,7 +33,7 @@ export async function createPole(data: CreatePoleRequest) {
   const nearbyPoles = await findNearbyPoles(data.latitude, data.longitude);
 
   // トランザクションで登録
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: any) => {
     // 1. 電柱を作成
     const pole = await tx.pole.create({
       data: {
@@ -116,12 +116,12 @@ export async function findNearbyPoles(
 
   // 正確な距離を計算
   return poles
-    .map((pole) => ({
+    .map((pole: any) => ({
       ...pole,
       distance: calculateDistance(lat, lng, Number(pole.latitude), Number(pole.longitude)),
     }))
-    .filter((pole) => pole.distance <= radiusMeters)
-    .sort((a, b) => a.distance - b.distance);
+    .filter((pole: any) => pole.distance <= radiusMeters)
+    .sort((a: any, b: any) => a.distance - b.distance);
 }
 
 /**
