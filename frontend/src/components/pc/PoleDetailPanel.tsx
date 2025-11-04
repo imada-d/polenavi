@@ -26,6 +26,7 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
   const [photoType, setPhotoType] = useState<'plate' | 'full' | 'detail'>('full');
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -285,7 +286,8 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
 
         {/* セクション2: 写真 */}
         <Accordion title="写真" icon="📸">
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* 既存の写真一覧 */}
             {poleData.photos && poleData.photos.length > 0 ? (
               <div className="grid grid-cols-2 gap-2">
                 {poleData.photos.map((photo: any, index: number) => (
@@ -293,6 +295,7 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
                     <img
                       src={photo.photoUrl}
                       alt={`写真${index + 1}`}
+                      onClick={() => setPreviewPhoto(photo.photoUrl)}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     />
                     {FEATURES.LIKES_ENABLED && (
@@ -305,6 +308,120 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
               </div>
             ) : (
               <p className="text-gray-400 text-center py-4">写真はまだありません</p>
+            )}
+
+            {/* 写真追加UI */}
+            {FEATURES.PHOTO_UPLOAD_ENABLED && (
+              <div className="space-y-4 pt-4 border-t border-gray-200">
+                {!preview ? (
+                  /* ファイル選択エリア */
+                  <>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                        isDragging
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="text-4xl mb-2">📸</div>
+                      <p className="text-gray-700 font-semibold mb-1">
+                        クリックして写真を選択
+                      </p>
+                      <p className="text-gray-500 text-sm">
+                        または画像ファイルをドラッグ&ドロップ
+                      </p>
+                      <p className="text-gray-400 text-xs mt-2">
+                        最大5MB、JPEG/PNG/WebP対応
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  /* プレビューとタイプ選択 */
+                  <>
+                    {/* プレビュー画像 */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-gray-700">プレビュー</p>
+                      <img
+                        src={preview}
+                        alt="プレビュー"
+                        className="w-full rounded-lg border-2 border-gray-300"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {selectedFile?.name} ({(selectedFile!.size / 1024).toFixed(0)}KB)
+                      </p>
+                    </div>
+
+                    {/* 写真タイプ選択 */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-gray-700">写真の種類</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => setPhotoType('plate')}
+                          disabled={isUploading}
+                          className={`py-2 rounded-lg font-semibold transition-colors ${
+                            photoType === 'plate'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          📋 番号札
+                        </button>
+                        <button
+                          onClick={() => setPhotoType('full')}
+                          disabled={isUploading}
+                          className={`py-2 rounded-lg font-semibold transition-colors ${
+                            photoType === 'full'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          📷 全体
+                        </button>
+                        <button
+                          onClick={() => setPhotoType('detail')}
+                          disabled={isUploading}
+                          className={`py-2 rounded-lg font-semibold transition-colors ${
+                            photoType === 'detail'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          🔍 詳細
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* アクションボタン */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleCancelPhoto}
+                        disabled={isUploading}
+                        className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 disabled:opacity-50"
+                      >
+                        別の写真を選択
+                      </button>
+                      <button
+                        onClick={handleUpload}
+                        disabled={isUploading}
+                        className="flex-1 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isUploading ? '📤 アップロード中...' : '✅ アップロード'}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         </Accordion>
@@ -394,123 +511,30 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
             </div>
           </Accordion>
         )}
-
-        {/* セクション6: 写真を追加 */}
-        {FEATURES.PHOTO_UPLOAD_ENABLED && (
-          <Accordion title="写真を追加" icon="📸">
-            <div className="space-y-4">
-              {!preview ? (
-                /* ファイル選択エリア */
-                <>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                      isDragging
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="text-4xl mb-2">📸</div>
-                    <p className="text-gray-700 font-semibold mb-1">
-                      クリックして写真を選択
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      または画像ファイルをドラッグ&ドロップ
-                    </p>
-                    <p className="text-gray-400 text-xs mt-2">
-                      最大5MB、JPEG/PNG/WebP対応
-                    </p>
-                  </div>
-                </>
-              ) : (
-                /* プレビューとタイプ選択 */
-                <>
-                  {/* プレビュー画像 */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold text-gray-700">プレビュー</p>
-                    <img
-                      src={preview}
-                      alt="プレビュー"
-                      className="w-full rounded-lg border-2 border-gray-300"
-                    />
-                    <p className="text-xs text-gray-500">
-                      {selectedFile?.name} ({(selectedFile!.size / 1024).toFixed(0)}KB)
-                    </p>
-                  </div>
-
-                  {/* 写真タイプ選択 */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold text-gray-700">写真の種類</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        onClick={() => setPhotoType('plate')}
-                        disabled={isUploading}
-                        className={`py-2 rounded-lg font-semibold transition-colors ${
-                          photoType === 'plate'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        📋 番号札
-                      </button>
-                      <button
-                        onClick={() => setPhotoType('full')}
-                        disabled={isUploading}
-                        className={`py-2 rounded-lg font-semibold transition-colors ${
-                          photoType === 'full'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        📷 全体
-                      </button>
-                      <button
-                        onClick={() => setPhotoType('detail')}
-                        disabled={isUploading}
-                        className={`py-2 rounded-lg font-semibold transition-colors ${
-                          photoType === 'detail'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        🔍 詳細
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* アクションボタン */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleCancelPhoto}
-                      disabled={isUploading}
-                      className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 disabled:opacity-50"
-                    >
-                      別の写真を選択
-                    </button>
-                    <button
-                      onClick={handleUpload}
-                      disabled={isUploading}
-                      className="flex-1 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isUploading ? '📤 アップロード中...' : '✅ アップロード'}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </Accordion>
-        )}
       </div>
+
+      {/* 写真プレビューモーダル */}
+      {previewPhoto && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[2000]"
+          onClick={() => setPreviewPhoto(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] p-4">
+            <button
+              onClick={() => setPreviewPhoto(null)}
+              className="absolute top-2 right-2 text-white text-3xl font-bold bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-colors"
+            >
+              ✕
+            </button>
+            <img
+              src={previewPhoto}
+              alt="写真プレビュー"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
