@@ -4,9 +4,10 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import Accordion from '../common/Accordion';
+import PhotoUploadModal from '../common/PhotoUploadModal';
 import { FEATURES } from '../../config/features';
 import { calculateDistance } from '../../utils/distance';
-import { uploadPolePhoto } from '../../api/poles';
+import { uploadPolePhoto, getPoleById } from '../../api/poles';
 
 interface PoleDetailPanelProps {
   poleId: number;
@@ -14,12 +15,12 @@ interface PoleDetailPanelProps {
   onClose: () => void;
 }
 
-export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: PoleDetailPanelProps) {
+export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPoleData, onClose }: PoleDetailPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [poleData, setPoleData] = useState(initialPoleData);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -66,47 +67,21 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
   };
 
   // 何を: 写真アップロードボタンのクリックハンドラー
-  // なぜ: ファイル選択ダイアログを開くため
+  // なぜ: モーダルを開くため
   const handlePhotoClick = () => {
-    fileInputRef.current?.click();
+    setIsPhotoModalOpen(true);
   };
 
-  // 何を: ファイル選択時のハンドラー
-  // なぜ: 選択された写真をアップロードするため
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // 何を: 写真アップロード処理
+  // なぜ: 選択された写真をアップロードして、データを再取得するため
+  const handlePhotoUpload = async (file: File, photoType: 'plate' | 'full' | 'detail') => {
+    await uploadPolePhoto(poleData.id, file, photoType);
 
-    // 画像ファイルかチェック
-    if (!file.type.startsWith('image/')) {
-      alert('画像ファイルを選択してください');
-      return;
-    }
+    // データを再取得して表示を更新
+    const updatedData = await getPoleById(poleData.id);
+    setPoleData(updatedData);
 
-    // ファイルサイズチェック（10MB以下）
-    if (file.size > 10 * 1024 * 1024) {
-      alert('ファイルサイズは10MB以下にしてください');
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      await uploadPolePhoto(poleData.id, file);
-      alert('✅ 写真をアップロードしました');
-
-      // ページをリロードして写真を表示
-      window.location.reload();
-    } catch (error: any) {
-      console.error('写真アップロードエラー:', error);
-      alert(`❌ ${error.message}`);
-    } finally {
-      setIsUploading(false);
-      // input valueをリセット（同じファイルを再選択できるように）
-      if (event.target) {
-        event.target.value = '';
-      }
-    }
+    alert('✅ 写真をアップロードしました');
   };
 
   // 何を: 詳細パネル上部の小さい地図を初期化
@@ -150,17 +125,17 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
   }, [poleData.latitude, poleData.longitude]);
 
   return (
-    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
+    <>
+      {/* 写真アップロードモーダル */}
+      <PhotoUploadModal
+        isOpen={isPhotoModalOpen}
+        onClose={() => setIsPhotoModalOpen(false)}
+        onUpload={handlePhotoUpload}
+        poleId={poleData.id}
       />
 
-      {/* ヘッダー */}
+      <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
+        {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">📍 電柱詳細</h1>
         <button
@@ -248,14 +223,9 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
             {FEATURES.PHOTO_UPLOAD_ENABLED && (
               <button
                 onClick={handlePhotoClick}
-                disabled={isUploading}
-                className={`w-full py-2 border-2 border-dashed rounded-lg transition-colors ${
-                  isUploading
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-500'
-                }`}
+                className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
               >
-                {isUploading ? '📤 アップロード中...' : '+ 写真を追加'}
+                + 写真を追加
               </button>
             )}
           </div>
@@ -334,14 +304,9 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
             <div className="space-y-2">
               <button
                 onClick={handlePhotoClick}
-                disabled={isUploading}
-                className={`w-full py-2 rounded-lg transition-colors ${
-                  isUploading
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                }`}
+                className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
               >
-                {isUploading ? '📤 アップロード中...' : '📸 写真を追加'}
+                📸 写真を追加
               </button>
               <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                 🔢 番号を追加
@@ -359,5 +324,6 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
         )}
       </div>
     </div>
+    </>
   );
 }

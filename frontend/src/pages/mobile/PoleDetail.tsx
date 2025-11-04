@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import Accordion from '../../components/common/Accordion';
+import PhotoUploadModal from '../../components/common/PhotoUploadModal';
 import { FEATURES } from '../../config/features';
 import { getPoleById, uploadPolePhoto } from '../../api/poles';
 import { calculateDistance } from '../../utils/distance';
@@ -14,13 +15,12 @@ export default function PoleDetail() {
   const navigate = useNavigate();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [poleData, setPoleData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -69,47 +69,23 @@ export default function PoleDetail() {
   };
 
   // 何を: 写真アップロードボタンのクリックハンドラー
-  // なぜ: ファイル選択ダイアログを開くため
+  // なぜ: モーダルを開くため
   const handlePhotoClick = () => {
-    fileInputRef.current?.click();
+    setIsPhotoModalOpen(true);
   };
 
-  // 何を: ファイル選択時のハンドラー
-  // なぜ: 選択された写真をアップロードするため
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !poleData) return;
+  // 何を: 写真アップロード処理
+  // なぜ: 選択された写真をアップロードして、データを再取得するため
+  const handlePhotoUpload = async (file: File, photoType: 'plate' | 'full' | 'detail') => {
+    if (!poleData) return;
 
-    // 画像ファイルかチェック
-    if (!file.type.startsWith('image/')) {
-      alert('画像ファイルを選択してください');
-      return;
-    }
+    await uploadPolePhoto(poleData.id, file, photoType);
 
-    // ファイルサイズチェック（10MB以下）
-    if (file.size > 10 * 1024 * 1024) {
-      alert('ファイルサイズは10MB以下にしてください');
-      return;
-    }
+    // データを再取得して表示を更新
+    const updatedData = await getPoleById(poleData.id);
+    setPoleData(updatedData);
 
-    setIsUploading(true);
-
-    try {
-      await uploadPolePhoto(poleData.id, file);
-      alert('✅ 写真をアップロードしました');
-
-      // ページをリロードして写真を表示
-      window.location.reload();
-    } catch (error: any) {
-      console.error('写真アップロードエラー:', error);
-      alert(`❌ ${error.message}`);
-    } finally {
-      setIsUploading(false);
-      // input valueをリセット（同じファイルを再選択できるように）
-      if (event.target) {
-        event.target.value = '';
-      }
-    }
+    alert('✅ 写真をアップロードしました');
   };
 
   // 何を: 電柱データを取得
@@ -195,17 +171,17 @@ export default function PoleDetail() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
+    <>
+      {/* 写真アップロードモーダル */}
+      <PhotoUploadModal
+        isOpen={isPhotoModalOpen}
+        onClose={() => setIsPhotoModalOpen(false)}
+        onUpload={handlePhotoUpload}
+        poleId={poleData?.id || 0}
       />
 
-      {/* ヘッダー */}
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-50">
         <button
           onClick={() => navigate(-1)}
@@ -293,14 +269,9 @@ export default function PoleDetail() {
             {FEATURES.PHOTO_UPLOAD_ENABLED && (
               <button
                 onClick={handlePhotoClick}
-                disabled={isUploading}
-                className={`w-full py-3 border-2 border-dashed rounded-lg transition-colors ${
-                  isUploading
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'border-gray-300 text-gray-600 hover:border-blue-500 hover:text-blue-500'
-                }`}
+                className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
               >
-                {isUploading ? '📤 アップロード中...' : '+ 写真を追加'}
+                + 写真を追加
               </button>
             )}
           </div>
@@ -379,14 +350,9 @@ export default function PoleDetail() {
             <div className="space-y-2">
               <button
                 onClick={handlePhotoClick}
-                disabled={isUploading}
-                className={`w-full py-3 rounded-lg transition-colors ${
-                  isUploading
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-                }`}
+                className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
               >
-                {isUploading ? '📤 アップロード中...' : '📸 写真を追加'}
+                📸 写真を追加
               </button>
               <button className="w-full py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                 🔢 番号を追加
@@ -404,5 +370,6 @@ export default function PoleDetail() {
         )}
       </div>
     </div>
+    </>
   );
 }

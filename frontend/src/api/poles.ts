@@ -111,11 +111,15 @@ export const getPoleById = async (poleId: number): Promise<any> => {
 
 // 何を: 電柱に写真をアップロードする関数
 // なぜ: ユーザーが電柱の写真を追加できるようにするため
-export const uploadPolePhoto = async (poleId: number, file: File): Promise<any> => {
+export const uploadPolePhoto = async (
+  poleId: number,
+  file: File,
+  photoType: 'plate' | 'full' | 'detail' = 'full'
+): Promise<any> => {
   try {
     const formData = new FormData();
     formData.append('photo', file);
-    formData.append('photoType', 'full');
+    formData.append('photoType', photoType);
 
     const response = await apiClient.post(`/poles/${poleId}/photos`, formData, {
       headers: {
