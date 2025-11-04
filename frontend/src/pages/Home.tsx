@@ -223,6 +223,14 @@ export default function Home() {
   const handleMapReady = useCallback((map: L.Map) => {
     console.log('🗺️ マップ準備完了、電柱を読み込みます');
     mapInstanceRef.current = map;
+
+    // 何を: 地図の移動（ドラッグ・ズーム）が終わったら電柱を再読み込み
+    // なぜ: 移動先の範囲にある電柱を表示するため
+    map.on('moveend', () => {
+      console.log('🔄 地図が移動しました、電柱を再読み込みします');
+      loadNearbyPoles();
+    });
+
     // マップが準備できたら電柱を読み込む
     loadNearbyPoles();
   }, [loadNearbyPoles]);
