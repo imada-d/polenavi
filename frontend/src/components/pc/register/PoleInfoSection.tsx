@@ -43,9 +43,6 @@ export default function PoleInfoSection({
             <span className="text-xl mr-2">⚡</span>
             <div className="text-left">
               <div className="font-bold text-sm">電柱</div>
-              <div className={`text-xs ${poleType === 'electric' ? 'text-blue-100' : 'text-gray-500'}`}>
-                電力会社が管理
-              </div>
             </div>
           </button>
 

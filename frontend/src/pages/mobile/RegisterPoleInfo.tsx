@@ -92,9 +92,6 @@ export default function RegisterPoleInfo() {
               <span className="text-2xl mr-3">⚡</span>
               <div className="text-left">
                 <div className="font-bold">電柱</div>
-                <div className={`text-sm ${poleType === 'electric' ? 'text-blue-100' : 'text-gray-500'}`}>
-                  電力会社が管理する電柱
-                </div>
               </div>
             </button>
 

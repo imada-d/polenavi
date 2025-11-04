@@ -40,6 +40,8 @@ export default function RegisterConfirm() {
         poleSubType,
         plateCount,
         numbers: numbers || [],
+        memo: memoText,
+        hashtag: hashtags,
       });
 
       // 登録完了画面へ

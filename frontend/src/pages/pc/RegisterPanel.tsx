@@ -1,6 +1,7 @@
 import { useState, useEffect, memo, useRef } from 'react';
 import PoleInfoSection from '../../components/pc/register/PoleInfoSection';
 import NumberSection from '../../components/pc/register/NumberSection';
+import MemoSection from '../../components/pc/register/MemoSection';
 import { registerPole } from '../../api/poles';
 import L from 'leaflet';
 
@@ -21,6 +22,8 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRe
   const [poleSubType, setPoleSubType] = useState<'light' | 'sign' | 'traffic' | 'other' | null>(null);
   const [plateCount, setPlateCount] = useState<number | null>(null);
   const [numbers, setNumbers] = useState<string[]>([]);
+  const [hashtags, setHashtags] = useState<string>('');
+  const [memoText, setMemoText] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // 何を: 位置調整モードの状態管理
@@ -188,6 +191,8 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRe
         poleSubType: poleType === 'other' ? poleSubType : null,
         plateCount,
         numbers: finalNumbers,
+        memo: memoText,
+        hashtag: hashtags,
       });
 
       // 成功したら閉じる
@@ -277,6 +282,13 @@ function RegisterPanel({ pinLocation, onClose, map, onLocationChange, fixedPinRe
             setNumbers={setNumbers}
           />
         )}
+
+        <MemoSection
+          hashtags={hashtags}
+          memoText={memoText}
+          onHashtagsChange={setHashtags}
+          onMemoTextChange={setMemoText}
+        />
       </main>
       
       {/* フッター（登録ボタン） */}

@@ -10,6 +10,8 @@ interface PoleRegistrationData {
   poleSubType?: 'light' | 'sign' | 'traffic' | 'other';
   plateCount: number;
   numbers: string[];
+  memo?: string;
+  hashtag?: string;
 }
 
 interface RegistrationState {
@@ -47,6 +49,8 @@ export function usePoleRegistration() {
         poleSubType: data.poleSubType,
         plateCount: data.plateCount,
         numbers: data.numbers,
+        memo: data.memo,
+        hashtag: data.hashtag,
       });
 
       // バックエンドのレスポンス形式: { success: true, message: "...", data: {...} }

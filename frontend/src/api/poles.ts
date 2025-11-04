@@ -31,6 +31,8 @@ export const registerPole = async (data: RegisterPoleData): Promise<any> => {
       poleSubType: data.poleSubType,
       plateCount: data.plateCount,
       numbers: data.numbers,
+      memo: data.memo,
+      hashtag: data.hashtag,
     });
 
     // 成功レスポンスを返す
