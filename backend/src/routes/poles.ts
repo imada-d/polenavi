@@ -23,4 +23,8 @@ router.get('/search', polesController.searchByNumber);
 // なぜ: 登録済みの柱の情報を表示するため
 router.get('/:id', polesController.getPoleById);
 
+// 何を: 柱を検証するエンドポイント
+// なぜ: ユーザーが実際にその場所に行って検証できるようにするため
+router.post('/:id/verify', polesController.verifyPole);
+
 export default router;

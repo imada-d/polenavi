@@ -7,6 +7,7 @@ import L from 'leaflet';
 import Accordion from '../../components/common/Accordion';
 import { FEATURES } from '../../config/features';
 import { getPoleById } from '../../api/poles';
+import { calculateDistance } from '../../utils/distance';
 
 export default function PoleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,53 @@ export default function PoleDetail() {
   const [poleData, setPoleData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  // 何を: 検証ボタンのクリックハンドラー
+  // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
+  const handleVerify = () => {
+    if (!poleData) return;
+
+    if (!('geolocation' in navigator)) {
+      alert('お使いのブラウザは位置情報に対応していません。');
+      return;
+    }
+
+    setIsVerifying(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // 電柱との距離を計算
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          poleData.latitude,
+          poleData.longitude
+        );
+
+        setIsVerifying(false);
+
+        // 100m以内なら検証成功
+        if (distance <= 100) {
+          alert(`✅ 検証成功！\n電柱まで約${Math.round(distance)}mです。\n\n※ログイン機能実装後、検証記録が保存されます。`);
+        } else {
+          alert(`❌ 電柱に近づいてください\n現在地から約${Math.round(distance)}m離れています。\n検証には100m以内に近づく必要があります。`);
+        }
+      },
+      (error) => {
+        setIsVerifying(false);
+        console.error('位置情報の取得に失敗しました:', error);
+        alert('位置情報の取得に失敗しました。設定を確認してください。');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   // 何を: 電柱データを取得
   // なぜ: 詳細情報を表示するため
@@ -247,8 +295,16 @@ export default function PoleDetail() {
                 </div>
               )}
 
-              <button className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-bold">
-                📍 この場所を検証する
+              <button
+                onClick={handleVerify}
+                disabled={isVerifying}
+                className={`w-full py-3 rounded-lg transition-colors font-bold ${
+                  isVerifying
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+              >
+                {isVerifying ? '📍 位置情報を取得中...' : '📍 この場所を検証する'}
               </button>
             </div>
           </Accordion>

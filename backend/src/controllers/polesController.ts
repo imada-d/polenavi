@@ -102,3 +102,33 @@ export async function searchByNumber(req: Request, res: Response, next: NextFunc
     next(error);
   }
 }
+
+/**
+ * 電柱を検証
+ *
+ * POST /api/poles/:id/verify
+ * Body: { latitude: number, longitude: number }
+ */
+export async function verifyPole(req: Request, res: Response, next: NextFunction) {
+  try {
+    const poleId = parseInt(req.params.id, 10);
+    const { latitude, longitude } = req.body;
+
+    if (!latitude || !longitude) {
+      return res.status(400).json({
+        success: false,
+        error: { message: '位置情報が必要です' },
+      });
+    }
+
+    const result = await poleService.verifyPole(poleId, latitude, longitude);
+
+    res.json({
+      success: true,
+      message: '検証が完了しました',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
