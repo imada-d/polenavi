@@ -124,84 +124,82 @@ export default function Home() {
     }
   }, [location.state, navigate]);
 
+  // 何を: 近くの電柱を取得して表示する関数
+  // なぜ: マップ準備時と登録時に使い回すため
+  const loadNearbyPoles = useCallback(async () => {
+    if (!mapInstanceRef.current) return;
+
+    // 地図の中心座標を取得
+    const center = mapInstanceRef.current.getCenter();
+
+    try {
+      const poles = await getNearbyPoles(center.lat, center.lng, 50000);
+
+      // 既存のマーカーを削除
+      poleMarkersRef.current.forEach(marker => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.removeLayer(marker);
+        }
+      });
+      poleMarkersRef.current = [];
+
+      // 取得した電柱をマップに表示
+      poles.forEach((pole: any) => {
+        if (!mapInstanceRef.current) return;
+
+        const markerColor = pole.poleTypeName === '電柱' ? 'blue' : 'orange';
+
+        const marker = L.marker([pole.latitude, pole.longitude], {
+          icon: L.icon({
+            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          })
+        }).addTo(mapInstanceRef.current);
+
+        // 何を: ホバー時に電柱番号を表示するツールチップ
+        // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
+        const numbers = pole.numbers || [];
+        const numberText = numbers.length > 0 ? numbers.join(', ') : '番号なし';
+        marker.bindTooltip(numberText, {
+          permanent: false,
+          direction: 'top',
+          offset: [0, -40]
+        });
+
+        // 何を: クリック時に詳細を表示するポップアップ
+        // なぜ: 電柱の詳細情報を確認できるようにするため
+        const popupContent = `
+          <div style="min-width: 200px;">
+            <h3 style="font-weight: bold; margin-bottom: 8px;">${pole.poleTypeName}</h3>
+            <p style="margin: 4px 0;"><strong>番号:</strong> ${numberText}</p>
+            <p style="margin: 4px 0;"><strong>距離:</strong> 約${Math.round(pole.distance)}m</p>
+            <p style="margin: 4px 0;"><strong>位置:</strong> ${pole.latitude.toFixed(6)}, ${pole.longitude.toFixed(6)}</p>
+          </div>
+        `;
+        marker.bindPopup(popupContent, {
+          maxWidth: 300,
+          className: 'pole-popup'
+        });
+
+        poleMarkersRef.current.push(marker);
+      });
+
+      console.log(`✅ ${poles.length}件の電柱を表示しました`);
+    } catch (error) {
+      console.error('❌ 電柱の取得に失敗:', error);
+    }
+  }, []);
+
   // handleMapReady をメモ化（再実行を防ぐ）
   const handleMapReady = useCallback((map: L.Map) => {
     mapInstanceRef.current = map;
-  }, []);
-
-  // 何を: マップ準備後に近くの電柱を取得して表示
-  // なぜ: 登録済み電柱をページロード時に表示するため
-  useEffect(() => {
-    const loadNearbyPoles = async () => {
-      if (!mapInstanceRef.current) return;
-
-      // 地図の中心座標を取得
-      const center = mapInstanceRef.current.getCenter();
-
-      try {
-        const poles = await getNearbyPoles(center.lat, center.lng, 50000);
-
-        // 既存のマーカーを削除
-        poleMarkersRef.current.forEach(marker => {
-          if (mapInstanceRef.current) {
-            mapInstanceRef.current.removeLayer(marker);
-          }
-        });
-        poleMarkersRef.current = [];
-
-        // 取得した電柱をマップに表示
-        poles.forEach((pole: any) => {
-          if (!mapInstanceRef.current) return;
-
-          const markerColor = pole.poleTypeName === '電柱' ? 'blue' : 'orange';
-
-          const marker = L.marker([pole.latitude, pole.longitude], {
-            icon: L.icon({
-              iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
-              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-              popupAnchor: [1, -34],
-              shadowSize: [41, 41]
-            })
-          }).addTo(mapInstanceRef.current);
-
-          // 何を: ホバー時に電柱番号を表示するツールチップ
-          // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
-          const numbers = pole.numbers || [];
-          const numberText = numbers.length > 0 ? numbers.join(', ') : '番号なし';
-          marker.bindTooltip(numberText, {
-            permanent: false,
-            direction: 'top',
-            offset: [0, -40]
-          });
-
-          // 何を: クリック時に詳細を表示するポップアップ
-          // なぜ: 電柱の詳細情報を確認できるようにするため
-          const popupContent = `
-            <div style="min-width: 200px;">
-              <h3 style="font-weight: bold; margin-bottom: 8px;">${pole.poleTypeName}</h3>
-              <p style="margin: 4px 0;"><strong>番号:</strong> ${numberText}</p>
-              <p style="margin: 4px 0;"><strong>距離:</strong> 約${Math.round(pole.distance)}m</p>
-              <p style="margin: 4px 0;"><strong>位置:</strong> ${pole.latitude.toFixed(6)}, ${pole.longitude.toFixed(6)}</p>
-            </div>
-          `;
-          marker.bindPopup(popupContent);
-
-          poleMarkersRef.current.push(marker);
-        });
-
-        console.log(`✅ ${poles.length}件の電柱を表示しました`);
-      } catch (error) {
-        console.error('❌ 電柱の取得に失敗:', error);
-      }
-    };
-
-    // マップが準備できたら電柱を取得
-    if (mapInstanceRef.current && initialCenter) {
-      loadNearbyPoles();
-    }
-  }, [mapInstanceRef.current, initialCenter]);
+    // マップが準備できたら電柱を読み込む
+    loadNearbyPoles();
+  }, [loadNearbyPoles]);
 
   const handleCurrentLocation = () => {
     if ('geolocation' in navigator) {
@@ -364,7 +362,10 @@ export default function Home() {
         <p style="margin: 4px 0; font-size: 12px; color: gray;">ページを更新すると番号が表示されます</p>
       </div>
     `;
-    marker.bindPopup(popupContent);
+    marker.bindPopup(popupContent, {
+      maxWidth: 300,
+      className: 'pole-popup'
+    });
 
     // 何を: 登録したマーカーを保存
     // なぜ: ページリロード時も表示し続けるため

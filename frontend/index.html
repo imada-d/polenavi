@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PoleNavi - 電柱・柱の位置情報共有プラットフォーム</title>
+    <style>
+      /* Leafletポップアップのz-index調整 */
+      .leaflet-popup-pane {
+        z-index: 3000 !important;
+      }
+      .pole-popup .leaflet-popup-content-wrapper {
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
