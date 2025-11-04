@@ -2,6 +2,7 @@
 // なぜ: 電柱詳細画面で写真を追加する際に、タイプ選択とプレビュー機能を提供するため
 
 import { useState, useRef } from 'react';
+import imageCompression from 'browser-image-compression';
 
 interface PhotoUploadModalProps {
   isOpen: boolean;
@@ -21,27 +22,42 @@ export default function PhotoUploadModal({ isOpen, onClose, onUpload }: PhotoUpl
   if (!isOpen) return null;
 
   // ファイルを処理（選択またはドロップ）
-  const processFile = (file: File) => {
+  const processFile = async (file: File) => {
     // 画像ファイルかチェック
     if (!file.type.startsWith('image/')) {
       alert('画像ファイルを選択してください');
       return;
     }
 
-    // ファイルサイズチェック（10MB以下）
+    // ファイルサイズチェック（圧縮前は10MB以下）
     if (file.size > 10 * 1024 * 1024) {
       alert('ファイルサイズは10MB以下にしてください');
       return;
     }
 
-    setSelectedFile(file);
+    try {
+      // 5MB超える場合は圧縮
+      let processedFile = file;
+      if (file.size > 5 * 1024 * 1024) {
+        processedFile = await imageCompression(file, {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
+      }
 
-    // プレビュー生成
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+      setSelectedFile(processedFile);
+
+      // プレビュー生成
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(processedFile);
+    } catch (error) {
+      console.error('画像の処理に失敗しました:', error);
+      alert('画像の処理に失敗しました');
+    }
   };
 
   // ファイル選択
@@ -155,7 +171,7 @@ export default function PhotoUploadModal({ isOpen, onClose, onUpload }: PhotoUpl
                   または画像ファイルをドラッグ&ドロップ
                 </p>
                 <p className="text-gray-400 text-xs mt-2">
-                  最大10MB、JPEG/PNG/WebP対応
+                  最大5MB、JPEG/PNG/WebP対応
                 </p>
               </div>
             </>

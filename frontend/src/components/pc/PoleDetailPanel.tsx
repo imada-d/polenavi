@@ -3,8 +3,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import imageCompression from 'browser-image-compression';
 import Accordion from '../common/Accordion';
-import PhotoUploadModal from '../common/PhotoUploadModal';
 import { FEATURES } from '../../config/features';
 import { calculateDistance } from '../../utils/distance';
 import { uploadPolePhoto, getPoleById } from '../../api/poles';
@@ -18,9 +18,14 @@ interface PoleDetailPanelProps {
 export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPoleData, onClose }: PoleDetailPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [poleData, setPoleData] = useState(initialPoleData);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [photoType, setPhotoType] = useState<'plate' | 'full' | 'detail'>('full');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -66,22 +71,113 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
     );
   };
 
-  // 何を: 写真アップロードボタンのクリックハンドラー
-  // なぜ: モーダルを開くため
-  const handlePhotoClick = () => {
-    setIsPhotoModalOpen(true);
+  // 何を: ファイルを処理（選択またはドロップ）
+  // なぜ: 画像ファイルのバリデーションと圧縮、プレビュー生成を行うため
+  const processFile = async (file: File) => {
+    // 画像ファイルかチェック
+    if (!file.type.startsWith('image/')) {
+      alert('画像ファイルを選択してください');
+      return;
+    }
+
+    // ファイルサイズチェック（圧縮前は10MB以下）
+    if (file.size > 10 * 1024 * 1024) {
+      alert('ファイルサイズは10MB以下にしてください');
+      return;
+    }
+
+    try {
+      // 5MB超える場合は圧縮
+      let processedFile = file;
+      if (file.size > 5 * 1024 * 1024) {
+        processedFile = await imageCompression(file, {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
+      }
+
+      setSelectedFile(processedFile);
+
+      // プレビュー生成
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(processedFile);
+    } catch (error) {
+      console.error('画像の処理に失敗しました:', error);
+      alert('画像の処理に失敗しました');
+    }
   };
 
-  // 何を: 写真アップロード処理
-  // なぜ: 選択された写真をアップロードして、データを再取得するため
-  const handlePhotoUpload = async (file: File, photoType: 'plate' | 'full' | 'detail') => {
-    await uploadPolePhoto(poleData.id, file, photoType);
+  // 何を: ファイル選択ハンドラー
+  // なぜ: input要素からファイルを選択した際の処理
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
 
-    // データを再取得して表示を更新
-    const updatedData = await getPoleById(poleData.id);
-    setPoleData(updatedData);
+  // 何を: ドラッグ&ドロップハンドラー
+  // なぜ: ドラッグ&ドロップでファイルをアップロードできるようにするため
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
 
-    alert('✅ 写真をアップロードしました');
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+  };
+
+  // 何を: 写真アップロード実行
+  // なぜ: 選択された写真をサーバーにアップロードして、データを再取得するため
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
+
+    try {
+      await uploadPolePhoto(poleData.id, selectedFile, photoType);
+
+      // データを再取得して表示を更新
+      const updatedData = await getPoleById(poleData.id);
+      setPoleData(updatedData);
+
+      // 選択をリセット
+      setSelectedFile(null);
+      setPreview(null);
+      setPhotoType('full');
+
+      alert('✅ 写真をアップロードしました');
+    } catch (error: any) {
+      console.error('写真アップロードエラー:', error);
+      alert(`❌ ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // 何を: 写真選択をキャンセル
+  // なぜ: 別の写真を選択し直せるようにするため
+  const handleCancelPhoto = () => {
+    setSelectedFile(null);
+    setPreview(null);
+    setPhotoType('full');
   };
 
   // 何を: 詳細パネル上部の小さい地図を初期化
@@ -125,16 +221,7 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
   }, [poleData.latitude, poleData.longitude]);
 
   return (
-    <>
-      {/* 写真アップロードモーダル */}
-      <PhotoUploadModal
-        isOpen={isPhotoModalOpen}
-        onClose={() => setIsPhotoModalOpen(false)}
-        onUpload={handlePhotoUpload}
-        poleId={poleData.id}
-      />
-
-      <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
+    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
         {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">📍 電柱詳細</h1>
@@ -219,15 +306,6 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
             ) : (
               <p className="text-gray-400 text-center py-4">写真はまだありません</p>
             )}
-
-            {FEATURES.PHOTO_UPLOAD_ENABLED && (
-              <button
-                onClick={handlePhotoClick}
-                className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-500 transition-colors"
-              >
-                + 写真を追加
-              </button>
-            )}
           </div>
         </Accordion>
 
@@ -302,12 +380,6 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
         {FEATURES.EDIT_ENABLED && (
           <Accordion title="この電柱を編集" icon="✏️">
             <div className="space-y-2">
-              <button
-                onClick={handlePhotoClick}
-                className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-              >
-                📸 写真を追加
-              </button>
               <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                 🔢 番号を追加
               </button>
@@ -322,8 +394,123 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
             </div>
           </Accordion>
         )}
+
+        {/* セクション6: 写真を追加 */}
+        {FEATURES.PHOTO_UPLOAD_ENABLED && (
+          <Accordion title="写真を追加" icon="📸">
+            <div className="space-y-4">
+              {!preview ? (
+                /* ファイル選択エリア */
+                <>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                      isDragging
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="text-4xl mb-2">📸</div>
+                    <p className="text-gray-700 font-semibold mb-1">
+                      クリックして写真を選択
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      または画像ファイルをドラッグ&ドロップ
+                    </p>
+                    <p className="text-gray-400 text-xs mt-2">
+                      最大5MB、JPEG/PNG/WebP対応
+                    </p>
+                  </div>
+                </>
+              ) : (
+                /* プレビューとタイプ選択 */
+                <>
+                  {/* プレビュー画像 */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-gray-700">プレビュー</p>
+                    <img
+                      src={preview}
+                      alt="プレビュー"
+                      className="w-full rounded-lg border-2 border-gray-300"
+                    />
+                    <p className="text-xs text-gray-500">
+                      {selectedFile?.name} ({(selectedFile!.size / 1024).toFixed(0)}KB)
+                    </p>
+                  </div>
+
+                  {/* 写真タイプ選択 */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-semibold text-gray-700">写真の種類</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => setPhotoType('plate')}
+                        disabled={isUploading}
+                        className={`py-2 rounded-lg font-semibold transition-colors ${
+                          photoType === 'plate'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        📋 番号札
+                      </button>
+                      <button
+                        onClick={() => setPhotoType('full')}
+                        disabled={isUploading}
+                        className={`py-2 rounded-lg font-semibold transition-colors ${
+                          photoType === 'full'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        📷 全体
+                      </button>
+                      <button
+                        onClick={() => setPhotoType('detail')}
+                        disabled={isUploading}
+                        className={`py-2 rounded-lg font-semibold transition-colors ${
+                          photoType === 'detail'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        🔍 詳細
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* アクションボタン */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCancelPhoto}
+                      disabled={isUploading}
+                      className="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 disabled:opacity-50"
+                    >
+                      別の写真を選択
+                    </button>
+                    <button
+                      onClick={handleUpload}
+                      disabled={isUploading}
+                      className="flex-1 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isUploading ? '📤 アップロード中...' : '✅ アップロード'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </Accordion>
+        )}
       </div>
     </div>
-    </>
   );
 }

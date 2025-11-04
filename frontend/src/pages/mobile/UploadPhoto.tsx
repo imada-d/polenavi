@@ -3,6 +3,7 @@
 
 import { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 import { uploadPolePhoto } from '../../api/poles';
 
 export default function UploadPhoto() {
@@ -16,7 +17,7 @@ export default function UploadPhoto() {
   const [isUploading, setIsUploading] = useState(false);
 
   // ファイル選択
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -26,20 +27,35 @@ export default function UploadPhoto() {
       return;
     }
 
-    // ファイルサイズチェック（10MB以下）
+    // ファイルサイズチェック（圧縮前は10MB以下）
     if (file.size > 10 * 1024 * 1024) {
       alert('ファイルサイズは10MB以下にしてください');
       return;
     }
 
-    setSelectedFile(file);
+    try {
+      // 5MB超える場合は圧縮
+      let processedFile = file;
+      if (file.size > 5 * 1024 * 1024) {
+        processedFile = await imageCompression(file, {
+          maxSizeMB: 5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        });
+      }
 
-    // プレビュー生成
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+      setSelectedFile(processedFile);
+
+      // プレビュー生成
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(processedFile);
+    } catch (error) {
+      console.error('画像の処理に失敗しました:', error);
+      alert('画像の処理に失敗しました');
+    }
   };
 
   // アップロード実行
@@ -99,7 +115,7 @@ export default function UploadPhoto() {
                 カメラまたはギャラリーから選択
               </p>
               <p className="text-gray-400 text-xs mt-3">
-                最大10MB、JPEG/PNG/WebP対応
+                最大5MB、JPEG/PNG/WebP対応
               </p>
             </div>
           </>
