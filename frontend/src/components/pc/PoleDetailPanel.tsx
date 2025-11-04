@@ -57,7 +57,7 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
   }, [poleData.latitude, poleData.longitude]);
 
   return (
-    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[450px] bg-white border-l shadow-lg z-[1500] flex-col">
+    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">📍 電柱詳細</h1>

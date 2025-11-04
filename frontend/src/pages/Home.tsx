@@ -469,7 +469,7 @@ export default function Home() {
         
         {/* 右側のコントロールエリア */}
         <div className={`absolute top-4 z-[1000] flex flex-col gap-2 transition-all duration-300 ${
-          showRegisterPanel ? 'right-[420px]' : 'right-4'
+          showRegisterPanel ? 'right-[420px]' : showDetailPanel ? 'right-[570px]' : 'right-4'
         }`}>
           {/* 地図タイプ選択ボタン */}
           <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -516,8 +516,8 @@ export default function Home() {
             <span>検索</span>
           </button>
 
-          {/* PC版：新規登録ボタン（登録モード中は非表示） */}
-          {!isRegisterMode && !showRegisterPanel && (
+          {/* PC版：新規登録ボタン（登録モード中・パネル表示中は非表示） */}
+          {!isRegisterMode && !showRegisterPanel && !showDetailPanel && (
             <button
               onClick={handleQuickRegister}
               className="hidden md:flex bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg hover:bg-blue-700 font-bold transition-colors items-center gap-2"
