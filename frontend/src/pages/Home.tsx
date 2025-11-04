@@ -137,13 +137,19 @@ export default function Home() {
   // 何を: 近くの電柱を取得して表示する関数
   // なぜ: マップ準備時と登録時に使い回すため
   const loadNearbyPoles = useCallback(async () => {
-    if (!mapInstanceRef.current) return;
+    if (!mapInstanceRef.current) {
+      console.log('❌ mapInstanceRef.currentがnullです');
+      return;
+    }
 
     // 地図の中心座標を取得
     const center = mapInstanceRef.current.getCenter();
+    console.log('🗺️ 地図の中心座標:', center.lat, center.lng);
 
     try {
+      console.log('📡 電柱データを取得中...');
       const poles = await getNearbyPoles(center.lat, center.lng, 50000);
+      console.log('📦 取得した電柱データ:', poles);
 
       // 既存のマーカーを削除
       poleMarkersRef.current.forEach(marker => {
@@ -154,16 +160,25 @@ export default function Home() {
       poleMarkersRef.current = [];
 
       // 取得した電柱をマップに表示
-      poles.forEach((pole: any) => {
+      poles.forEach((pole: any, index: number) => {
         if (!mapInstanceRef.current) return;
+
+        console.log(`📍 電柱${index + 1}:`, {
+          poleTypeName: pole.poleTypeName,
+          poleSubType: pole.poleSubType,
+          位置: [pole.latitude, pole.longitude],
+          番号: pole.numbers
+        });
 
         // 何を: 電柱の種類に応じた適切なカスタムアイコンを使用
         // なぜ: テストピンと同じ視覚的表現で登録済み電柱を表示するため
         const icon = getPoleIcon(pole.poleTypeName, pole.poleSubType);
+        console.log(`🎨 使用するアイコン:`, icon);
 
         const marker = L.marker([pole.latitude, pole.longitude], {
           icon: icon
         }).addTo(mapInstanceRef.current);
+        console.log(`✅ マーカー${index + 1}を地図に追加しました`);
 
         // 何を: ホバー時に電柱番号を表示するツールチップ
         // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
@@ -190,6 +205,11 @@ export default function Home() {
           className: 'pole-popup'
         });
 
+        // クリックイベントのデバッグ
+        marker.on('click', () => {
+          console.log('🖱️ マーカーがクリックされました:', pole.poleTypeName);
+        });
+
         poleMarkersRef.current.push(marker);
       });
 
@@ -201,6 +221,7 @@ export default function Home() {
 
   // handleMapReady をメモ化（再実行を防ぐ）
   const handleMapReady = useCallback((map: L.Map) => {
+    console.log('🗺️ マップ準備完了、電柱を読み込みます');
     mapInstanceRef.current = map;
     // マップが準備できたら電柱を読み込む
     loadNearbyPoles();
