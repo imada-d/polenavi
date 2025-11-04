@@ -6,6 +6,7 @@ import Stats from './pages/Stats';
 import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
 import PoleDetail from './pages/mobile/PoleDetail';
+import UploadPhoto from './pages/mobile/UploadPhoto';
 import RegisterLocation from './pages/RegisterLocation';
 import RegisterPoleInfo from './pages/mobile/RegisterPoleInfo';
 import RegisterPhotoClassify from './pages/mobile/RegisterPhotoClassify';
@@ -31,6 +32,7 @@ function AppContent() {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
+        <Route path="/pole/:id/upload" element={<UploadPhoto />} />
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-info" element={<RegisterPoleInfo />} />
         <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} />

@@ -5,9 +5,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import Accordion from '../../components/common/Accordion';
-import PhotoUploadModal from '../../components/common/PhotoUploadModal';
 import { FEATURES } from '../../config/features';
-import { getPoleById, uploadPolePhoto } from '../../api/poles';
+import { getPoleById } from '../../api/poles';
 import { calculateDistance } from '../../utils/distance';
 
 export default function PoleDetail() {
@@ -20,7 +19,6 @@ export default function PoleDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -69,27 +67,13 @@ export default function PoleDetail() {
   };
 
   // 何を: 写真アップロードボタンのクリックハンドラー
-  // なぜ: モーダルを開くため
+  // なぜ: アップロードページに遷移するため
   const handlePhotoClick = () => {
-    setIsPhotoModalOpen(true);
-  };
-
-  // 何を: 写真アップロード処理
-  // なぜ: 選択された写真をアップロードして、データを再取得するため
-  const handlePhotoUpload = async (file: File, photoType: 'plate' | 'full' | 'detail') => {
-    if (!poleData) return;
-
-    await uploadPolePhoto(poleData.id, file, photoType);
-
-    // データを再取得して表示を更新
-    const updatedData = await getPoleById(poleData.id);
-    setPoleData(updatedData);
-
-    alert('✅ 写真をアップロードしました');
+    navigate(`/pole/${id}/upload`);
   };
 
   // 何を: 電柱データを取得
-  // なぜ: 詳細情報を表示するため
+  // なぜ: 詳細情報を表示するため（写真アップロード後も再取得）
   useEffect(() => {
     const fetchPoleData = async () => {
       if (!id) return;
@@ -107,6 +91,27 @@ export default function PoleDetail() {
 
     fetchPoleData();
   }, [id]);
+
+  // 何を: ページに戻ってきたときにデータを再取得
+  // なぜ: 写真アップロード後に更新された内容を表示するため
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && id && poleData) {
+        try {
+          const updatedData = await getPoleById(parseInt(id, 10));
+          setPoleData(updatedData);
+        } catch (err) {
+          console.error('データの再取得に失敗:', err);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [id, poleData]);
 
   // 何を: 詳細ページ上部の地図を初期化
   // なぜ: 電柱の位置を視覚的に確認できるようにするため
@@ -171,16 +176,7 @@ export default function PoleDetail() {
   }
 
   return (
-    <>
-      {/* 写真アップロードモーダル */}
-      <PhotoUploadModal
-        isOpen={isPhotoModalOpen}
-        onClose={() => setIsPhotoModalOpen(false)}
-        onUpload={handlePhotoUpload}
-        poleId={poleData?.id || 0}
-      />
-
-      <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
         {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-50">
         <button
@@ -370,6 +366,5 @@ export default function PoleDetail() {
         )}
       </div>
     </div>
-    </>
   );
 }

@@ -15,15 +15,13 @@ export default function PhotoUploadModal({ isOpen, onClose, onUpload }: PhotoUpl
   const [preview, setPreview] = useState<string | null>(null);
   const [photoType, setPhotoType] = useState<'plate' | 'full' | 'detail'>('full');
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
-  // ファイル選択
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  // ファイルを処理（選択またはドロップ）
+  const processFile = (file: File) => {
     // 画像ファイルかチェック
     if (!file.type.startsWith('image/')) {
       alert('画像ファイルを選択してください');
@@ -44,6 +42,37 @@ export default function PhotoUploadModal({ isOpen, onClose, onUpload }: PhotoUpl
       setPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  // ファイル選択
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
+
+  // ドラッグ&ドロップ
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
   };
 
   // アップロード実行
@@ -73,7 +102,15 @@ export default function PhotoUploadModal({ isOpen, onClose, onUpload }: PhotoUpl
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-[2000] flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-[2000] flex items-center justify-center p-4"
+      onClick={(e) => {
+        // モーダル背景クリックで閉じる
+        if (e.target === e.currentTarget && !isUploading) {
+          handleClose();
+        }
+      }}
+    >
       <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* ヘッダー */}
         <div className="flex items-center justify-between p-4 border-b">
@@ -101,7 +138,14 @@ export default function PhotoUploadModal({ isOpen, onClose, onUpload }: PhotoUpl
               />
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-gray-50 transition-colors"
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                  isDragging
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+                }`}
               >
                 <div className="text-5xl mb-3">📸</div>
                 <p className="text-gray-700 font-semibold mb-1">
