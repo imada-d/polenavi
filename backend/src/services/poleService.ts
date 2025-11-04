@@ -275,3 +275,69 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
   return R * c; // メートル
 }
+
+/**
+ * メモ・ハッシュタグで電柱を検索
+ */
+export async function searchPolesByMemo(query: string) {
+  if (!query || query.trim().length === 0) {
+    throw new ValidationError('検索キーワードを入力してください');
+  }
+
+  const trimmedQuery = query.trim();
+
+  // ハッシュタグ検索か、テキスト検索か判定
+  const isHashtagSearch = trimmedQuery.startsWith('#');
+  const searchTerm = isHashtagSearch ? trimmedQuery : trimmedQuery;
+
+  // メモを検索
+  const memos = await prisma.poleMemo.findMany({
+    where: {
+      OR: [
+        // ハッシュタグ配列内を検索
+        {
+          hashtags: {
+            has: searchTerm,
+          },
+        },
+        // メモテキスト内を検索（部分一致）
+        {
+          memoText: {
+            contains: searchTerm,
+            mode: 'insensitive', // 大文字小文字を区別しない
+          },
+        },
+      ],
+      isPublic: true,
+    },
+    include: {
+      pole: {
+        include: {
+          poleNumbers: true,
+        },
+      },
+    },
+    take: 50, // 最大50件
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  // 重複する電柱を排除
+  const uniquePoles = Array.from(
+    new Map(memos.map((memo: any) => [memo.pole.id, memo])).values()
+  );
+
+  return uniquePoles.map((memo: any) => ({
+    poleId: memo.pole.id,
+    latitude: memo.pole.latitude,
+    longitude: memo.pole.longitude,
+    poleTypeName: memo.pole.poleTypeName,
+    numberCount: memo.pole.numberCount,
+    numbers: memo.pole.poleNumbers.map((pn: any) => pn.poleNumber),
+    memoText: memo.memoText,
+    hashtags: memo.hashtags,
+    createdByName: memo.createdByName,
+    createdAt: memo.createdAt,
+  }));
+}

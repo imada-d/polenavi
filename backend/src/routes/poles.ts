@@ -19,6 +19,10 @@ router.get('/nearby', polesController.getNearbyPoles);
 // なぜ: 番号札の番号で柱を検索できるようにするため
 router.get('/search', polesController.searchByNumber);
 
+// 何を: メモ・ハッシュタグから柱を検索するエンドポイント
+// なぜ: メモやハッシュタグで柱を検索できるようにするため
+router.get('/search/memo', polesController.searchPolesByMemo);
+
 // 何を: 柱の詳細情報を取得するエンドポイント
 // なぜ: 登録済みの柱の情報を表示するため
 router.get('/:id', polesController.getPoleById);

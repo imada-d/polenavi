@@ -136,3 +136,21 @@ export const uploadPolePhoto = async (
     throw new Error(errorMessage);
   }
 };
+
+// 何を: メモ・ハッシュタグで電柱を検索する関数
+// なぜ: ユーザーがメモやハッシュタグで電柱を検索できるようにするため
+export const searchPolesByMemo = async (query: string): Promise<any> => {
+  try {
+    const response = await apiClient.get('/poles/search/memo', {
+      params: { q: query },
+    });
+
+    console.log('✅ メモ検索成功:', response.data);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('❌ メモ検索エラー:', error);
+
+    const errorMessage = error.response?.data?.error?.message || 'メモの検索に失敗しました';
+    throw new Error(errorMessage);
+  }
+};

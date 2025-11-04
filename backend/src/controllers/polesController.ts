@@ -132,3 +132,35 @@ export async function verifyPole(req: Request, res: Response, next: NextFunction
     next(error);
   }
 }
+
+/**
+ * メモ・ハッシュタグで電柱を検索
+ *
+ * GET /api/poles/search/memo?q=検索キーワード
+ */
+export async function searchPolesByMemo(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const query = req.query.q as string;
+
+    if (!query || query.trim().length === 0) {
+      res.status(400).json({
+        success: false,
+        error: { message: '検索キーワードを入力してください' },
+      });
+      return;
+    }
+
+    const results = await poleService.searchPolesByMemo(query);
+
+    res.json({
+      success: true,
+      data: {
+        query,
+        count: results.length,
+        poles: results,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
