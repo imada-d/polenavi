@@ -44,7 +44,7 @@ export default function RegisterLocation() {
     if (currentLocation && pinLocation) {
       // 現在地を「現在地」というテキストで表示
       const currentLocationIcon = L.divIcon({
-        html: '<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">📍 現在地</div>',
+        html: '<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>',
         className: 'current-location-label',
         iconSize: [60, 24],
         iconAnchor: [30, 12],
@@ -179,7 +179,7 @@ export default function RegisterLocation() {
             className="bg-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-50 font-bold"
             title="現在地に戻す"
           >
-            📍 現在地
+            <span translate="no">📍 現在地</span>
           </button>
         </div>
       </main>
