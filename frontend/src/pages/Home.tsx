@@ -144,19 +144,13 @@ export default function Home() {
   // 何を: 近くの電柱を取得して表示する関数
   // なぜ: マップ準備時と登録時に使い回すため
   const loadNearbyPoles = useCallback(async () => {
-    if (!mapInstanceRef.current) {
-      console.log('❌ mapInstanceRef.currentがnullです');
-      return;
-    }
+    if (!mapInstanceRef.current) return;
 
     // 地図の中心座標を取得
     const center = mapInstanceRef.current.getCenter();
-    console.log('🗺️ 地図の中心座標:', center.lat, center.lng);
 
     try {
-      console.log('📡 電柱データを取得中...');
       const poles = await getNearbyPoles(center.lat, center.lng, 50000);
-      console.log('📦 取得した電柱データ:', poles);
 
       // 何を: 既存のクラスタグループをクリア
       // なぜ: 古いマーカーを削除して新しいマーカーだけ表示するため
@@ -176,24 +170,18 @@ export default function Home() {
       poleMarkersRef.current = [];
 
       // 取得した電柱をマップに表示
-      poles.forEach((pole: any, index: number) => {
+      poles.forEach((pole: any) => {
         if (!mapInstanceRef.current) return;
-
-        console.log(`📍 電柱${index + 1} 完全なデータ:`, pole);
-        console.log(`  - latitude型:`, typeof pole.latitude, pole.latitude);
-        console.log(`  - longitude型:`, typeof pole.longitude, pole.longitude);
 
         // 何を: 電柱の種類に応じた適切なカスタムアイコンを使用
         // なぜ: テストピンと同じ視覚的表現で登録済み電柱を表示するため
         const icon = getPoleIcon(pole.poleTypeName, pole.poleSubType);
-        console.log(`🎨 使用するアイコン:`, icon);
 
         // 何を: マーカーを作成（地図には直接追加せず、クラスタグループに追加）
         // なぜ: ズームレベルに応じて自動的にグループ化するため
         const marker = L.marker([pole.latitude, pole.longitude], {
           icon: icon
         });
-        console.log(`✅ マーカー${index + 1}を作成しました`);
 
         // 何を: ホバー時に電柱番号を表示するツールチップ
         // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
@@ -220,11 +208,6 @@ export default function Home() {
           className: 'pole-popup'
         });
 
-        // クリックイベントのデバッグ
-        marker.on('click', () => {
-          console.log('🖱️ マーカーがクリックされました:', pole.poleTypeName);
-        });
-
         // 何を: マーカーをクラスタグループに追加
         // なぜ: Googleマップのように自動的にグループ化して表示するため
         markerClusterGroupRef.current?.addLayer(marker);
@@ -236,8 +219,6 @@ export default function Home() {
       if (markerClusterGroupRef.current && mapInstanceRef.current) {
         mapInstanceRef.current.addLayer(markerClusterGroupRef.current);
       }
-
-      console.log(`✅ ${poles.length}件の電柱を表示しました（クラスタリング有効）`);
     } catch (error) {
       console.error('❌ 電柱の取得に失敗:', error);
     }
@@ -245,13 +226,11 @@ export default function Home() {
 
   // handleMapReady をメモ化（再実行を防ぐ）
   const handleMapReady = useCallback((map: L.Map) => {
-    console.log('🗺️ マップ準備完了、電柱を読み込みます');
     mapInstanceRef.current = map;
 
     // 何を: 地図の移動（ドラッグ・ズーム）が終わったら電柱を再読み込み
     // なぜ: 移動先の範囲にある電柱を表示するため
     map.on('moveend', () => {
-      console.log('🔄 地図が移動しました、電柱を再読み込みします');
       loadNearbyPoles();
     });
 
