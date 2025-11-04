@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
+import { getNearbyPoles } from '../api/poles';
 import L from 'leaflet';
 
 export default function Home() {
@@ -10,10 +11,14 @@ export default function Home() {
   const location = useLocation();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.Marker | null>(null);
-  
+
   // 何を: パネル表示中の固定ピン用のref
   // なぜ: 位置調整モード以外でもピンを表示し続けるため
   const fixedPinRef = useRef<L.Marker | null>(null);
+
+  // 何を: 登録済み電柱マーカーを保存するためのref
+  // なぜ: ページリロード後も電柱を表示し続けるため
+  const poleMarkersRef = useRef<L.Marker[]>([]);
   
   // 地図タイプの状態を管理（2モード）
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street');
@@ -123,6 +128,58 @@ export default function Home() {
   const handleMapReady = useCallback((map: L.Map) => {
     mapInstanceRef.current = map;
   }, []);
+
+  // 何を: マップ準備後に近くの電柱を取得して表示
+  // なぜ: 登録済み電柱をページロード時に表示するため
+  useEffect(() => {
+    const loadNearbyPoles = async () => {
+      if (!mapInstanceRef.current) return;
+
+      // 地図の中心座標を取得
+      const center = mapInstanceRef.current.getCenter();
+
+      try {
+        const poles = await getNearbyPoles(center.lat, center.lng, 50000);
+
+        // 既存のマーカーを削除
+        poleMarkersRef.current.forEach(marker => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.removeLayer(marker);
+          }
+        });
+        poleMarkersRef.current = [];
+
+        // 取得した電柱をマップに表示
+        poles.forEach((pole: any) => {
+          if (!mapInstanceRef.current) return;
+
+          const markerColor = pole.poleTypeName === '電柱' ? 'blue' : 'orange';
+
+          const marker = L.marker([pole.latitude, pole.longitude], {
+            icon: L.icon({
+              iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
+              shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [1, -34],
+              shadowSize: [41, 41]
+            })
+          }).addTo(mapInstanceRef.current);
+
+          poleMarkersRef.current.push(marker);
+        });
+
+        console.log(`✅ ${poles.length}件の電柱を表示しました`);
+      } catch (error) {
+        console.error('❌ 電柱の取得に失敗:', error);
+      }
+    };
+
+    // マップが準備できたら電柱を取得
+    if (mapInstanceRef.current && initialCenter) {
+      loadNearbyPoles();
+    }
+  }, [mapInstanceRef.current, initialCenter]);
 
   const handleCurrentLocation = () => {
     if ('geolocation' in navigator) {
@@ -255,7 +312,7 @@ export default function Home() {
     const markerColor = poleType === 'electric' ? 'blue' : 'orange';
 
     // マーカーを作成
-    L.marker(location, {
+    const marker = L.marker(location, {
       icon: L.icon({
         iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
@@ -265,6 +322,10 @@ export default function Home() {
         shadowSize: [41, 41]
       })
     }).addTo(mapInstanceRef.current);
+
+    // 何を: 登録したマーカーを保存
+    // なぜ: ページリロード時も表示し続けるため
+    poleMarkersRef.current.push(marker);
 
     // 地図を登録した位置に移動
     mapInstanceRef.current.setView(location, 18, {

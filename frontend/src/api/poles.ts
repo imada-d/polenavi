@@ -72,3 +72,19 @@ export const searchPoleByNumber = async (number: string): Promise<any> => {
     throw new Error(errorMessage);
   }
 };
+
+// 何を: 近くの電柱を取得する関数
+// なぜ: マップ上に登録済みの電柱を表示するため
+export const getNearbyPoles = async (lat: number, lng: number, radius: number = 50000): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/poles/nearby', {
+      params: { lat, lng, radius },
+    });
+
+    console.log('✅ 電柱取得成功:', response.data);
+    return response.data.data.poles || [];
+  } catch (error: any) {
+    console.error('❌ 電柱取得エラー:', error);
+    return [];
+  }
+};
