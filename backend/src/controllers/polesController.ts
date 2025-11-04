@@ -66,10 +66,10 @@ export async function getNearbyPoles(req: Request, res: Response, next: NextFunc
     res.json({
       success: true,
       data: {
-        poles: poles.map((p) => ({
+        poles: poles.map((p: any) => ({
           id: p.id,
-          latitude: p.latitude,
-          longitude: p.longitude,
+          latitude: Number(p.latitude), // Decimal型をNumberに変換
+          longitude: Number(p.longitude), // Decimal型をNumberに変換
           distance: p.distance,
           poleTypeName: p.poleTypeName,
           numberCount: p.numberCount,

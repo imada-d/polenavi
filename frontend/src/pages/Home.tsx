@@ -179,12 +179,9 @@ export default function Home() {
       poles.forEach((pole: any, index: number) => {
         if (!mapInstanceRef.current) return;
 
-        console.log(`📍 電柱${index + 1}:`, {
-          poleTypeName: pole.poleTypeName,
-          poleSubType: pole.poleSubType,
-          位置: [pole.latitude, pole.longitude],
-          番号: pole.numbers
-        });
+        console.log(`📍 電柱${index + 1} 完全なデータ:`, pole);
+        console.log(`  - latitude型:`, typeof pole.latitude, pole.latitude);
+        console.log(`  - longitude型:`, typeof pole.longitude, pole.longitude);
 
         // 何を: 電柱の種類に応じた適切なカスタムアイコンを使用
         // なぜ: テストピンと同じ視覚的表現で登録済み電柱を表示するため
