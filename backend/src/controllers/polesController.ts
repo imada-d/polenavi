@@ -73,6 +73,7 @@ export async function getNearbyPoles(req: Request, res: Response, next: NextFunc
           distance: p.distance,
           poleTypeName: p.poleTypeName,
           numberCount: p.numberCount,
+          numbers: p.poleNumbers?.map((n: any) => n.poleNumber) || [],
         })),
       },
     });

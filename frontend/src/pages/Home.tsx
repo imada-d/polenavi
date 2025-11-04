@@ -166,6 +166,28 @@ export default function Home() {
             })
           }).addTo(mapInstanceRef.current);
 
+          // 何を: ホバー時に電柱番号を表示するツールチップ
+          // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
+          const numbers = pole.numbers || [];
+          const numberText = numbers.length > 0 ? numbers.join(', ') : '番号なし';
+          marker.bindTooltip(numberText, {
+            permanent: false,
+            direction: 'top',
+            offset: [0, -40]
+          });
+
+          // 何を: クリック時に詳細を表示するポップアップ
+          // なぜ: 電柱の詳細情報を確認できるようにするため
+          const popupContent = `
+            <div style="min-width: 200px;">
+              <h3 style="font-weight: bold; margin-bottom: 8px;">${pole.poleTypeName}</h3>
+              <p style="margin: 4px 0;"><strong>番号:</strong> ${numberText}</p>
+              <p style="margin: 4px 0;"><strong>距離:</strong> 約${Math.round(pole.distance)}m</p>
+              <p style="margin: 4px 0;"><strong>位置:</strong> ${pole.latitude.toFixed(6)}, ${pole.longitude.toFixed(6)}</p>
+            </div>
+          `;
+          marker.bindPopup(popupContent);
+
           poleMarkersRef.current.push(marker);
         });
 
@@ -310,6 +332,7 @@ export default function Home() {
     // 何を: 電柱の種類に応じてマーカーの色を変える
     // なぜ: 視覚的に電柱と他の柱を区別するため
     const markerColor = poleType === 'electric' ? 'blue' : 'orange';
+    const poleTypeName = poleType === 'electric' ? '電柱' : 'その他の柱';
 
     // マーカーを作成
     const marker = L.marker(location, {
@@ -322,6 +345,26 @@ export default function Home() {
         shadowSize: [41, 41]
       })
     }).addTo(mapInstanceRef.current);
+
+    // 何を: ホバー時に「新規登録」と表示
+    // なぜ: 登録直後であることがわかるようにするため
+    marker.bindTooltip('新規登録', {
+      permanent: false,
+      direction: 'top',
+      offset: [0, -40]
+    });
+
+    // 何を: クリック時に詳細を表示
+    // なぜ: 登録した電柱の情報を確認できるようにするため
+    const popupContent = `
+      <div style="min-width: 200px;">
+        <h3 style="font-weight: bold; margin-bottom: 8px;">${poleTypeName}</h3>
+        <p style="margin: 4px 0; color: green;"><strong>✅ 登録完了</strong></p>
+        <p style="margin: 4px 0;"><strong>位置:</strong> ${location[0].toFixed(6)}, ${location[1].toFixed(6)}</p>
+        <p style="margin: 4px 0; font-size: 12px; color: gray;">ページを更新すると番号が表示されます</p>
+      </div>
+    `;
+    marker.bindPopup(popupContent);
 
     // 何を: 登録したマーカーを保存
     // なぜ: ページリロード時も表示し続けるため
