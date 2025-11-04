@@ -2,8 +2,9 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Map, { poleIcons } from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
+import PoleDetailPanel from '../components/pc/PoleDetailPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
-import { getNearbyPoles } from '../api/poles';
+import { getNearbyPoles, getPoleById } from '../api/poles';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -50,9 +51,14 @@ export default function Home() {
   // PC版：登録パネルの表示状態
   const [showRegisterPanel, setShowRegisterPanel] = useState(false);
   const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
-  
+
   // 登録モードの管理
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+
+  // PC版：詳細パネルの表示状態
+  const [showDetailPanel, setShowDetailPanel] = useState(false);
+  const [selectedPoleId, setSelectedPoleId] = useState<number | null>(null);
+  const [selectedPoleData, setSelectedPoleData] = useState<any | null>(null);
 
   // 初回のみ現在地を取得して初期表示にする
   useEffect(() => {
@@ -141,6 +147,26 @@ export default function Home() {
     }
   }, [location.state, navigate]);
 
+  // 何を: 電柱マーカークリック時の処理
+  // なぜ: 電柱の詳細情報を表示するため
+  const handlePoleClick = useCallback(async (poleId: number) => {
+    try {
+      // PC版の場合は詳細パネルを表示
+      if (window.innerWidth >= 768) {
+        const poleData = await getPoleById(poleId);
+        setSelectedPoleId(poleId);
+        setSelectedPoleData(poleData);
+        setShowDetailPanel(true);
+      } else {
+        // モバイル版の場合は詳細ページに遷移
+        navigate(`/pole/${poleId}`);
+      }
+    } catch (error) {
+      console.error('電柱詳細取得エラー:', error);
+      alert('電柱の詳細情報を取得できませんでした');
+    }
+  }, [navigate]);
+
   // 何を: 近くの電柱を取得して表示する関数
   // なぜ: マップ準備時と登録時に使い回すため
   const loadNearbyPoles = useCallback(async () => {
@@ -193,19 +219,10 @@ export default function Home() {
           offset: [0, -40]
         });
 
-        // 何を: クリック時に詳細を表示するポップアップ
-        // なぜ: 電柱の詳細情報を確認できるようにするため
-        const popupContent = `
-          <div style="min-width: 200px;">
-            <h3 style="font-weight: bold; margin-bottom: 8px;">${pole.poleTypeName}</h3>
-            <p style="margin: 4px 0;"><strong>番号:</strong> ${numberText}</p>
-            <p style="margin: 4px 0;"><strong>距離:</strong> 約${Math.round(pole.distance)}m</p>
-            <p style="margin: 4px 0;"><strong>位置:</strong> ${pole.latitude.toFixed(6)}, ${pole.longitude.toFixed(6)}</p>
-          </div>
-        `;
-        marker.bindPopup(popupContent, {
-          maxWidth: 300,
-          className: 'pole-popup'
+        // 何を: クリック時に詳細パネルを表示
+        // なぜ: 電柱の詳細情報をアコーディオン形式で確認できるようにするため
+        marker.on('click', () => {
+          handlePoleClick(pole.id);
         });
 
         // 何を: マーカーをクラスタグループに追加
@@ -222,7 +239,7 @@ export default function Home() {
     } catch (error) {
       console.error('❌ 電柱の取得に失敗:', error);
     }
-  }, []);
+  }, [handlePoleClick]);
 
   // handleMapReady をメモ化（再実行を防ぐ）
   const handleMapReady = useCallback((map: L.Map) => {
@@ -535,6 +552,19 @@ export default function Home() {
             onLocationChange={setPinLocation}
             fixedPinRef={fixedPinRef}
             onRegisterSuccess={handleRegisterSuccess}
+          />
+        )}
+
+        {/* PC版：詳細パネル（768px以上で表示） */}
+        {showDetailPanel && selectedPoleId && selectedPoleData && (
+          <PoleDetailPanel
+            poleId={selectedPoleId}
+            poleData={selectedPoleData}
+            onClose={() => {
+              setShowDetailPanel(false);
+              setSelectedPoleId(null);
+              setSelectedPoleData(null);
+            }}
           />
         )}
       </main>

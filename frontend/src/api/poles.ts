@@ -88,3 +88,23 @@ export const getNearbyPoles = async (lat: number, lng: number, radius: number = 
     return [];
   }
 };
+
+// 何を: 電柱IDから詳細情報を取得する関数
+// なぜ: 電柱をクリックした時に詳細情報を表示するため
+export const getPoleById = async (poleId: number): Promise<any> => {
+  try {
+    const response = await apiClient.get(`/poles/${poleId}`);
+
+    console.log('✅ 電柱詳細取得成功:', response.data);
+    return response.data.data.pole;
+  } catch (error: any) {
+    console.error('❌ 電柱詳細取得エラー:', error);
+
+    if (error.response?.status === 404) {
+      throw new Error('電柱が見つかりませんでした');
+    }
+
+    const errorMessage = error.response?.data?.error?.message || '電柱詳細の取得に失敗しました';
+    throw new Error(errorMessage);
+  }
+};
