@@ -77,9 +77,10 @@ model Pole {
   numberCount     Int       @default(0) @map("number_count")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
-  
+
   poleNumbers     PoleNumber[]
   photos          PolePhoto[]
+  memos           PoleMemo[]
 
   @@map("poles")
 }
@@ -175,6 +176,7 @@ model User {
   poleNumbers        PoleNumber[]
   uploadedPhotos     PolePhoto[]  @relation("PhotoUploadedBy")
   deletedPhotos      PolePhoto[]  @relation("PhotoDeletedBy")
+  memos              PoleMemo[]
 
   @@map("users")
 }
@@ -187,4 +189,22 @@ model GuestUser {
   createdAt      DateTime @default(now()) @map("created_at")
 
   @@map("guest_users")
+}
+
+// メモテーブル（1電柱に複数のメモを登録可能）
+model PoleMemo {
+  id            Int      @id @default(autoincrement())
+  poleId        Int      @map("pole_id")
+  pole          Pole     @relation(fields: [poleId], references: [id])
+  hashtags      String[] // PostgreSQLの配列型
+  memoText      String?  @map("memo_text") @db.Text
+  createdBy     Int?     @map("created_by")
+  createdByUser User?    @relation(fields: [createdBy], references: [id])
+  createdByName String   @map("created_by_name") @db.VarChar(100)
+  isPublic      Boolean  @default(true) @map("is_public")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([poleId])
+  @@map("pole_memos")
 }
