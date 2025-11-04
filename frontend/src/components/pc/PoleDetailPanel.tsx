@@ -16,7 +16,7 @@ interface PoleDetailPanelProps {
   onClose: () => void;
 }
 
-export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPoleData, onClose }: PoleDetailPanelProps) {
+export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onClose }: PoleDetailPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +33,13 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData: initialPole
   const [newMemoText, setNewMemoText] = useState('');
   const [newHashtags, setNewHashtags] = useState('');
   const [isAddingMemo, setIsAddingMemo] = useState(false);
+
+  // 何を: propsのpoleDataが変更されたら、stateを更新
+  // なぜ: 別の電柱をクリックしたときに表示を更新するため
+  useEffect(() => {
+    console.log('🔄 PoleDetailPanel: poleData prop changed, updating state', initialPoleData);
+    setPoleData(initialPoleData);
+  }, [poleId, initialPoleData]);
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため

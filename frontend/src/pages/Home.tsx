@@ -154,21 +154,13 @@ export default function Home() {
   // 何を: 電柱マーカークリック時の処理
   // なぜ: 電柱の詳細情報を表示するため
   const handlePoleClick = useCallback(async (poleId: number) => {
-    console.log('🔍 handlePoleClick called with poleId:', poleId, 'current selectedPoleId:', selectedPoleId);
+    console.log('🔍 handlePoleClick called with poleId:', poleId);
     try {
       // PC版の場合は詳細パネルを表示
       if (window.innerWidth >= 768) {
-        // 何を: 同じ電柱をクリックした場合も強制的にデータを再取得
-        // なぜ: useEffectは同じIDでは実行されないため
-        if (poleId === selectedPoleId && showDetailPanel) {
-          console.log('🔄 Same pole clicked, force refresh data');
-          const poleData = await getPoleById(poleId);
-          setSelectedPoleData(poleData);
-        } else {
-          console.log('✨ New pole selected');
-          setSelectedPoleId(poleId);
-          setShowDetailPanel(true);
-        }
+        console.log('✨ Setting pole ID:', poleId);
+        setSelectedPoleId(poleId);
+        setShowDetailPanel(true);
       } else {
         // モバイル版の場合は詳細ページに遷移
         navigate(`/pole/${poleId}`);
@@ -177,7 +169,7 @@ export default function Home() {
       console.error('電柱詳細取得エラー:', error);
       alert('電柱の詳細情報を取得できませんでした');
     }
-  }, [navigate, selectedPoleId, showDetailPanel]);
+  }, [navigate]);
 
   // 何を: selectedPoleIdが変更されたら、電柱の詳細データを取得
   // なぜ: 詳細パネルが開いている状態で別の電柱をクリックしても、データが更新されるようにするため
