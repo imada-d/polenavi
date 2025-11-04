@@ -42,11 +42,11 @@ export default function PoleDetailPanel({ poleId: _poleId, poleData, onClose }: 
 
         setIsVerifying(false);
 
-        // 100m以内なら検証成功
-        if (distance <= 100) {
+        // 50m以内なら検証成功
+        if (distance <= 50) {
           alert(`✅ 検証成功！\n電柱まで約${Math.round(distance)}mです。\n\n※ログイン機能実装後、検証記録が保存されます。`);
         } else {
-          alert(`❌ 電柱に近づいてください\n現在地から約${Math.round(distance)}m離れています。\n検証には100m以内に近づく必要があります。`);
+          alert(`❌ 電柱に近づいてください\n現在地から約${Math.round(distance)}m離れています。\n検証には50m以内に近づく必要があります。`);
         }
       },
       (error) => {
