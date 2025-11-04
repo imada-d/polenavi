@@ -89,3 +89,20 @@ button:focus-visible {
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out;
 }
+
+/* 地図マーカーの常時表示ラベル */
+.permanent-pole-label {
+  background-color: rgba(59, 130, 246, 0.9) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  white-space: nowrap !important;
+}
+
+.permanent-pole-label::before {
+  display: none !important;
+}

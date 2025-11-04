@@ -219,6 +219,11 @@ export default function Home() {
 
       poleMarkersRef.current = [];
 
+      // 何を: 現在のズームレベルを取得
+      // なぜ: ズームレベルに応じて番号の表示を切り替えるため
+      const currentZoom = mapInstanceRef.current.getZoom();
+      const shouldShowLabels = currentZoom >= 15; // ズーム15以上で常に表示
+
       // 取得した電柱をマップに表示
       poles.forEach((pole: any) => {
         if (!mapInstanceRef.current) return;
@@ -233,14 +238,15 @@ export default function Home() {
           icon: icon
         });
 
-        // 何を: ホバー時に電柱番号を表示するツールチップ
-        // なぜ: ユーザーがマーカーに近づいた時に番号がわかるようにするため
+        // 何を: 電柱番号を表示するツールチップ
+        // なぜ: ズームレベル15以上では常に表示、それ以下ではホバー時のみ表示
         const numbers = pole.numbers || [];
         const numberText = numbers.length > 0 ? numbers.join(', ') : '番号なし';
         marker.bindTooltip(numberText, {
-          permanent: false,
+          permanent: shouldShowLabels, // ズームレベルに応じて常に表示/ホバー時のみ
           direction: 'top',
-          offset: [0, -40]
+          offset: [0, -40],
+          className: shouldShowLabels ? 'permanent-pole-label' : ''
         });
 
         // 何を: クリック時に詳細パネルを表示

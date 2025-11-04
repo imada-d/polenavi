@@ -313,11 +313,11 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
             {/* 電柱番号 */}
             <div>
               <p className="text-sm text-gray-600 mb-1">電柱番号</p>
-              {poleData.numbers && poleData.numbers.length > 0 ? (
+              {poleData.poleNumbers && poleData.poleNumbers.length > 0 ? (
                 <div className="space-y-1">
-                  {poleData.numbers.map((num: string, index: number) => (
+                  {poleData.poleNumbers.map((numObj: any, index: number) => (
                     <p key={index} className="font-bold text-blue-600 text-lg">
-                      {num}
+                      {numObj.poleNumber}
                     </p>
                   ))}
                 </div>
