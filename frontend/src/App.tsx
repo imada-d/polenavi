@@ -5,6 +5,7 @@ import Search from './pages/Search';
 import Stats from './pages/Stats';
 import Gallery from './pages/Gallery';
 import Ranking from './pages/Ranking';
+import PoleDetail from './pages/mobile/PoleDetail';
 import RegisterLocation from './pages/RegisterLocation';
 import RegisterPoleInfo from './pages/mobile/RegisterPoleInfo';
 import RegisterPhotoClassify from './pages/mobile/RegisterPhotoClassify';
@@ -17,9 +18,9 @@ import RegisterComplete from './pages/mobile/RegisterComplete';
 
 function AppContent() {
   const location = useLocation();
-  
-  // 登録画面ではボトムナビを非表示
-  const hideBottomNav = location.pathname.startsWith('/register');
+
+  // 登録画面と詳細画面ではボトムナビを非表示
+  const hideBottomNav = location.pathname.startsWith('/register') || location.pathname.startsWith('/pole/');
 
   return (
     <div className="relative">
@@ -29,6 +30,7 @@ function AppContent() {
         <Route path="/stats" element={<Stats />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/ranking" element={<Ranking />} />
+        <Route path="/pole/:id" element={<PoleDetail />} />
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-info" element={<RegisterPoleInfo />} />
         <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} />
