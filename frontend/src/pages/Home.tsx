@@ -1,10 +1,20 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Map from '../components/common/Map';
+import Map, { poleIcons } from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
 import { getNearbyPoles } from '../api/poles';
 import L from 'leaflet';
+
+// 何を: 電柱の種類名から適切なアイコンを取得する関数
+// なぜ: データベースの poleTypeName を正しいアイコンにマッピングするため
+const getPoleIcon = (poleTypeName: string, poleSubType?: string) => {
+  if (poleTypeName === '電柱') return poleIcons.electric;
+  if (poleTypeName === '照明柱' || poleSubType === 'light') return poleIcons.light;
+  if (poleTypeName === '標識柱' || poleSubType === 'sign') return poleIcons.sign;
+  if (poleTypeName === '信号柱' || poleSubType === 'traffic') return poleIcons.traffic;
+  return poleIcons.other;
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -147,17 +157,12 @@ export default function Home() {
       poles.forEach((pole: any) => {
         if (!mapInstanceRef.current) return;
 
-        const markerColor = pole.poleTypeName === '電柱' ? 'blue' : 'orange';
+        // 何を: 電柱の種類に応じた適切なカスタムアイコンを使用
+        // なぜ: テストピンと同じ視覚的表現で登録済み電柱を表示するため
+        const icon = getPoleIcon(pole.poleTypeName, pole.poleSubType);
 
         const marker = L.marker([pole.latitude, pole.longitude], {
-          icon: L.icon({
-            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-          })
+          icon: icon
         }).addTo(mapInstanceRef.current);
 
         // 何を: ホバー時に電柱番号を表示するツールチップ
@@ -324,24 +329,20 @@ export default function Home() {
 
   // 何を: 登録成功時に地図上にマーカーを作成
   // なぜ: 登録した電柱がすぐに地図に表示されるようにするため
-  const handleRegisterSuccess = (location: [number, number], poleType: string) => {
+  const handleRegisterSuccess = (location: [number, number], poleType: string, poleSubType?: string) => {
     if (!mapInstanceRef.current) return;
 
-    // 何を: 電柱の種類に応じてマーカーの色を変える
-    // なぜ: 視覚的に電柱と他の柱を区別するため
-    const markerColor = poleType === 'electric' ? 'blue' : 'orange';
+    // 何を: 電柱の種類名を取得（表示用）
+    // なぜ: ポップアップに正しい種類名を表示するため
     const poleTypeName = poleType === 'electric' ? '電柱' : 'その他の柱';
+
+    // 何を: 電柱の種類に応じた適切なカスタムアイコンを使用
+    // なぜ: テストピンや既存の電柱と同じ視覚的表現で表示するため
+    const icon = getPoleIcon(poleTypeName, poleSubType);
 
     // マーカーを作成
     const marker = L.marker(location, {
-      icon: L.icon({
-        iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${markerColor}.png`,
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-      })
+      icon: icon
     }).addTo(mapInstanceRef.current);
 
     // 何を: ホバー時に「新規登録」と表示

@@ -31,7 +31,7 @@ const createPoleIcon = (iconUrl: string) => {
 };
 
 // 各柱の種類ごとのアイコン
-const poleIcons = {
+export const poleIcons = {
   electric: createPoleIcon(poleElectricIcon),
   light: createPoleIcon(poleLightIcon),
   sign: createPoleIcon(poleSignIcon),
