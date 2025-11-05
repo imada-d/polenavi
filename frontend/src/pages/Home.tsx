@@ -249,6 +249,19 @@ export default function Home() {
           className: shouldShowLabels ? 'permanent-pole-label' : ''
         });
 
+        // 何を: モバイル用のポップアップを追加
+        // なぜ: タップした時に番号を大きく表示するため
+        const popupContent = `
+          <div style="text-align: center; padding: 4px;">
+            <strong style="font-size: 14px;">${numberText}</strong><br>
+            <span style="font-size: 11px; color: #666;">${pole.poleTypeName || 'その他'}</span>
+          </div>
+        `;
+        marker.bindPopup(popupContent, {
+          closeButton: false,
+          className: 'pole-number-popup'
+        });
+
         // 何を: クリック時に詳細パネルを表示
         // なぜ: 電柱の詳細情報をアコーディオン形式で確認できるようにするため
         marker.on('click', () => {
@@ -303,10 +316,10 @@ export default function Home() {
 
             // 現在地を「📍 現在地」というテキストで表示
             const currentLocationIcon = L.divIcon({
-              html: '<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>',
+              html: '<div style="background-color: #4285F4; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>',
               className: 'current-location-label',
-              iconSize: [60, 24],
-              iconAnchor: [30, 12],
+              iconSize: [85, 28],
+              iconAnchor: [42.5, 14],
             });
 
             currentLocationMarkerRef.current = L.marker([latitude, longitude], {

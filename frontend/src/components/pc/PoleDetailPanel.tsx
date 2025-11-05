@@ -34,6 +34,11 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
   const [newHashtags, setNewHashtags] = useState('');
   const [isAddingMemo, setIsAddingMemo] = useState(false);
 
+  // 編集関連のstate
+  const [isEditingNumber, setIsEditingNumber] = useState(false);
+  const [newNumber, setNewNumber] = useState('');
+  const [isAddingNumber, setIsAddingNumber] = useState(false);
+
   // 何を: propsのpoleDataが変更されたら、stateを更新
   // なぜ: 別の電柱をクリックしたときに表示を更新するため
   useEffect(() => {
@@ -246,6 +251,31 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     } catch (error: any) {
       console.error('メモ削除エラー:', error);
       alert(`❌ ${error.message}`);
+    }
+  };
+
+  // 何を: 番号を追加するハンドラー
+  // なぜ: ユーザーが電柱番号を追加できるようにするため
+  const handleAddNumber = async () => {
+    if (!newNumber.trim()) {
+      alert('番号を入力してください');
+      return;
+    }
+
+    setIsAddingNumber(true);
+
+    try {
+      // TODO: バックエンドAPIを実装後、ここで番号を追加する処理を実装
+      // 現在は仮実装として、アラートを表示
+      alert(`番号「${newNumber}」を追加する機能は実装中です。\n\nバックエンドAPIが必要です。`);
+
+      setNewNumber('');
+      setIsEditingNumber(false);
+    } catch (error: any) {
+      console.error('番号追加エラー:', error);
+      alert(`❌ ${error.message}`);
+    } finally {
+      setIsAddingNumber(false);
     }
   };
 
@@ -618,13 +648,60 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
         {/* セクション5: この電柱を編集 */}
         {FEATURES.EDIT_ENABLED && (
           <Accordion title="この電柱を編集" icon="✏️">
-            <div className="space-y-2">
-              <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-                🔢 番号を追加
-              </button>
+            <div className="space-y-3">
+              {/* 番号を追加 */}
+              <div>
+                {!isEditingNumber ? (
+                  <button
+                    onClick={() => setIsEditingNumber(true)}
+                    className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                  >
+                    🔢 番号を追加
+                  </button>
+                ) : (
+                  <div className="space-y-2 p-3 bg-blue-50 rounded-lg">
+                    <label className="block text-sm font-medium text-gray-700">
+                      電柱番号を入力
+                    </label>
+                    <input
+                      type="text"
+                      value={newNumber}
+                      onChange={(e) => setNewNumber(e.target.value)}
+                      placeholder="例: 247エ714"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleAddNumber}
+                        disabled={isAddingNumber}
+                        className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                          isAddingNumber
+                            ? 'bg-gray-400 text-gray-200'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
+                      >
+                        {isAddingNumber ? '追加中...' : '追加'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditingNumber(false);
+                          setNewNumber('');
+                        }}
+                        className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        キャンセル
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 位置を修正 */}
               <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                 📍 位置を修正
               </button>
+
+              {/* 削除要請 */}
               {FEATURES.DELETE_REQUEST_ENABLED && (
                 <button className="w-full py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
                   🗑️ 削除要請

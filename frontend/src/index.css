@@ -106,3 +106,20 @@ button:focus-visible {
 .permanent-pole-label::before {
   display: none !important;
 }
+
+/* クラスターマーカーの色をカスタマイズ */
+/* 何を: 緑色から青色に変更 */
+/* なぜ: 地図の背景色（緑）と被らないようにするため */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: rgba(59, 130, 246, 0.6) !important; /* 青色 */
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: rgba(37, 99, 235, 0.8) !important; /* 濃い青 */
+  color: white !important;
+  font-weight: bold !important;
+}
