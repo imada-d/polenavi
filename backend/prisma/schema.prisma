@@ -177,6 +177,8 @@ model User {
   uploadedPhotos     PolePhoto[]  @relation("PhotoUploadedBy")
   deletedPhotos      PolePhoto[]  @relation("PhotoDeletedBy")
   memos              PoleMemo[]
+  reportsCreated     Report[]     @relation("ReportedBy")
+  reportsReviewed    Report[]     @relation("ReviewedBy")
 
   @@map("users")
 }
@@ -207,4 +209,27 @@ model PoleMemo {
 
   @@index([poleId])
   @@map("pole_memos")
+}
+
+// 通報・削除要請テーブル
+model Report {
+  id             Int       @id @default(autoincrement())
+  reportType     String    @map("report_type") @db.VarChar(20) // photo, pole, number
+  targetId       Int       @map("target_id")
+  reason         String    @db.VarChar(50)
+  description    String?   @db.Text
+  reportedBy     Int?      @map("reported_by")
+  reportedByUser User?     @relation("ReportedBy", fields: [reportedBy], references: [id])
+  reportedByName String    @map("reported_by_name") @db.VarChar(100)
+  status         String    @default("pending") @db.VarChar(20) // pending, reviewed, resolved
+  autoHidden     Boolean   @default(false) @map("auto_hidden")
+  reviewedBy     Int?      @map("reviewed_by")
+  reviewedByUser User?     @relation("ReviewedBy", fields: [reviewedBy], references: [id])
+  resolution     String?   @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at")
+  reviewedAt     DateTime? @map("reviewed_at")
+
+  @@index([reportType, targetId])
+  @@index([status])
+  @@map("reports")
 }
