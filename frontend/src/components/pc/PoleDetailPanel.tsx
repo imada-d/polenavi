@@ -39,6 +39,16 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
   const [newNumber, setNewNumber] = useState('');
   const [isAddingNumber, setIsAddingNumber] = useState(false);
 
+  // 位置修正関連のstate
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [newLocation, setNewLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // 削除要請関連のstate
+  const [isRequestingDelete, setIsRequestingDelete] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleteDescription, setDeleteDescription] = useState('');
+  const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
+
   // 何を: propsのpoleDataが変更されたら、stateを更新
   // なぜ: 別の電柱をクリックしたときに表示を更新するため
   useEffect(() => {
@@ -279,6 +289,77 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     }
   };
 
+  // 何を: 位置修正モードを開始するハンドラー
+  // なぜ: ユーザーがマーカーをドラッグして位置を修正できるようにするため
+  const handleStartEditLocation = () => {
+    setIsEditingLocation(true);
+    setNewLocation({ lat: poleData.latitude, lng: poleData.longitude });
+  };
+
+  // 何を: 位置修正を保存するハンドラー
+  // なぜ: 新しい位置をサーバーに送信して保存するため
+  const handleSaveLocation = async () => {
+    if (!newLocation) return;
+
+    try {
+      // TODO: バックエンドAPIを実装後、ここで位置を修正する処理を実装
+      alert(`位置修正機能は実装中です。\n\n新しい位置: ${newLocation.lat.toFixed(6)}, ${newLocation.lng.toFixed(6)}\n\nバックエンドAPIが必要です。`);
+
+      setIsEditingLocation(false);
+      setNewLocation(null);
+    } catch (error: any) {
+      console.error('位置修正エラー:', error);
+      alert(`❌ ${error.message}`);
+    }
+  };
+
+  // 何を: 位置修正をキャンセルするハンドラー
+  // なぜ: 修正をキャンセルして元の状態に戻すため
+  const handleCancelEditLocation = () => {
+    setIsEditingLocation(false);
+    setNewLocation(null);
+
+    // 地図を元の位置に戻す
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView([poleData.latitude, poleData.longitude], 16);
+    }
+  };
+
+  // 何を: 削除要請を送信するハンドラー
+  // なぜ: ユーザーが誤った電柱や不要な電柱の削除を要請できるようにするため
+  const handleSubmitDeleteRequest = async () => {
+    if (!deleteReason) {
+      alert('削除理由を選択してください');
+      return;
+    }
+
+    if (!deleteDescription.trim()) {
+      alert('詳細説明を入力してください');
+      return;
+    }
+
+    if (!confirm('この電柱の削除を要請しますか？\n\n管理者が確認後、適切に対応いたします。')) {
+      return;
+    }
+
+    setIsSubmittingDelete(true);
+
+    try {
+      // TODO: バックエンドAPIを実装後、ここで削除要請を送信する処理を実装
+      alert(`削除要請機能は実装中です。\n\n理由: ${deleteReason}\n説明: ${deleteDescription}\n\nバックエンドAPIが必要です。`);
+
+      // フォームをリセット
+      setDeleteReason('');
+      setDeleteDescription('');
+      setIsRequestingDelete(false);
+    } catch (error: any) {
+      console.error('削除要請エラー:', error);
+      alert(`❌ ${error.message}`);
+    } finally {
+      setIsSubmittingDelete(false);
+    }
+  };
+
   // 何を: 詳細パネル上部の小さい地図を初期化
   // なぜ: 電柱の位置を視覚的に確認できるようにするため
   useEffect(() => {
@@ -288,7 +369,7 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
       center: [poleData.latitude, poleData.longitude],
       zoom: 16,
       zoomControl: false,
-      dragging: false, // ドラッグ無効
+      dragging: !isEditingLocation, // 位置修正モードでは地図のドラッグを許可
       scrollWheelZoom: false, // ズーム無効
       doubleClickZoom: false,
       touchZoom: false,
@@ -299,15 +380,22 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
       attribution: '© OpenStreetMap contributors',
     }).addTo(map);
 
-    // 電柱マーカーを追加
-    L.marker([poleData.latitude, poleData.longitude], {
+    // 電柱マーカーを追加（位置修正モードではドラッグ可能に）
+    const marker = L.marker([poleData.latitude, poleData.longitude], {
       icon: L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
       }),
+      draggable: isEditingLocation,
     }).addTo(map);
+
+    // マーカーがドラッグされたときの処理
+    marker.on('dragend', () => {
+      const pos = marker.getLatLng();
+      setNewLocation({ lat: pos.lat, lng: pos.lng });
+    });
 
     mapInstanceRef.current = map;
 
@@ -317,10 +405,10 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
         mapInstanceRef.current = null;
       }
     };
-  }, [poleData.latitude, poleData.longitude]);
+  }, [poleData.latitude, poleData.longitude, isEditingLocation]);
 
   return (
-    <div className="hidden md:flex fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex-col">
+    <div className="fixed inset-0 md:inset-auto md:right-0 md:top-0 md:h-screen md:w-[550px] bg-white md:border-l shadow-lg z-[1500] flex flex-col">
         {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">📍 電柱詳細</h1>
@@ -697,15 +785,121 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
               </div>
 
               {/* 位置を修正 */}
-              <button className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
-                📍 位置を修正
-              </button>
+              <div>
+                {!isEditingLocation ? (
+                  <button
+                    onClick={handleStartEditLocation}
+                    className="w-full py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                  >
+                    📍 位置を修正
+                  </button>
+                ) : (
+                  <div className="space-y-2 p-3 bg-blue-50 rounded-lg border-2 border-blue-300">
+                    <p className="text-sm font-medium text-blue-800">
+                      ⬆️ 上の地図でマーカーをドラッグして位置を調整してください
+                    </p>
+                    {newLocation && (
+                      <p className="text-xs text-gray-600">
+                        新しい位置: {newLocation.lat.toFixed(6)}, {newLocation.lng.toFixed(6)}
+                      </p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSaveLocation}
+                        className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        ✅ 保存
+                      </button>
+                      <button
+                        onClick={handleCancelEditLocation}
+                        className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        キャンセル
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* 削除要請 */}
               {FEATURES.DELETE_REQUEST_ENABLED && (
-                <button className="w-full py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
-                  🗑️ 削除要請
-                </button>
+                <div>
+                  {!isRequestingDelete ? (
+                    <button
+                      onClick={() => setIsRequestingDelete(true)}
+                      className="w-full py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                    >
+                      🗑️ 削除要請
+                    </button>
+                  ) : (
+                    <div className="space-y-3 p-3 bg-red-50 rounded-lg border-2 border-red-200">
+                      <p className="text-sm font-semibold text-red-800">
+                        削除要請の理由を入力してください
+                      </p>
+
+                      {/* 理由選択 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          理由 <span className="text-red-600">*</span>
+                        </label>
+                        <select
+                          value={deleteReason}
+                          onChange={(e) => setDeleteReason(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                          disabled={isSubmittingDelete}
+                        >
+                          <option value="">選択してください</option>
+                          <option value="wrong_location">位置が間違っている</option>
+                          <option value="duplicate">重複している</option>
+                          <option value="removed">電柱が撤去された</option>
+                          <option value="spam">スパム・いたずら</option>
+                          <option value="other">その他</option>
+                        </select>
+                      </div>
+
+                      {/* 詳細説明 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          詳細説明 <span className="text-red-600">*</span>
+                        </label>
+                        <textarea
+                          value={deleteDescription}
+                          onChange={(e) => setDeleteDescription(e.target.value)}
+                          placeholder="削除を要請する理由を具体的に説明してください..."
+                          rows={3}
+                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                          disabled={isSubmittingDelete}
+                        />
+                      </div>
+
+                      {/* アクションボタン */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSubmitDeleteRequest}
+                          disabled={isSubmittingDelete}
+                          className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                            isSubmittingDelete
+                              ? 'bg-gray-400 text-gray-200'
+                              : 'bg-red-600 text-white hover:bg-red-700'
+                          }`}
+                        >
+                          {isSubmittingDelete ? '送信中...' : '🗑️ 削除を要請'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsRequestingDelete(false);
+                            setDeleteReason('');
+                            setDeleteDescription('');
+                          }}
+                          disabled={isSubmittingDelete}
+                          className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </Accordion>
