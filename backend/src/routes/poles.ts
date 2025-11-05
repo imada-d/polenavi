@@ -32,6 +32,14 @@ router.get('/:id', polesController.getPoleById);
 // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
 router.post('/:id/verify', polesController.verifyPole);
 
+// 何を: 柱の番号を追加するエンドポイント
+// なぜ: ユーザーが電柱番号を追加できるようにするため
+router.post('/:id/numbers', polesController.addPoleNumber);
+
+// 何を: 柱の位置を修正するエンドポイント
+// なぜ: ユーザーが位置情報を修正できるようにするため
+router.put('/:id/location', polesController.updatePoleLocation);
+
 // 何を: 写真をアップロードするエンドポイント
 // なぜ: セキュリティチェック（ファイル形式・サイズ）を行ってから保存するため
 router.post('/upload-photo', upload.single('photo'), handleUploadError, (req: Request, res: Response, _next: NextFunction): void => {

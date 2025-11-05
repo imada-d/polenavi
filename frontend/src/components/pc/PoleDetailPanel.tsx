@@ -7,8 +7,9 @@ import imageCompression from 'browser-image-compression';
 import Accordion from '../common/Accordion';
 import { FEATURES } from '../../config/features';
 import { calculateDistance } from '../../utils/distance';
-import { uploadPolePhoto, getPoleById } from '../../api/poles';
+import { uploadPolePhoto, getPoleById, addPoleNumber, updatePoleLocation } from '../../api/poles';
 import { createMemo, deleteMemo } from '../../api/memos';
+import { createDeleteRequest } from '../../api/reports';
 
 interface PoleDetailPanelProps {
   poleId: number;
@@ -275,12 +276,16 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     setIsAddingNumber(true);
 
     try {
-      // TODO: バックエンドAPIを実装後、ここで番号を追加する処理を実装
-      // 現在は仮実装として、アラートを表示
-      alert(`番号「${newNumber}」を追加する機能は実装中です。\n\nバックエンドAPIが必要です。`);
+      await addPoleNumber(poleData.id, newNumber.trim());
+
+      // データを再取得して表示を更新
+      const updatedData = await getPoleById(poleData.id);
+      setPoleData(updatedData);
 
       setNewNumber('');
       setIsEditingNumber(false);
+
+      alert('✅ 番号を追加しました');
     } catch (error: any) {
       console.error('番号追加エラー:', error);
       alert(`❌ ${error.message}`);
@@ -302,11 +307,16 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     if (!newLocation) return;
 
     try {
-      // TODO: バックエンドAPIを実装後、ここで位置を修正する処理を実装
-      alert(`位置修正機能は実装中です。\n\n新しい位置: ${newLocation.lat.toFixed(6)}, ${newLocation.lng.toFixed(6)}\n\nバックエンドAPIが必要です。`);
+      await updatePoleLocation(poleData.id, newLocation.lat, newLocation.lng);
+
+      // データを再取得して表示を更新
+      const updatedData = await getPoleById(poleData.id);
+      setPoleData(updatedData);
 
       setIsEditingLocation(false);
       setNewLocation(null);
+
+      alert('✅ 位置を修正しました');
     } catch (error: any) {
       console.error('位置修正エラー:', error);
       alert(`❌ ${error.message}`);
@@ -345,13 +355,14 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     setIsSubmittingDelete(true);
 
     try {
-      // TODO: バックエンドAPIを実装後、ここで削除要請を送信する処理を実装
-      alert(`削除要請機能は実装中です。\n\n理由: ${deleteReason}\n説明: ${deleteDescription}\n\nバックエンドAPIが必要です。`);
+      await createDeleteRequest(poleData.id, deleteReason, deleteDescription.trim());
 
       // フォームをリセット
       setDeleteReason('');
       setDeleteDescription('');
       setIsRequestingDelete(false);
+
+      alert('✅ 削除要請を送信しました。管理者が確認いたします。');
     } catch (error: any) {
       console.error('削除要請エラー:', error);
       alert(`❌ ${error.message}`);
@@ -408,7 +419,7 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
   }, [poleData.latitude, poleData.longitude, isEditingLocation]);
 
   return (
-    <div className="fixed inset-0 md:inset-auto md:right-0 md:top-0 md:h-screen md:w-[550px] bg-white md:border-l shadow-lg z-[1500] flex flex-col">
+    <div className="fixed right-0 top-0 h-screen w-[550px] bg-white border-l shadow-lg z-[1500] flex flex-col">
         {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">📍 電柱詳細</h1>

@@ -341,3 +341,90 @@ export async function searchPolesByMemo(query: string) {
     createdAt: memo.createdAt,
   }));
 }
+
+/**
+ * 電柱番号を追加
+ */
+export async function addPoleNumber(poleId: number, poleNumber: string) {
+  // 電柱の存在確認
+  const pole = await prisma.pole.findUnique({
+    where: { id: poleId },
+  });
+
+  if (!pole) {
+    throw new NotFoundError('指定された電柱が見つかりません');
+  }
+
+  // 番号の正規化
+  const normalized = normalizePoleNumber(poleNumber);
+
+  // 重複チェック
+  const existing = await prisma.poleNumber.findFirst({
+    where: {
+      poleId,
+      poleNumber: normalized,
+    },
+  });
+
+  if (existing) {
+    throw new ValidationError('この番号は既に登録されています');
+  }
+
+  // 番号を追加
+  const result = await prisma.$transaction(async (tx: any) => {
+    const newNumber = await tx.poleNumber.create({
+      data: {
+        poleId,
+        poleNumber: normalized,
+        registeredBy: null, // TODO: ログイン機能実装後にユーザーIDを設定
+        registeredByName: 'ゲストユーザー',
+      },
+    });
+
+    // 電柱のnumberCountを更新
+    await tx.pole.update({
+      where: { id: poleId },
+      data: {
+        numberCount: {
+          increment: 1,
+        },
+      },
+    });
+
+    return newNumber;
+  });
+
+  return {
+    id: result.id,
+    poleNumber: result.poleNumber,
+  };
+}
+
+/**
+ * 電柱の位置を修正
+ */
+export async function updatePoleLocation(poleId: number, latitude: number, longitude: number) {
+  // 電柱の存在確認
+  const pole = await prisma.pole.findUnique({
+    where: { id: poleId },
+  });
+
+  if (!pole) {
+    throw new NotFoundError('指定された電柱が見つかりません');
+  }
+
+  // 位置を更新
+  const updated = await prisma.pole.update({
+    where: { id: poleId },
+    data: {
+      latitude,
+      longitude,
+    },
+  });
+
+  return {
+    id: updated.id,
+    latitude: updated.latitude,
+    longitude: updated.longitude,
+  };
+}

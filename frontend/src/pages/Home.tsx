@@ -45,6 +45,7 @@ export default function Home() {
   const [initialCenter, setInitialCenter] = useState<[number, number] | null>(null);
   const [initialZoom, setInitialZoom] = useState<number>(13);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true); // 位置情報取得中フラグ
+  const [currentUserLocation, setCurrentUserLocation] = useState<[number, number] | null>(null); // 現在地座標を保存
 
   // 住所検索
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,6 +77,7 @@ export default function Home() {
           console.log(`✅ 現在地取得成功: ${latitude}, ${longitude}`);
           setInitialCenter([latitude, longitude]);
           setInitialZoom(16); // 現在地の場合は詳細表示
+          setCurrentUserLocation([latitude, longitude]); // 現在地座標を保存
           setIsLoadingLocation(false);
         },
         (error) => {
@@ -316,6 +318,24 @@ export default function Home() {
     // マップが準備できたら電柱を読み込む
     loadNearbyPoles();
   }, [loadNearbyPoles]);
+
+  // 何を: 地図が準備できて、現在地が取得できていたら現在地マーカーを表示
+  // なぜ: 初期表示時に自動的に現在地マーカーを表示するため
+  useEffect(() => {
+    if (mapInstanceRef.current && currentUserLocation && !currentLocationMarkerRef.current) {
+      console.log('📍 初期表示：現在地マーカーを追加');
+      const currentLocationIcon = L.divIcon({
+        html: '<div style="background-color: #4285F4; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>',
+        className: 'current-location-label',
+        iconSize: [85, 28],
+        iconAnchor: [42.5, 14],
+      });
+
+      currentLocationMarkerRef.current = L.marker(currentUserLocation, {
+        icon: currentLocationIcon,
+      }).addTo(mapInstanceRef.current);
+    }
+  }, [currentUserLocation]);
 
   const handleCurrentLocation = () => {
     if ('geolocation' in navigator) {

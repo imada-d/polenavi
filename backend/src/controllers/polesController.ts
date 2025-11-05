@@ -164,3 +164,83 @@ export async function searchPolesByMemo(req: Request, res: Response, next: NextF
     next(error);
   }
 }
+
+/**
+ * 電柱番号を追加
+ *
+ * POST /api/poles/:id/numbers
+ */
+export async function addPoleNumber(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const poleId = parseInt(req.params.id, 10);
+    const { poleNumber } = req.body;
+
+    if (!poleNumber || poleNumber.trim().length === 0) {
+      res.status(400).json({
+        success: false,
+        error: { message: '電柱番号を入力してください' },
+      });
+      return;
+    }
+
+    const result = await poleService.addPoleNumber(poleId, poleNumber.trim());
+
+    res.status(201).json({
+      success: true,
+      message: '番号を追加しました',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * 電柱の位置を修正
+ *
+ * PUT /api/poles/:id/location
+ */
+export async function updatePoleLocation(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const poleId = parseInt(req.params.id, 10);
+    const { latitude, longitude } = req.body;
+
+    if (!latitude || !longitude) {
+      res.status(400).json({
+        success: false,
+        error: { message: '緯度と経度を指定してください' },
+      });
+      return;
+    }
+
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      res.status(400).json({
+        success: false,
+        error: { message: '緯度と経度は数値である必要があります' },
+      });
+      return;
+    }
+
+    // 緯度は -90 ～ 90、経度は -180 ～ 180
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      res.status(400).json({
+        success: false,
+        error: { message: '緯度または経度の値が不正です' },
+      });
+      return;
+    }
+
+    const result = await poleService.updatePoleLocation(poleId, lat, lng);
+
+    res.json({
+      success: true,
+      message: '位置を修正しました',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

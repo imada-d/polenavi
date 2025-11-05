@@ -154,3 +154,39 @@ export const searchPolesByMemo = async (query: string): Promise<any> => {
     throw new Error(errorMessage);
   }
 };
+// 何を: 電柱番号を追加する関数
+// なぜ: ユーザーが電柱番号を追加できるようにするため
+export const addPoleNumber = async (poleId: number, poleNumber: string): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/poles/${poleId}/numbers`, {
+      poleNumber,
+    });
+
+    console.log('✅ 番号追加成功:', response.data);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('❌ 番号追加エラー:', error);
+
+    const errorMessage = error.response?.data?.error?.message || '番号の追加に失敗しました';
+    throw new Error(errorMessage);
+  }
+};
+
+// 何を: 電柱の位置を修正する関数
+// なぜ: ユーザーが位置情報を修正できるようにするため
+export const updatePoleLocation = async (poleId: number, latitude: number, longitude: number): Promise<any> => {
+  try {
+    const response = await apiClient.put(`/poles/${poleId}/location`, {
+      latitude,
+      longitude,
+    });
+
+    console.log('✅ 位置修正成功:', response.data);
+    return response.data.data;
+  } catch (error: any) {
+    console.error('❌ 位置修正エラー:', error);
+
+    const errorMessage = error.response?.data?.error?.message || '位置の修正に失敗しました';
+    throw new Error(errorMessage);
+  }
+};

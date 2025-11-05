@@ -110,12 +110,18 @@ button:focus-visible {
 /* クラスターマーカーの色をカスタマイズ */
 /* 何を: 緑色から青色に変更 */
 /* なぜ: 地図の背景色（緑）と被らないようにするため */
+.leaflet-cluster-anim .marker-cluster-small,
+.leaflet-cluster-anim .marker-cluster-medium,
+.leaflet-cluster-anim .marker-cluster-large,
 .marker-cluster-small,
 .marker-cluster-medium,
 .marker-cluster-large {
   background-color: rgba(59, 130, 246, 0.6) !important; /* 青色 */
 }
 
+.leaflet-cluster-anim .marker-cluster-small div,
+.leaflet-cluster-anim .marker-cluster-medium div,
+.leaflet-cluster-anim .marker-cluster-large div,
 .marker-cluster-small div,
 .marker-cluster-medium div,
 .marker-cluster-large div {
