@@ -41,10 +41,11 @@ export default function Home() {
   
   // 地図タイプの状態を管理（2モード）
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street');
-  // 初期表示位置（日本全体）
-  const [initialCenter, setInitialCenter] = useState<[number, number]>([36.2048, 138.2529]);
-  const [initialZoom, setInitialZoom] = useState<number>(5); // 日本全体が見えるズーム
-  
+  // 初期表示位置（現在地取得前は null、失敗時に日本全体）
+  const [initialCenter, setInitialCenter] = useState<[number, number] | null>(null);
+  const [initialZoom, setInitialZoom] = useState<number>(13);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true); // 位置情報取得中フラグ
+
   // 住所検索
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -64,20 +65,38 @@ export default function Home() {
   // PC版：検索パネルの表示状態
   const [showSearchPanel, setShowSearchPanel] = useState(false);
 
-  // 初回のみ現在地を取得して初期表示にする
+  // 何を: 初回表示で現在地を取得、失敗時のみ日本全体を表示
+  // なぜ: ユーザーが毎回現在地から始められるようにするため
   useEffect(() => {
     if ('geolocation' in navigator) {
+      console.log('📍 位置情報を取得中...');
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          console.log(`✅ 現在地取得成功: ${latitude}, ${longitude}`);
           setInitialCenter([latitude, longitude]);
-          setInitialZoom(13); // 現在地の場合は詳細表示
+          setInitialZoom(16); // 現在地の場合は詳細表示
+          setIsLoadingLocation(false);
         },
         (error) => {
-          console.log('位置情報が取得できませんでした。日本全体を表示します。', error);
-          // エラー時は日本全体のまま
+          console.log('❌ 位置情報が取得できませんでした。日本全体を表示します。', error);
+          // エラー時は日本全体
+          setInitialCenter([36.2048, 138.2529]);
+          setInitialZoom(5);
+          setIsLoadingLocation(false);
+        },
+        {
+          enableHighAccuracy: false, // 高精度不要（起動を早くするため）
+          timeout: 10000, // 10秒でタイムアウト
+          maximumAge: 60000, // 1分以内のキャッシュを許可
         }
       );
+    } else {
+      // 位置情報非対応の場合は日本全体
+      console.log('⚠️ このブラウザは位置情報に対応していません');
+      setInitialCenter([36.2048, 138.2529]);
+      setInitialZoom(5);
+      setIsLoadingLocation(false);
     }
   }, []);
 
@@ -481,12 +500,23 @@ export default function Home() {
       </header>
       
       <main className="flex-1 relative">
-        <Map 
-          onMapReady={handleMapReady} 
-          mapType={mapType}
-          center={initialCenter}
-          zoom={initialZoom}
-        />
+        {/* 何を: 位置情報取得中はローディング表示 */}
+        {/* なぜ: 地図が2回描画されるのを防ぐため */}
+        {isLoadingLocation || !initialCenter ? (
+          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">📍 現在地を取得中...</p>
+            </div>
+          </div>
+        ) : (
+          <Map
+            onMapReady={handleMapReady}
+            mapType={mapType}
+            center={initialCenter}
+            zoom={initialZoom}
+          />
+        )}
         
         {/* 住所検索窓（地図の上部中央） */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-md px-4">
