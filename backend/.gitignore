@@ -1,3 +1,7 @@
 node_modules
 # Keep environment variables out of version control
 .env
+
+# Uploaded files (個人情報を含むためGitに含めない)
+uploads/*
+!uploads/.gitkeep

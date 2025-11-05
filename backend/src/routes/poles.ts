@@ -1,8 +1,9 @@
 // 何を: 柱の登録・検索APIのルート定義
 // なぜ: フロントエンドからのリクエストを処理するため
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import * as polesController from '../controllers/polesController';
+import { upload, handleUploadError } from '../middleware/upload';
 
 const router = express.Router();
 
@@ -30,5 +31,40 @@ router.get('/:id', polesController.getPoleById);
 // 何を: 柱を検証するエンドポイント
 // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
 router.post('/:id/verify', polesController.verifyPole);
+
+// 何を: 写真をアップロードするエンドポイント
+// なぜ: セキュリティチェック（ファイル形式・サイズ）を行ってから保存するため
+router.post('/upload-photo', upload.single('photo'), handleUploadError, (req: Request, res: Response, _next: NextFunction): void => {
+  try {
+    // 何を: ファイルがアップロードされたか確認
+    // なぜ: ファイルが選択されていない場合はエラーを返すため
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        error: { message: '画像が選択されていません' },
+      });
+      return;
+    }
+
+    console.log(`✅ 写真アップロード成功: ${req.file.filename}`);
+
+    // 何を: ファイル情報を返す
+    // なぜ: フロントエンドでファイル名やパスを使用するため
+    res.status(200).json({
+      success: true,
+      data: {
+        filename: req.file.filename,
+        path: req.file.path,
+        size: req.file.size,
+      },
+    });
+  } catch (error: any) {
+    console.error('❌ 写真アップロードエラー:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: '写真のアップロードに失敗しました' },
+    });
+  }
+});
 
 export default router;
