@@ -327,8 +327,18 @@ export default function PoleDetailPanel({
     if (!newLocation) return;
 
     try {
+      const oldLat = Number(poleData.latitude);
+      const oldLng = Number(poleData.longitude);
+      const distanceMoved = Math.sqrt(
+        Math.pow((newLocation.lat - oldLat) * 111000, 2) +
+        Math.pow((newLocation.lng - oldLng) * 111000 * Math.cos(oldLat * Math.PI / 180), 2)
+      );
+      console.log(`📍 電柱ID ${poleData.id} の位置を修正:`);
+      console.log(`   元の位置: ${oldLat}, ${oldLng}`);
+      console.log(`   新しい位置: ${newLocation.lat}, ${newLocation.lng}`);
+      console.log(`   移動距離: ${distanceMoved.toFixed(2)}m`);
+
       await updatePoleLocation(poleData.id, newLocation.lat, newLocation.lng);
-      console.log(`📍 電柱ID ${poleData.id} の位置を修正: ${newLocation.lat}, ${newLocation.lng}`);
 
       // データを再取得して表示を更新
       const updatedData = await getPoleById(poleData.id);

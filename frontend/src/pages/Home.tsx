@@ -489,6 +489,8 @@ export default function Home() {
   const handleEditLocationStart = (lat: number, lng: number) => {
     if (!mapInstanceRef.current) return;
 
+    console.log(`🎯 位置修正開始: 初期位置 ${lat}, ${lng}`);
+
     // 何を: メインの地図に移動
     // なぜ: ユーザーが位置を確認・調整しやすくするため
     mapInstanceRef.current.setView([lat, lng], 18, {
