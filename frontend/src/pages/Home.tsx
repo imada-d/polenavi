@@ -317,7 +317,23 @@ export default function Home() {
 
     // マップが準備できたら電柱を読み込む
     loadNearbyPoles();
-  }, [loadNearbyPoles]);
+
+    // 何を: 地図準備時に現在地が既に取得されていたら現在地マーカーを追加
+    // なぜ: 地図の準備と現在地取得のタイミングによってマーカーが表示されない問題を防ぐため
+    if (currentUserLocation && !currentLocationMarkerRef.current) {
+      console.log('📍 地図準備時：現在地マーカーを追加');
+      const currentLocationIcon = L.divIcon({
+        html: '<div style="background-color: #4285F4; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>',
+        className: 'current-location-label',
+        iconSize: [85, 28],
+        iconAnchor: [42.5, 14],
+      });
+
+      currentLocationMarkerRef.current = L.marker(currentUserLocation, {
+        icon: currentLocationIcon,
+      }).addTo(map);
+    }
+  }, [loadNearbyPoles, currentUserLocation]);
 
   // 何を: 地図が準備できて、現在地が取得できていたら現在地マーカーを表示
   // なぜ: 初期表示時に自動的に現在地マーカーを表示するため
