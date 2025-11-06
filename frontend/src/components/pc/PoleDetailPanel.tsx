@@ -298,7 +298,12 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
   // なぜ: ユーザーがマーカーをドラッグして位置を修正できるようにするため
   const handleStartEditLocation = () => {
     setIsEditingLocation(true);
-    setNewLocation({ lat: poleData.latitude, lng: poleData.longitude });
+    // 何を: latitude/longitudeを数値に変換してセット
+    // なぜ: データベースから文字列として取得される場合があるため
+    setNewLocation({
+      lat: Number(poleData.latitude),
+      lng: Number(poleData.longitude)
+    });
   };
 
   // 何を: 位置修正を保存するハンドラー
