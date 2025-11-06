@@ -70,11 +70,6 @@ export default function Home() {
   // PC版：検索パネルの表示状態
   const [showSearchPanel, setShowSearchPanel] = useState(false);
 
-  // 何を: 位置修正モードの状態
-  // なぜ: メインの地図でドラッグ可能なマーカーを表示するため
-  const [isEditingPoleLocation, setIsEditingPoleLocation] = useState(false);
-  const [editingPoleLocation, setEditingPoleLocation] = useState<[number, number] | null>(null);
-
   // 何を: 初回表示で現在地を取得、失敗時のみ日本全体を表示
   // なぜ: ユーザーが毎回現在地から始められるようにするため
   useEffect(() => {
@@ -488,9 +483,6 @@ export default function Home() {
   const handleEditLocationStart = (lat: number, lng: number) => {
     if (!mapInstanceRef.current) return;
 
-    setIsEditingPoleLocation(true);
-    setEditingPoleLocation([lat, lng]);
-
     // 何を: メインの地図に移動
     // なぜ: ユーザーが位置を確認・調整しやすくするため
     mapInstanceRef.current.setView([lat, lng], 18, {
@@ -511,23 +503,11 @@ export default function Home() {
         shadowSize: [41, 41]
       })
     }).addTo(mapInstanceRef.current);
-
-    // 何を: マーカーがドラッグされた時の処理
-    // なぜ: 新しい位置をPoleDetailPanelに通知するため
-    editingPoleMarkerRef.current.on('dragend', () => {
-      if (editingPoleMarkerRef.current) {
-        const pos = editingPoleMarkerRef.current.getLatLng();
-        setEditingPoleLocation([pos.lat, pos.lng]);
-      }
-    });
   };
 
   // 何を: 位置修正モードキャンセル時のハンドラー
   // なぜ: メインの地図のドラッグ可能なマーカーを削除するため
   const handleEditLocationCancel = () => {
-    setIsEditingPoleLocation(false);
-    setEditingPoleLocation(null);
-
     // 何を: ドラッグ可能なマーカーを削除
     // なぜ: 位置修正モードを終了するため
     if (editingPoleMarkerRef.current && mapInstanceRef.current) {
@@ -738,10 +718,6 @@ export default function Home() {
             }}
             onEditLocationStart={handleEditLocationStart}
             onEditLocationCancel={handleEditLocationCancel}
-            onLocationChange={(lat, lng) => {
-              // 位置が変更されたら状態を更新
-              setEditingPoleLocation([lat, lng]);
-            }}
           />
         )}
 
