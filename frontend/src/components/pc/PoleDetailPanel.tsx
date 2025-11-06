@@ -15,9 +15,19 @@ interface PoleDetailPanelProps {
   poleId: number;
   poleData: any; // TODO: 型定義を後で追加
   onClose: () => void;
+  onEditLocationStart?: (lat: number, lng: number) => void; // 位置修正モード開始
+  onEditLocationCancel?: () => void; // 位置修正モードキャンセル
+  onLocationChange?: (lat: number, lng: number) => void; // 位置変更通知
 }
 
-export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onClose }: PoleDetailPanelProps) {
+export default function PoleDetailPanel({
+  poleId,
+  poleData: initialPoleData,
+  onClose,
+  onEditLocationStart,
+  onEditLocationCancel,
+  onLocationChange
+}: PoleDetailPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -300,10 +310,13 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     setIsEditingLocation(true);
     // 何を: latitude/longitudeを数値に変換してセット
     // なぜ: データベースから文字列として取得される場合があるため
-    setNewLocation({
-      lat: Number(poleData.latitude),
-      lng: Number(poleData.longitude)
-    });
+    const lat = Number(poleData.latitude);
+    const lng = Number(poleData.longitude);
+    setNewLocation({ lat, lng });
+
+    // 何を: 親コンポーネント（Home）に位置修正モード開始を通知
+    // なぜ: メインの大きな地図でドラッグ可能なマーカーを表示するため
+    onEditLocationStart?.(lat, lng);
   };
 
   // 何を: 位置修正を保存するハンドラー
@@ -321,6 +334,10 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
       setIsEditingLocation(false);
       setNewLocation(null);
 
+      // 何を: 親コンポーネント（Home）に位置修正モード終了を通知
+      // なぜ: メインの地図のドラッグ可能マーカーを削除するため
+      onEditLocationCancel?.();
+
       alert('✅ 位置を修正しました');
     } catch (error: any) {
       console.error('位置修正エラー:', error);
@@ -333,6 +350,10 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
   const handleCancelEditLocation = () => {
     setIsEditingLocation(false);
     setNewLocation(null);
+
+    // 何を: 親コンポーネント（Home）に位置修正モード終了を通知
+    // なぜ: メインの地図のドラッグ可能マーカーを削除するため
+    onEditLocationCancel?.();
 
     // 地図を元の位置に戻す
     if (mapInstanceRef.current) {
@@ -411,6 +432,9 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
     marker.on('dragend', () => {
       const pos = marker.getLatLng();
       setNewLocation({ lat: pos.lat, lng: pos.lng });
+      // 何を: 親コンポーネント（Home）に位置変更を通知
+      // なぜ: メインの地図のマーカーも同期させるため（現在は使用されない）
+      onLocationChange?.(pos.lat, pos.lng);
     });
 
     mapInstanceRef.current = map;
@@ -436,8 +460,17 @@ export default function PoleDetailPanel({ poleId, poleData: initialPoleData, onC
         </button>
       </header>
 
-      {/* 地図エリア */}
-      <div ref={mapRef} className="w-full h-48 bg-gray-200"></div>
+      {/* 地図エリア（位置修正モード中は非表示） */}
+      {!isEditingLocation ? (
+        <div ref={mapRef} className="w-full h-48 bg-gray-200"></div>
+      ) : (
+        <div className="w-full h-48 bg-blue-50 flex items-center justify-center border-b-2 border-blue-300">
+          <div className="text-center px-4">
+            <p className="text-lg font-bold text-blue-800 mb-2">🗺️ 位置修正モード</p>
+            <p className="text-sm text-blue-600">⬅️ メインの大きな地図でマーカーをドラッグして位置を調整してください</p>
+          </div>
+        </div>
+      )}
 
       {/* アコーディオンエリア */}
       <div className="flex-1 overflow-y-auto">

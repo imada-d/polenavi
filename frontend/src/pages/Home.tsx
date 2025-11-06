@@ -38,7 +38,11 @@ export default function Home() {
   // 何を: マーカークラスタグループのref
   // なぜ: ズームレベルに応じて電柱を自動的にグループ化するため（Googleマップと同じ）
   const markerClusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
-  
+
+  // 何を: 位置修正モード中のマーカー用ref
+  // なぜ: メインの地図でドラッグ可能なマーカーを管理するため
+  const editingPoleMarkerRef = useRef<L.Marker | null>(null);
+
   // 地図タイプの状態を管理（2モード）
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street');
   // 初期表示位置（現在地取得前は null、失敗時に日本全体）
@@ -65,6 +69,11 @@ export default function Home() {
 
   // PC版：検索パネルの表示状態
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+
+  // 何を: 位置修正モードの状態
+  // なぜ: メインの地図でドラッグ可能なマーカーを表示するため
+  const [isEditingPoleLocation, setIsEditingPoleLocation] = useState(false);
+  const [editingPoleLocation, setEditingPoleLocation] = useState<[number, number] | null>(null);
 
   // 何を: 初回表示で現在地を取得、失敗時のみ日本全体を表示
   // なぜ: ユーザーが毎回現在地から始められるようにするため
@@ -474,6 +483,59 @@ export default function Home() {
     setPinLocation(null);
   };
 
+  // 何を: 位置修正モード開始時のハンドラー
+  // なぜ: PoleDetailPanelから通知を受けて、メインの地図にドラッグ可能なマーカーを表示するため
+  const handleEditLocationStart = (lat: number, lng: number) => {
+    if (!mapInstanceRef.current) return;
+
+    setIsEditingPoleLocation(true);
+    setEditingPoleLocation([lat, lng]);
+
+    // 何を: メインの地図に移動
+    // なぜ: ユーザーが位置を確認・調整しやすくするため
+    mapInstanceRef.current.setView([lat, lng], 18, {
+      animate: true,
+      duration: 0.5,
+    });
+
+    // 何を: ドラッグ可能なマーカーを作成
+    // なぜ: ユーザーが大きな地図で位置を調整できるようにするため
+    editingPoleMarkerRef.current = L.marker([lat, lng], {
+      draggable: true,
+      icon: L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      })
+    }).addTo(mapInstanceRef.current);
+
+    // 何を: マーカーがドラッグされた時の処理
+    // なぜ: 新しい位置をPoleDetailPanelに通知するため
+    editingPoleMarkerRef.current.on('dragend', () => {
+      if (editingPoleMarkerRef.current) {
+        const pos = editingPoleMarkerRef.current.getLatLng();
+        setEditingPoleLocation([pos.lat, pos.lng]);
+      }
+    });
+  };
+
+  // 何を: 位置修正モードキャンセル時のハンドラー
+  // なぜ: メインの地図のドラッグ可能なマーカーを削除するため
+  const handleEditLocationCancel = () => {
+    setIsEditingPoleLocation(false);
+    setEditingPoleLocation(null);
+
+    // 何を: ドラッグ可能なマーカーを削除
+    // なぜ: 位置修正モードを終了するため
+    if (editingPoleMarkerRef.current && mapInstanceRef.current) {
+      mapInstanceRef.current.removeLayer(editingPoleMarkerRef.current);
+      editingPoleMarkerRef.current = null;
+    }
+  };
+
   // 何を: 登録成功時に地図上にマーカーを作成
   // なぜ: 登録した電柱がすぐに地図に表示されるようにするため
   const handleRegisterSuccess = (location: [number, number], poleType: string, poleSubType?: string) => {
@@ -673,6 +735,12 @@ export default function Home() {
               setShowDetailPanel(false);
               setSelectedPoleId(null);
               setSelectedPoleData(null);
+            }}
+            onEditLocationStart={handleEditLocationStart}
+            onEditLocationCancel={handleEditLocationCancel}
+            onLocationChange={(lat, lng) => {
+              // 位置が変更されたら状態を更新
+              setEditingPoleLocation([lat, lng]);
             }}
           />
         )}
