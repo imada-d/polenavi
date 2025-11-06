@@ -18,6 +18,7 @@ interface PoleDetailPanelProps {
   onEditLocationStart?: (lat: number, lng: number) => void; // 位置修正モード開始
   onEditLocationCancel?: () => void; // 位置修正モードキャンセル
   onLocationChange?: (lat: number, lng: number) => void; // 位置変更通知
+  onLocationSaved?: () => void; // 位置修正保存成功時
 }
 
 export default function PoleDetailPanel({
@@ -26,7 +27,8 @@ export default function PoleDetailPanel({
   onClose,
   onEditLocationStart,
   onEditLocationCancel,
-  onLocationChange
+  onLocationChange,
+  onLocationSaved
 }: PoleDetailPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -337,6 +339,10 @@ export default function PoleDetailPanel({
       // 何を: 親コンポーネント（Home）に位置修正モード終了を通知
       // なぜ: メインの地図のドラッグ可能マーカーを削除するため
       onEditLocationCancel?.();
+
+      // 何を: 親コンポーネント（Home）に位置修正保存成功を通知
+      // なぜ: 地図上の電柱マーカーを再読み込みして位置を更新するため
+      onLocationSaved?.();
 
       alert('✅ 位置を修正しました');
     } catch (error: any) {

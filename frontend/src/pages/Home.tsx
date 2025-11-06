@@ -719,6 +719,7 @@ export default function Home() {
             }}
             onEditLocationStart={handleEditLocationStart}
             onEditLocationCancel={handleEditLocationCancel}
+            onLocationSaved={loadNearbyPoles}
           />
         )}
 
