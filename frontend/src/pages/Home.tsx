@@ -5,6 +5,7 @@ import RegisterPanel from './pc/RegisterPanel';
 import PoleDetailPanel from '../components/pc/PoleDetailPanel';
 import SearchPanel from '../components/pc/SearchPanel';
 import MapPinRegister from '../components/pc/register/MapPinRegister';
+import Header from '../components/pc/Header';
 import { getNearbyPoles, getPoleById } from '../api/poles';
 import L from 'leaflet';
 import 'leaflet.markercluster';
@@ -605,8 +606,12 @@ export default function Home() {
 
   return (
     <div className="h-screen w-full flex flex-col">
-      <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold">PoleNavi</h1>
+      {/* PC用ヘッダー */}
+      <Header />
+
+      {/* モバイル用ヘッダー */}
+      <header className="md:hidden bg-white border-b px-4 py-3 flex items-center justify-between">
+        <h1 className="text-xl font-bold">🗺️ PoleNavi</h1>
         <div className="flex gap-2">
           <button className="p-2 hover:bg-gray-100 rounded">🔔</button>
         </div>

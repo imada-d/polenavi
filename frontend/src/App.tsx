@@ -1,10 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import BottomNav from './components/mobile/BottomNav';
 import Home from './pages/Home';
-import Search from './pages/mobile/Search';
-import Groups from './pages/mobile/Groups';
-import MyPage from './pages/mobile/MyPage';
+import SearchMobile from './pages/mobile/Search';
+import GroupsMobile from './pages/mobile/Groups';
+import MyPageMobile from './pages/mobile/MyPage';
+import SearchPC from './pages/pc/SearchPC';
+import GroupsPC from './pages/pc/GroupsPC';
+import MyPagePC from './pages/pc/MyPagePC';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PoleDetail from './pages/mobile/PoleDetail';
@@ -18,6 +22,19 @@ import RegisterConfirm from './pages/mobile/RegisterConfirm';
 import RegisterComplete from './pages/mobile/RegisterComplete';
 
 
+
+// レスポンシブラッパー：PC/モバイルで異なるコンポーネントを表示
+function ResponsiveWrapper({ mobile: Mobile, pc: PC }: { mobile: React.ComponentType; pc: React.ComponentType }) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile ? <Mobile /> : <PC />;
+}
 
 function AppContent() {
   const location = useLocation();
@@ -33,9 +50,9 @@ function AppContent() {
     <div className="relative">
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/groups" element={<Groups />} />
-        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/search" element={<ResponsiveWrapper mobile={SearchMobile} pc={SearchPC} />} />
+        <Route path="/groups" element={<ResponsiveWrapper mobile={GroupsMobile} pc={GroupsPC} />} />
+        <Route path="/mypage" element={<ResponsiveWrapper mobile={MyPageMobile} pc={MyPagePC} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
