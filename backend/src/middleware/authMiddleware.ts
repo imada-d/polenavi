@@ -28,7 +28,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     }
 
     // トークンを検証
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    return jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
         if (err.name === 'TokenExpiredError') {
           return res.status(401).json({
