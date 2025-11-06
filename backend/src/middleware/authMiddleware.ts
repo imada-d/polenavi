@@ -44,7 +44,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
       // リクエストオブジェクトにユーザー情報を追加
       (req as any).user = decoded as JwtPayload;
-      next();
+      return next();
     });
   } catch (error: any) {
     console.error('Auth middleware error:', error);
@@ -91,5 +91,5 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction) =>
     });
   }
 
-  next();
+  return next();
 };

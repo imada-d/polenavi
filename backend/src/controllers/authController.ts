@@ -114,7 +114,7 @@ export const signup = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7日間
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'ユーザー登録が完了しました',
       accessToken, // フロントエンドはこれをメモリで管理
@@ -196,7 +196,7 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'ログインに成功しました',
       accessToken,
@@ -270,7 +270,7 @@ export const refresh = async (req: Request, res: Response) => {
       { expiresIn: JWT_ACCESS_EXPIRES_IN }
     );
 
-    res.json({
+    return res.json({
       success: true,
       accessToken,
     });
@@ -318,7 +318,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       user,
     });
