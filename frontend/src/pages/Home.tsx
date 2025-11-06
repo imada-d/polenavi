@@ -263,7 +263,9 @@ export default function Home() {
         // 何を: マーカーを作成（地図には直接追加せず、クラスタグループに追加）
         // なぜ: ズームレベルに応じて自動的にグループ化するため
         // 補足: latitude/longitudeを数値に変換（データベースから文字列として返される場合があるため）
-        const marker = L.marker([Number(pole.latitude), Number(pole.longitude)], {
+        const lat = Number(pole.latitude);
+        const lng = Number(pole.longitude);
+        const marker = L.marker([lat, lng], {
           icon: icon
         });
 
@@ -516,8 +518,11 @@ export default function Home() {
     // 何を: ドラッグ可能なマーカーを削除
     // なぜ: 位置修正モードを終了するため
     if (editingPoleMarkerRef.current && mapInstanceRef.current) {
+      console.log('🗑️ ドラッグ可能マーカーを削除');
       mapInstanceRef.current.removeLayer(editingPoleMarkerRef.current);
       editingPoleMarkerRef.current = null;
+    } else {
+      console.log('⚠️ ドラッグ可能マーカーが存在しません');
     }
   };
 
