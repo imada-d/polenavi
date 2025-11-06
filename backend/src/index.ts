@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { config } from './config';
@@ -18,9 +19,13 @@ const app = express();
 
 // ミドルウェア
 app.use(helmet()); // セキュリティヘッダー
-app.use(cors({ origin: config.corsOrigin })); // CORS設定
+app.use(cors({
+  origin: config.corsOrigin,
+  credentials: true // Cookie送信を許可
+})); // CORS設定
 app.use(express.json()); // JSONパース
 app.use(express.urlencoded({ extended: true })); // URLエンコード
+app.use(cookieParser()); // Cookie解析
 
 // 静的ファイル配信（アップロード画像）
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
