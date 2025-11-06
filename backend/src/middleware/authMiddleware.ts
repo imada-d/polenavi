@@ -48,7 +48,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     });
   } catch (error: any) {
     console.error('Auth middleware error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: '認証処理に失敗しました',
       error: error.message,
@@ -57,7 +57,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 };
 
 // オプショナル認証ミドルウェア（トークンがあれば検証、なくてもOK）
-export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+export const optionalAuth = (req: Request, _res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];

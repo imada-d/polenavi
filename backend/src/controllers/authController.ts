@@ -129,7 +129,7 @@ export const signup = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Signup error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'ユーザー登録に失敗しました',
       error: error.message,
@@ -211,7 +211,7 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'ログインに失敗しました',
       error: error.message,
@@ -276,7 +276,7 @@ export const refresh = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Refresh token error:', error);
-    res.status(403).json({
+    return res.status(403).json({
       success: false,
       message: 'トークンの更新に失敗しました',
       error: error.message,
@@ -324,7 +324,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Get current user error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'ユーザー情報の取得に失敗しました',
       error: error.message,
