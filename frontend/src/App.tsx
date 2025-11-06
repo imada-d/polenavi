@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import BottomNav from './components/mobile/BottomNav';
 import Home from './pages/Home';
-import Search from './pages/Search';
-import Stats from './pages/Stats';
-import Gallery from './pages/Gallery';
-import Ranking from './pages/Ranking';
+import Search from './pages/mobile/Search';
+import Groups from './pages/mobile/Groups';
+import MyPage from './pages/mobile/MyPage';
 import PoleDetail from './pages/mobile/PoleDetail';
 import UploadPhoto from './pages/mobile/UploadPhoto';
 import RegisterLocation from './pages/RegisterLocation';
@@ -28,9 +27,8 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/stats" element={<Stats />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/ranking" element={<Ranking />} />
+        <Route path="/groups" element={<Groups />} />
+        <Route path="/mypage" element={<MyPage />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
         <Route path="/pole/:id/upload" element={<UploadPhoto />} />
         <Route path="/register/location" element={<RegisterLocation />} />

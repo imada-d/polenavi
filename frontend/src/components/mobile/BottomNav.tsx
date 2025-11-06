@@ -1,16 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
 
+// 何を: モバイル用ボトムナビゲーション（4タブ）
+// なぜ: シンプルで業務実用的なUIにするため
 export default function BottomNav() {
   const location = useLocation();
-  
+
   const isActive = (path: string) => location.pathname === path;
-  
+
+  // 何を: 4タブのナビゲーション（地図/検索/グループ/マイページ）
+  // なぜ: ゲーミフィケーション削除、グループ機能重視の新設計
   const navItems = [
     { path: '/', icon: '🗺️', label: '地図' },
     { path: '/search', icon: '🔍', label: '検索' },
-    { path: '/stats', icon: '📊', label: '統計' },
-    { path: '/gallery', icon: '📸', label: 'ギャラリー' },
-    { path: '/ranking', icon: '🏆', label: 'ランキング' },
+    { path: '/groups', icon: '👥', label: 'グループ' },
+    { path: '/mypage', icon: '👤', label: 'マイページ' },
   ];
   
   return (
