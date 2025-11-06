@@ -328,9 +328,11 @@ export default function PoleDetailPanel({
 
     try {
       await updatePoleLocation(poleData.id, newLocation.lat, newLocation.lng);
+      console.log(`📍 電柱ID ${poleData.id} の位置を修正: ${newLocation.lat}, ${newLocation.lng}`);
 
       // データを再取得して表示を更新
       const updatedData = await getPoleById(poleData.id);
+      console.log('📍 修正後の電柱データ:', updatedData);
       setPoleData(updatedData);
 
       setIsEditingLocation(false);

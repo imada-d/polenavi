@@ -228,6 +228,7 @@ export default function Home() {
 
     try {
       const poles = await getNearbyPoles(center.lat, center.lng, 50000);
+      console.log('📊 取得した電柱:', poles.map((p: any) => ({ id: p.id, lat: p.latitude, lng: p.longitude })));
 
       // 何を: 既存のクラスタグループをクリア
       // なぜ: 古いマーカーを削除して新しいマーカーだけ表示するため
