@@ -15,7 +15,7 @@ interface PoleDetailPanelProps {
   poleId: number;
   poleData: any; // TODO: 型定義を後で追加
   onClose: () => void;
-  onEditLocationStart?: (lat: number, lng: number) => void; // 位置修正モード開始
+  onEditLocationStart?: (lat: number, lng: number, onLocationChange?: (lat: number, lng: number) => void) => void; // 位置修正モード開始
   onEditLocationCancel?: () => void; // 位置修正モードキャンセル
   onLocationChange?: (lat: number, lng: number) => void; // 位置変更通知
   onLocationSaved?: (lat: number, lng: number) => void; // 位置修正保存成功時（新しい座標を渡す）
@@ -316,9 +316,16 @@ export default function PoleDetailPanel({
     const lng = Number(poleData.longitude);
     setNewLocation({ lat, lng });
 
+    // 何を: マーカーがドラッグされたときのコールバックを作成
+    // なぜ: メインの地図のマーカーがドラッグされたら、このコンポーネントの状態を更新するため
+    const handleLocationChange = (newLat: number, newLng: number) => {
+      console.log(`🔄 PoleDetailPanel: 位置変更を受信 ${newLat}, ${newLng}`);
+      setNewLocation({ lat: newLat, lng: newLng });
+    };
+
     // 何を: 親コンポーネント（Home）に位置修正モード開始を通知
     // なぜ: メインの大きな地図でドラッグ可能なマーカーを表示するため
-    onEditLocationStart?.(lat, lng);
+    onEditLocationStart?.(lat, lng, handleLocationChange);
   };
 
   // 何を: 位置修正を保存するハンドラー

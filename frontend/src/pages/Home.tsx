@@ -484,12 +484,20 @@ export default function Home() {
     setPinLocation(null);
   };
 
+  // 何を: 位置修正中のコールバックを保存するref
+  // なぜ: マーカーをドラッグしたときに PoleDetailPanel に通知するため
+  const editingLocationCallbackRef = useRef<((lat: number, lng: number) => void) | null>(null);
+
   // 何を: 位置修正モード開始時のハンドラー
   // なぜ: PoleDetailPanelから通知を受けて、メインの地図にドラッグ可能なマーカーを表示するため
-  const handleEditLocationStart = (lat: number, lng: number) => {
+  const handleEditLocationStart = (lat: number, lng: number, onLocationChange?: (lat: number, lng: number) => void) => {
     if (!mapInstanceRef.current) return;
 
     console.log(`🎯 位置修正開始: 初期位置 ${lat}, ${lng}`);
+
+    // 何を: 位置変更コールバックを保存
+    // なぜ: マーカーのドラッグイベントで使用するため
+    editingLocationCallbackRef.current = onLocationChange || null;
 
     // 何を: メインの地図に移動
     // なぜ: ユーザーが位置を確認・調整しやすくするため
@@ -512,6 +520,21 @@ export default function Home() {
         shadowSize: [41, 41]
       })
     }).addTo(mapInstanceRef.current);
+
+    // 何を: マーカーがドラッグされた時のイベントリスナーを追加
+    // なぜ: 新しい位置を取得してPoleDetailPanelに通知するため
+    editingPoleMarkerRef.current.on('dragend', () => {
+      if (editingPoleMarkerRef.current) {
+        const pos = editingPoleMarkerRef.current.getLatLng();
+        console.log(`📍 マーカーをドラッグ: 新しい位置 ${pos.lat}, ${pos.lng}`);
+
+        // 何を: PoleDetailPanelに新しい位置を通知
+        // なぜ: 詳細パネルの表示を更新するため
+        if (editingLocationCallbackRef.current) {
+          editingLocationCallbackRef.current(pos.lat, pos.lng);
+        }
+      }
+    });
   };
 
   // 何を: 位置修正モードキャンセル時のハンドラー
