@@ -18,7 +18,7 @@ interface PoleDetailPanelProps {
   onEditLocationStart?: (lat: number, lng: number) => void; // 位置修正モード開始
   onEditLocationCancel?: () => void; // 位置修正モードキャンセル
   onLocationChange?: (lat: number, lng: number) => void; // 位置変更通知
-  onLocationSaved?: () => void; // 位置修正保存成功時
+  onLocationSaved?: (lat: number, lng: number) => void; // 位置修正保存成功時（新しい座標を渡す）
 }
 
 export default function PoleDetailPanel({
@@ -345,7 +345,7 @@ export default function PoleDetailPanel({
       // 何を: 親コンポーネント（Home）に位置修正保存成功を通知
       // なぜ: 地図上の電柱マーカーを再読み込みして位置を更新するため
       console.log('📍 PoleDetailPanel: 位置修正保存成功、onLocationSavedを呼び出します');
-      onLocationSaved?.();
+      onLocationSaved?.(newLocation.lat, newLocation.lng);
 
       alert('✅ 位置を修正しました');
     } catch (error: any) {

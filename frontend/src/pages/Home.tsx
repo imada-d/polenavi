@@ -723,7 +723,21 @@ export default function Home() {
             }}
             onEditLocationStart={handleEditLocationStart}
             onEditLocationCancel={handleEditLocationCancel}
-            onLocationSaved={loadNearbyPoles}
+            onLocationSaved={(lat, lng) => {
+              // 何を: 電柱を再読み込みして、新しい位置に地図を移動
+              // なぜ: ユーザーが修正した位置を確認できるようにするため
+              console.log(`🗺️ 修正した電柱の位置に地図を移動: ${lat}, ${lng}`);
+              loadNearbyPoles();
+
+              // 何を: 地図を新しい位置に移動
+              // なぜ: 修正した電柱がすぐに見えるようにするため
+              if (mapInstanceRef.current) {
+                mapInstanceRef.current.setView([lat, lng], 18, {
+                  animate: true,
+                  duration: 1,
+                });
+              }
+            }}
           />
         )}
 
