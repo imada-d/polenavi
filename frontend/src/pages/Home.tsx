@@ -221,6 +221,8 @@ export default function Home() {
   const loadNearbyPoles = useCallback(async () => {
     if (!mapInstanceRef.current) return;
 
+    console.log('🔄 loadNearbyPoles: 電柱を再読み込み中...');
+
     // 地図の中心座標を取得
     const center = mapInstanceRef.current.getCenter();
 
@@ -259,7 +261,8 @@ export default function Home() {
 
         // 何を: マーカーを作成（地図には直接追加せず、クラスタグループに追加）
         // なぜ: ズームレベルに応じて自動的にグループ化するため
-        const marker = L.marker([pole.latitude, pole.longitude], {
+        // 補足: latitude/longitudeを数値に変換（データベースから文字列として返される場合があるため）
+        const marker = L.marker([Number(pole.latitude), Number(pole.longitude)], {
           icon: icon
         });
 

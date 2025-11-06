@@ -342,6 +342,7 @@ export default function PoleDetailPanel({
 
       // 何を: 親コンポーネント（Home）に位置修正保存成功を通知
       // なぜ: 地図上の電柱マーカーを再読み込みして位置を更新するため
+      console.log('📍 PoleDetailPanel: 位置修正保存成功、onLocationSavedを呼び出します');
       onLocationSaved?.();
 
       alert('✅ 位置を修正しました');
