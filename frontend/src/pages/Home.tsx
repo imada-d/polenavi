@@ -483,6 +483,10 @@ export default function Home() {
   const handleEditLocationStart = (lat: number, lng: number) => {
     if (!mapInstanceRef.current) return;
 
+    // 何を: 地図のドラッグを無効化
+    // なぜ: マーカーをドラッグしやすくするため（地図が動かないようにする）
+    mapInstanceRef.current.dragging.disable();
+
     // 何を: メインの地図に移動
     // なぜ: ユーザーが位置を確認・調整しやすくするため
     mapInstanceRef.current.setView([lat, lng], 18, {
@@ -513,6 +517,12 @@ export default function Home() {
     if (editingPoleMarkerRef.current && mapInstanceRef.current) {
       mapInstanceRef.current.removeLayer(editingPoleMarkerRef.current);
       editingPoleMarkerRef.current = null;
+    }
+
+    // 何を: 地図のドラッグを再度有効化
+    // なぜ: 通常の地図操作に戻すため
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.dragging.enable();
     }
   };
 
