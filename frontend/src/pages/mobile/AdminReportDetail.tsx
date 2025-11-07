@@ -13,7 +13,6 @@ export default function AdminReportDetail() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [resolution, setResolution] = useState('');
-  const [selectedAction, setSelectedAction] = useState<'keep' | 'reject' | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -51,7 +50,7 @@ export default function AdminReportDetail() {
       const result = await reviewReport(report.id, {
         status: 'resolved',
         resolution: resolution.trim() || autoResolution,
-        action,
+        action: action === 'keep' ? 'no_action' : 'delete',
       });
 
       if (action === 'reject' && result.uploaderWarningCount) {
