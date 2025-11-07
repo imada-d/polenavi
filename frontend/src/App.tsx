@@ -6,9 +6,11 @@ import Home from './pages/Home';
 import SearchMobile from './pages/mobile/Search';
 import GroupsMobile from './pages/mobile/Groups';
 import MyPageMobile from './pages/mobile/MyPage';
+import ProfileEditMobile from './pages/mobile/ProfileEdit';
 import SearchPC from './pages/pc/SearchPC';
 import GroupsPC from './pages/pc/GroupsPC';
 import MyPagePC from './pages/pc/MyPagePC';
+import ProfileEditPC from './pages/pc/ProfileEditPC';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PoleDetail from './pages/mobile/PoleDetail';
@@ -39,12 +41,13 @@ function ResponsiveWrapper({ mobile: Mobile, pc: PC }: { mobile: React.Component
 function AppContent() {
   const location = useLocation();
 
-  // 登録画面、詳細画面、認証画面ではボトムナビを非表示
+  // 登録画面、詳細画面、認証画面、設定画面ではボトムナビを非表示
   const hideBottomNav =
     location.pathname.startsWith('/register') ||
     location.pathname.startsWith('/pole/') ||
     location.pathname === '/login' ||
-    location.pathname === '/signup';
+    location.pathname === '/signup' ||
+    location.pathname === '/profile/edit';
 
   return (
     <div className="relative">
@@ -53,6 +56,7 @@ function AppContent() {
         <Route path="/search" element={<ResponsiveWrapper mobile={SearchMobile} pc={SearchPC} />} />
         <Route path="/groups" element={<ResponsiveWrapper mobile={GroupsMobile} pc={GroupsPC} />} />
         <Route path="/mypage" element={<ResponsiveWrapper mobile={MyPageMobile} pc={MyPagePC} />} />
+        <Route path="/profile/edit" element={<ResponsiveWrapper mobile={ProfileEditMobile} pc={ProfileEditPC} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />

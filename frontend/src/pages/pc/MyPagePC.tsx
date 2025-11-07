@@ -2,12 +2,41 @@
 // なぜ: PC画面でユーザー情報と設定を管理するため
 
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import Header from '../../components/pc/Header';
+import { getUserStats } from '../../api/user';
+import type { UserStats } from '../../api/user';
 
 export default function MyPagePC() {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const [stats, setStats] = useState<UserStats>({
+    registeredPoles: 0,
+    photos: 0,
+    memos: 0,
+    groups: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  // 統計データを取得
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadStats();
+    }
+  }, [isAuthenticated]);
+
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      const data = await getUserStats();
+      setStats(data);
+    } catch (error) {
+      console.error('統計データの取得に失敗:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -69,7 +98,10 @@ export default function MyPagePC() {
                     <p className="text-sm text-gray-400 mt-1">@{user.username}</p>
                   )}
                 </div>
-                <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">
+                <button
+                  onClick={() => navigate('/profile/edit')}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700"
+                >
                   編集
                 </button>
               </div>
@@ -99,27 +131,30 @@ export default function MyPagePC() {
             {/* 統計情報 */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
               <h3 className="text-xl font-bold mb-6">📊 活動統計</h3>
-              <div className="grid grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600">0</div>
-                  <div className="text-sm text-gray-600 mt-2">登録した電柱</div>
+              {loading ? (
+                <div className="text-center py-12 text-gray-400">
+                  読み込み中...
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-3xl font-bold text-green-600">0</div>
-                  <div className="text-sm text-gray-600 mt-2">撮影した写真</div>
+              ) : (
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-3xl font-bold text-blue-600">{stats.registeredPoles}</div>
+                    <div className="text-sm text-gray-600 mt-2">登録した電柱</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-3xl font-bold text-green-600">{stats.photos}</div>
+                    <div className="text-sm text-gray-600 mt-2">撮影した写真</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-3xl font-bold text-purple-600">{stats.memos}</div>
+                    <div className="text-sm text-gray-600 mt-2">書いたメモ</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-3xl font-bold text-orange-600">{stats.groups}</div>
+                    <div className="text-sm text-gray-600 mt-2">参加グループ</div>
+                  </div>
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-3xl font-bold text-purple-600">0</div>
-                  <div className="text-sm text-gray-600 mt-2">書いたメモ</div>
-                </div>
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-3xl font-bold text-orange-600">0</div>
-                  <div className="text-sm text-gray-600 mt-2">参加グループ</div>
-                </div>
-              </div>
-              <p className="text-xs text-gray-400 text-center mt-4">
-                ※ 統計データは実装予定です
-              </p>
+              )}
             </div>
 
             {/* プラン情報 */}
