@@ -188,6 +188,36 @@ export default function MyPage() {
             </div>
           )}
 
+          {/* 管理者メニュー（管理者・モデレーターのみ表示） */}
+          {(user.role === 'admin' || user.role === 'moderator') && (
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg shadow-sm border border-purple-200">
+              <h3 className="font-bold p-4 border-b border-purple-200 text-purple-900">🛠️ 管理者メニュー</h3>
+              <div className="divide-y divide-purple-100">
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="w-full text-left px-4 py-3 hover:bg-purple-100 flex items-center justify-between transition-colors"
+                >
+                  <span className="text-purple-900">管理者ダッシュボード</span>
+                  <span className="text-purple-400">→</span>
+                </button>
+                <button
+                  onClick={() => navigate('/stats')}
+                  className="w-full text-left px-4 py-3 hover:bg-purple-100 flex items-center justify-between transition-colors"
+                >
+                  <span className="text-purple-900">統計情報</span>
+                  <span className="text-purple-400">→</span>
+                </button>
+                <button
+                  onClick={() => navigate('/admin/users')}
+                  className="w-full text-left px-4 py-3 hover:bg-purple-100 flex items-center justify-between transition-colors"
+                >
+                  <span className="text-purple-900">ユーザー管理</span>
+                  <span className="text-purple-400">→</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 設定メニュー */}
           <div className="bg-white rounded-lg shadow-sm border">
             <h3 className="font-bold p-4 border-b">⚙️ 設定</h3>

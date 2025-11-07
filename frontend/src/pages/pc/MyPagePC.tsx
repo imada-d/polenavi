@@ -194,6 +194,36 @@ export default function MyPagePC() {
 
           {/* 右カラム - 設定メニュー */}
           <div className="space-y-6">
+            {/* 管理者メニュー（管理者・モデレーターのみ表示） */}
+            {(user.role === 'admin' || user.role === 'moderator') && (
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm border border-purple-200">
+                <h3 className="font-bold p-4 border-b border-purple-200 text-lg text-purple-900">🛠️ 管理者メニュー</h3>
+                <div className="divide-y divide-purple-100">
+                  <button
+                    onClick={() => navigate('/admin')}
+                    className="w-full text-left px-4 py-3 hover:bg-purple-100 flex items-center justify-between transition-colors"
+                  >
+                    <span className="text-purple-900">管理者ダッシュボード</span>
+                    <span className="text-purple-400">→</span>
+                  </button>
+                  <button
+                    onClick={() => navigate('/stats')}
+                    className="w-full text-left px-4 py-3 hover:bg-purple-100 flex items-center justify-between transition-colors"
+                  >
+                    <span className="text-purple-900">統計情報</span>
+                    <span className="text-purple-400">→</span>
+                  </button>
+                  <button
+                    onClick={() => navigate('/admin/users')}
+                    className="w-full text-left px-4 py-3 hover:bg-purple-100 flex items-center justify-between transition-colors"
+                  >
+                    <span className="text-purple-900">ユーザー管理</span>
+                    <span className="text-purple-400">→</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-xl shadow-sm border">
               <h3 className="font-bold p-4 border-b text-lg">⚙️ 設定</h3>
               <div className="divide-y">
