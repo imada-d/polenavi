@@ -44,9 +44,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return response.accessToken;
     } catch (error) {
       console.error('Failed to refresh token:', error);
-      // リフレッシュ失敗時はログアウト
+      // リフレッシュ失敗時はログアウト（Cookieもクリア）
       setUser(null);
       setToken(null);
+      // バックエンドのCookieをクリア
+      try {
+        const { logout: apiLogout } = await import('../api/auth');
+        await apiLogout();
+      } catch (logoutError) {
+        console.error('Failed to clear cookies:', logoutError);
+      }
       return null;
     }
   };

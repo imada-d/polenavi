@@ -12,11 +12,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 const JWT_ACCESS_EXPIRES_IN = '15m'; // アクセストークン: 15分
 const JWT_REFRESH_EXPIRES_IN = '7d'; // リフレッシュトークン: 7日間
 
-// リフレッシュトークンをメモリに保存（本番環境ではRedisを使用）
-const refreshTokens = new Map<string, { userId: number; email: string }>();
-
 // アクセストークンとリフレッシュトークンを生成
-const generateTokens = (userId: number, email: string, username: string, role: string) => {
+const generateTokens = async (userId: number, email: string, username: string, role: string) => {
   // アクセストークン（短時間有効）
   const accessToken = jwt.sign(
     { userId, email, username, role },
@@ -32,8 +29,17 @@ const generateTokens = (userId: number, email: string, username: string, role: s
     { expiresIn: JWT_REFRESH_EXPIRES_IN }
   );
 
-  // リフレッシュトークンをメモリに保存
-  refreshTokens.set(refreshTokenId, { userId, email });
+  // リフレッシュトークンをデータベースに保存
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7); // 7日後
+
+  await prisma.refreshToken.create({
+    data: {
+      tokenId: refreshTokenId,
+      userId,
+      expiresAt
+    }
+  });
 
   return { accessToken, refreshToken, refreshTokenId };
 };
@@ -99,7 +105,7 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     // トークン生成
-    const { accessToken, refreshToken } = generateTokens(
+    const { accessToken, refreshToken } = await generateTokens(
       user.id,
       user.email,
       user.username,
@@ -181,7 +187,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // トークン生成
-    const { accessToken, refreshToken } = generateTokens(
+    const { accessToken, refreshToken } = await generateTokens(
       user.id,
       user.email,
       user.username,
@@ -238,18 +244,20 @@ export const refresh = async (req: Request, res: Response) => {
       tokenId: string;
     };
 
-    // メモリ内のトークンを確認
-    if (!refreshTokens.has(decoded.tokenId)) {
+    // データベース内のトークンを確認
+    const storedToken = await prisma.refreshToken.findUnique({
+      where: { tokenId: decoded.tokenId },
+      include: { user: true }
+    });
+
+    if (!storedToken || storedToken.revoked || new Date() > storedToken.expiresAt) {
       return res.status(403).json({
         success: false,
         message: '無効なリフレッシュトークンです'
       });
     }
 
-    // ユーザー情報を取得
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    });
+    const user = storedToken.user;
 
     if (!user || !user.isActive) {
       return res.status(403).json({
@@ -342,10 +350,17 @@ export const logout = async (req: Request, res: Response) => {
         const decoded = jwt.verify(refreshToken, JWT_SECRET) as {
           tokenId: string;
         };
-        // メモリからリフレッシュトークンを削除
-        refreshTokens.delete(decoded.tokenId);
+        // データベースのリフレッシュトークンを無効化
+        await prisma.refreshToken.updateMany({
+          where: { tokenId: decoded.tokenId },
+          data: {
+            revoked: true,
+            revokedAt: new Date()
+          }
+        });
       } catch (error) {
         // トークンが無効でも続行
+        console.error('Token revocation error:', error);
       }
     }
 
@@ -356,13 +371,13 @@ export const logout = async (req: Request, res: Response) => {
       sameSite: 'strict',
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'ログアウトしました',
     });
   } catch (error: any) {
     console.error('Logout error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'ログアウトに失敗しました',
       error: error.message,
