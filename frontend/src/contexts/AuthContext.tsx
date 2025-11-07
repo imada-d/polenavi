@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { login as apiLogin, signup as apiSignup, getCurrentUser, refreshAccessToken } from '../api/auth';
 import type { User, LoginData, SignupData } from '../api/auth';
+import { setAccessToken } from '../api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +36,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null); // メモリのみ
   const [isLoading, setIsLoading] = useState(true);
+
+  // トークンが変更されたらapiClientに設定
+  useEffect(() => {
+    setAccessToken(token);
+  }, [token]);
 
   // トークンをリフレッシュ
   const refreshToken = async () => {

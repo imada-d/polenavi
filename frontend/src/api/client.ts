@@ -13,12 +13,19 @@ const apiClient = axios.create({
   },
 });
 
+// トークンを保持する変数（AuthContextから設定される）
+let accessToken: string | null = null;
+
+// トークンを設定する関数（AuthContextから呼ばれる）
+export const setAccessToken = (token: string | null) => {
+  accessToken = token;
+};
+
 // リクエストインターセプター（JWT トークンを自動で付与）
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
@@ -28,14 +35,11 @@ apiClient.interceptors.request.use(
 );
 
 // レスポンスインターセプター（エラーハンドリング）
+// 401エラーは AuthContext で処理するため、ここではリダイレクトしない
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // 認証エラー → ログアウト処理
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
+    // エラーをそのまま返す（AuthContextで処理）
     return Promise.reject(error);
   }
 );
