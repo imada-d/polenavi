@@ -130,6 +130,7 @@ export const signup = async (req: Request, res: Response) => {
         username: user.username,
         displayName: user.displayName,
         role: user.role,
+        emailNotifications: user.emailNotifications,
         createdAt: user.createdAt,
       },
     });
@@ -217,6 +218,7 @@ export const login = async (req: Request, res: Response) => {
         username: user.username,
         displayName: user.displayName,
         role: user.role,
+        emailNotifications: user.emailNotifications,
         createdAt: user.createdAt,
       },
     });
@@ -338,6 +340,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         homePrefecture: true,
         planType: true,
         emailVerified: true,
+        emailNotifications: true,
         createdAt: true,
       },
     });

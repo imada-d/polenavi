@@ -26,6 +26,10 @@ router.get('/search', polesController.searchByNumber);
 // なぜ: メモやハッシュタグで柱を検索できるようにするため
 router.get('/search/memo', polesController.searchPolesByMemo);
 
+// 何を: ハッシュタグで柱を検索するエンドポイント
+// なぜ: 特定のハッシュタグが付いた柱を一覧表示するため
+router.get('/hashtag/:tag', polesController.getPolesByHashtag);
+
 // 何を: 柱の詳細情報を取得するエンドポイント
 // なぜ: 登録済みの柱の情報を表示するため
 router.get('/:id', polesController.getPoleById);

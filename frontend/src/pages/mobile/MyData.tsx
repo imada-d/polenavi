@@ -262,17 +262,21 @@ export default function MyData() {
                   </div>
                 ) : (
                   hashtags.map((hashtag: any, idx: number) => (
-                    <div
+                    <button
                       key={idx}
-                      className="bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between"
+                      onClick={() => navigate(`/hashtag/${hashtag.tag}`)}
+                      className="w-full bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg">#{hashtag.tag}</span>
+                        <span className="text-lg text-blue-600">#{hashtag.tag}</span>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {hashtag.count}回使用
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                          {hashtag.count}回使用
+                        </span>
+                        <span className="text-gray-400">→</span>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>

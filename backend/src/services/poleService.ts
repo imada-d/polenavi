@@ -428,3 +428,54 @@ export async function updatePoleLocation(poleId: number, latitude: number, longi
     longitude: updated.longitude,
   };
 }
+
+/**
+ * ハッシュタグで電柱を検索
+ */
+export async function getPolesByHashtag(tag: string) {
+  const poles = await prisma.pole.findMany({
+    where: {
+      memos: {
+        some: {
+          hashtags: {
+            has: tag,
+          },
+        },
+      },
+    },
+    include: {
+      memos: {
+        where: {
+          hashtags: {
+            has: tag,
+          },
+        },
+        select: {
+          id: true,
+          memoText: true,
+          hashtags: true,
+          createdAt: true,
+          createdByUser: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+            },
+          },
+        },
+      },
+      photos: {
+        select: {
+          id: true,
+          photoUrl: true,
+        },
+        take: 1,
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return poles;
+}

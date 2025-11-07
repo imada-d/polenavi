@@ -255,3 +255,26 @@ export async function updatePoleLocation(req: Request, res: Response, next: Next
     next(error);
   }
 }
+
+/**
+ * ハッシュタグで電柱を検索
+ *
+ * GET /api/poles/hashtag/:tag
+ */
+export async function getPolesByHashtag(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { tag } = req.params;
+    const result = await poleService.getPolesByHashtag(tag);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

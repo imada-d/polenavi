@@ -14,6 +14,8 @@ import AccountSettings from './pages/AccountSettings';
 import HelpSupport from './pages/HelpSupport';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import HashtagPolesMobile from './pages/mobile/HashtagPoles';
+import HashtagPolesPC from './pages/pc/HashtagPolesPC';
 import SearchPC from './pages/pc/SearchPC';
 import GroupsPC from './pages/pc/GroupsPC';
 import MyPagePC from './pages/pc/MyPagePC';
@@ -62,7 +64,8 @@ function AppContent() {
     location.pathname === '/account-settings' ||
     location.pathname === '/help-support' ||
     location.pathname === '/terms' ||
-    location.pathname === '/privacy';
+    location.pathname === '/privacy' ||
+    location.pathname.startsWith('/hashtag/');
 
   return (
     <div className="relative">
@@ -79,6 +82,7 @@ function AppContent() {
         <Route path="/help-support" element={<HelpSupport />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/hashtag/:tag" element={<ResponsiveWrapper mobile={HashtagPolesMobile} pc={HashtagPolesPC} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
