@@ -184,9 +184,25 @@ export default function AccountSettings() {
         {/* アカウント削除 */}
         <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6 md:p-8">
           <h2 className="text-xl font-bold text-red-700 mb-4">アカウント削除</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            アカウントを削除すると、すべてのデータが削除され復元できません。
-          </p>
+          <div className="mb-4 space-y-2">
+            <p className="text-sm text-gray-700">
+              <strong>削除されるデータ：</strong>
+            </p>
+            <ul className="text-sm text-gray-600 list-disc list-inside ml-2">
+              <li>アカウント情報（メールアドレス、ユーザー名など）</li>
+              <li>登録したメモ</li>
+              <li>登録したハッシュタグ</li>
+            </ul>
+            <p className="text-sm text-gray-700 mt-3">
+              <strong>残るデータ：</strong>
+            </p>
+            <ul className="text-sm text-gray-600 list-disc list-inside ml-2">
+              <li>電柱データ（位置情報、電柱番号など）は公共情報として残ります</li>
+            </ul>
+            <p className="text-sm text-red-600 font-semibold mt-3">
+              ⚠️ 削除したデータは復元できません。
+            </p>
+          </div>
 
           {!showDeleteConfirm ? (
             <button

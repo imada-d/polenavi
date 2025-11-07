@@ -12,6 +12,8 @@ import NotificationSettings from './pages/NotificationSettings';
 import PrivacySettings from './pages/PrivacySettings';
 import AccountSettings from './pages/AccountSettings';
 import HelpSupport from './pages/HelpSupport';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import SearchPC from './pages/pc/SearchPC';
 import GroupsPC from './pages/pc/GroupsPC';
 import MyPagePC from './pages/pc/MyPagePC';
@@ -58,7 +60,9 @@ function AppContent() {
     location.pathname === '/notification-settings' ||
     location.pathname === '/privacy-settings' ||
     location.pathname === '/account-settings' ||
-    location.pathname === '/help-support';
+    location.pathname === '/help-support' ||
+    location.pathname === '/terms' ||
+    location.pathname === '/privacy';
 
   return (
     <div className="relative">
@@ -73,6 +77,8 @@ function AppContent() {
         <Route path="/privacy-settings" element={<PrivacySettings />} />
         <Route path="/account-settings" element={<AccountSettings />} />
         <Route path="/help-support" element={<HelpSupport />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />

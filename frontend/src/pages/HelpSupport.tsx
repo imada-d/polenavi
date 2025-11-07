@@ -12,7 +12,7 @@ export default function HelpSupport() {
   const faqs = [
     {
       question: '電柱の登録方法は？',
-      answer: 'ホーム画面の地図上で登録したい電柱の位置を長押しし、「電柱を登録」ボタンをタップします。その後、電柱番号や事業者名などの情報を入力してください。'
+      answer: 'ホーム画面で「電柱を登録」ボタンをタップし、地図上のピンを電柱の位置に移動させます。その後、電柱番号や事業者名などの情報を入力してください。'
     },
     {
       question: '電柱番号の検索方法は？',
@@ -144,6 +144,11 @@ export default function HelpSupport() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* 運営情報 */}
+        <div className="text-center py-6">
+          <p className="text-sm text-gray-500">運営：imada-lab</p>
         </div>
       </div>
     </div>
