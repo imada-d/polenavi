@@ -175,6 +175,13 @@ export default function MyPage() {
           <div className="bg-white rounded-lg shadow-sm border">
             <h3 className="font-bold p-4 border-b">⚙️ 設定</h3>
             <div className="divide-y">
+              <button
+                onClick={() => navigate('/mydata')}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+              >
+                <span>マイデータ</span>
+                <span className="text-gray-400">→</span>
+              </button>
               <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between">
                 <span>プロフィール編集</span>
                 <span className="text-gray-400">→</span>

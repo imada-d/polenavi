@@ -51,3 +51,51 @@ export const updateProfile = async (data: UpdateProfileData): Promise<any> => {
     throw new Error(errorMessage);
   }
 };
+
+// 自分が登録した電柱一覧を取得
+export const getMyPoles = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/users/my-data/poles');
+    console.log('✅ 電柱一覧取得成功:', response.data);
+    return response.data.data.poleNumbers || [];
+  } catch (error: any) {
+    console.error('❌ 電柱一覧取得エラー:', error);
+    return [];
+  }
+};
+
+// 自分が作成したメモ一覧を取得
+export const getMyMemos = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/users/my-data/memos');
+    console.log('✅ メモ一覧取得成功:', response.data);
+    return response.data.data.memos || [];
+  } catch (error: any) {
+    console.error('❌ メモ一覧取得エラー:', error);
+    return [];
+  }
+};
+
+// 自分がアップロードした写真一覧を取得
+export const getMyPhotos = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/users/my-data/photos');
+    console.log('✅ 写真一覧取得成功:', response.data);
+    return response.data.data.photos || [];
+  } catch (error: any) {
+    console.error('❌ 写真一覧取得エラー:', error);
+    return [];
+  }
+};
+
+// 自分が使用したハッシュタグ一覧を取得
+export const getMyHashtags = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/users/my-data/hashtags');
+    console.log('✅ ハッシュタグ一覧取得成功:', response.data);
+    return response.data.data.hashtags || [];
+  } catch (error: any) {
+    console.error('❌ ハッシュタグ一覧取得エラー:', error);
+    return [];
+  }
+};

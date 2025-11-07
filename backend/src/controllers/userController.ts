@@ -177,3 +177,164 @@ export const updateProfile = async (req: Request, res: Response) => {
     });
   }
 };
+
+// 自分が登録した電柱一覧を取得
+export const getMyPoles = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    const poleNumbers = await prisma.poleNumber.findMany({
+      where: { registeredBy: userId },
+      include: {
+        pole: {
+          include: {
+            poleNumbers: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return res.json({
+      success: true,
+      data: { poleNumbers }
+    });
+  } catch (error: any) {
+    console.error('Get my poles error:', error);
+    return res.status(500).json({
+      success: false,
+      message: '電柱一覧の取得に失敗しました',
+      error: error.message
+    });
+  }
+};
+
+// 自分が作成したメモ一覧を取得
+export const getMyMemos = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    const memos = await prisma.poleMemo.findMany({
+      where: { createdBy: userId },
+      include: {
+        pole: {
+          include: {
+            poleNumbers: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return res.json({
+      success: true,
+      data: { memos }
+    });
+  } catch (error: any) {
+    console.error('Get my memos error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'メモ一覧の取得に失敗しました',
+      error: error.message
+    });
+  }
+};
+
+// 自分がアップロードした写真一覧を取得
+export const getMyPhotos = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    const photos = await prisma.polePhoto.findMany({
+      where: {
+        uploadedBy: userId,
+        deletedAt: null
+      },
+      include: {
+        pole: {
+          include: {
+            poleNumbers: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return res.json({
+      success: true,
+      data: { photos }
+    });
+  } catch (error: any) {
+    console.error('Get my photos error:', error);
+    return res.status(500).json({
+      success: false,
+      message: '写真一覧の取得に失敗しました',
+      error: error.message
+    });
+  }
+};
+
+// 自分が使用したハッシュタグ一覧を取得
+export const getMyHashtags = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    const memos = await prisma.poleMemo.findMany({
+      where: { createdBy: userId },
+      select: { hashtags: true }
+    });
+
+    // ハッシュタグを集計
+    const hashtagCount: { [key: string]: number } = {};
+    memos.forEach(memo => {
+      memo.hashtags.forEach(tag => {
+        hashtagCount[tag] = (hashtagCount[tag] || 0) + 1;
+      });
+    });
+
+    // オブジェクトを配列に変換してソート
+    const hashtags = Object.entries(hashtagCount)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return res.json({
+      success: true,
+      data: { hashtags }
+    });
+  } catch (error: any) {
+    console.error('Get my hashtags error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'ハッシュタグ一覧の取得に失敗しました',
+      error: error.message
+    });
+  }
+};
