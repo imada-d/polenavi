@@ -16,7 +16,14 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import HashtagPolesMobile from './pages/mobile/HashtagPoles';
 import HashtagPolesPC from './pages/pc/HashtagPolesPC';
+import StatsMobile from './pages/mobile/Stats';
+import StatsPC from './pages/pc/StatsPC';
+import AdminDashboardMobile from './pages/mobile/AdminDashboard';
+import AdminDashboardPC from './pages/pc/AdminDashboardPC';
+import AdminUsersMobile from './pages/mobile/AdminUsers';
+import AdminUsersPC from './pages/pc/AdminUsersPC';
 import SearchPC from './pages/pc/SearchPC';
+import ProtectedRoute from './components/ProtectedRoute';
 import GroupsPC from './pages/pc/GroupsPC';
 import MyPagePC from './pages/pc/MyPagePC';
 import ProfileEditPC from './pages/pc/ProfileEditPC';
@@ -65,7 +72,9 @@ function AppContent() {
     location.pathname === '/help-support' ||
     location.pathname === '/terms' ||
     location.pathname === '/privacy' ||
-    location.pathname.startsWith('/hashtag/');
+    location.pathname.startsWith('/hashtag/') ||
+    location.pathname === '/stats' ||
+    location.pathname.startsWith('/admin');
 
   return (
     <div className="relative">
@@ -83,6 +92,9 @@ function AppContent() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/hashtag/:tag" element={<ResponsiveWrapper mobile={HashtagPolesMobile} pc={HashtagPolesPC} />} />
+        <Route path="/stats" element={<ResponsiveWrapper mobile={StatsMobile} pc={StatsPC} />} />
+        <Route path="/admin" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminDashboardMobile} pc={AdminDashboardPC} /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminUsersMobile} pc={AdminUsersPC} /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />

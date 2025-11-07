@@ -182,6 +182,7 @@ model User {
   reportsCreated     Report[]     @relation("ReportedBy")
   reportsReviewed    Report[]     @relation("ReviewedBy")
   refreshTokens      RefreshToken[]
+  hashtags           UserHashtag[]
 
   @@map("users")
 }
@@ -251,4 +252,27 @@ model Report {
   @@index([reportType, targetId])
   @@index([status])
   @@map("reports")
+}
+
+// ========================================
+// Phase 1.5: ハッシュタグマスター機能
+// ========================================
+
+// ユーザー別ハッシュタグマスタ
+model UserHashtag {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag         String   @db.VarChar(50)    // 正規化されたタグ（#なし、小文字）
+  displayTag  String   @map("display_tag") @db.VarChar(50)  // 表示用（初回入力時の形式）
+  color       String?  @db.VarChar(20)    // プリセットカラー: blue, green, red, yellow, purple, pink, orange, gray
+  icon        String?  @db.VarChar(20)    // 絵文字アイコン（例: 💡, 🔧）
+  usageCount  Int      @default(0) @map("usage_count")      // 使用回数
+  sortOrder   Int?     @map("sort_order") // 並び順（ユーザーがカスタマイズ可能）
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, tag])  // 同じユーザーで同じタグは1つだけ
+  @@index([userId, usageCount(sort: Desc)])  // 使用頻度順の取得用
+  @@map("user_hashtags")
 }
