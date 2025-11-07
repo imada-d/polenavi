@@ -251,7 +251,13 @@ export const refresh = async (req: Request, res: Response) => {
     });
 
     if (!storedToken || storedToken.revoked || new Date() > storedToken.expiresAt) {
-      return res.status(403).json({
+      // 無効なトークンの場合はCookieをクリア
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+      return res.status(401).json({
         success: false,
         message: '無効なリフレッシュトークンです'
       });
@@ -260,7 +266,13 @@ export const refresh = async (req: Request, res: Response) => {
     const user = storedToken.user;
 
     if (!user || !user.isActive) {
-      return res.status(403).json({
+      // 無効なユーザーの場合もCookieをクリア
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+      return res.status(401).json({
         success: false,
         message: 'ユーザーが見つからないか無効化されています'
       });
@@ -284,7 +296,13 @@ export const refresh = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Refresh token error:', error);
-    return res.status(403).json({
+    // エラーの場合もCookieをクリア
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+    return res.status(401).json({
       success: false,
       message: 'トークンの更新に失敗しました',
       error: error.message,
