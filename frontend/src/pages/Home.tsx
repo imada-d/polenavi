@@ -75,6 +75,22 @@ export default function Home() {
   // 何を: 初回表示で現在地を取得、失敗時のみ日本全体を表示
   // なぜ: ユーザーが毎回現在地から始められるようにするため
   useEffect(() => {
+    // URLパラメータがある場合は、そちらを優先
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
+    const zoom = searchParams.get('zoom');
+
+    if (lat && lng) {
+      console.log(`🗺️ URLパラメータから地図初期化: ${lat}, ${lng}`);
+      setInitialCenter([parseFloat(lat), parseFloat(lng)]);
+      setInitialZoom(zoom ? parseInt(zoom, 10) : 18);
+      setIsLoadingLocation(false);
+      // URLパラメータをクリア
+      setSearchParams({});
+      return;
+    }
+
+    // URLパラメータがない場合は現在地を取得
     if ('geolocation' in navigator) {
       console.log('📍 位置情報を取得中...');
       navigator.geolocation.getCurrentPosition(
@@ -178,57 +194,6 @@ export default function Home() {
     }
   }, [location.state, navigate]);
 
-  // URLパラメータから地図の位置を変更（マイデータからの遷移用）
-  useEffect(() => {
-    // 地図がまだ読み込み中の場合は待つ
-    if (isLoadingLocation || !mapInstanceRef.current) {
-      return;
-    }
-
-    const lat = searchParams.get('lat');
-    const lng = searchParams.get('lng');
-    const zoom = searchParams.get('zoom');
-
-    if (lat && lng) {
-      const latitude = parseFloat(lat);
-      const longitude = parseFloat(lng);
-      const zoomLevel = zoom ? parseInt(zoom, 10) : 18;
-
-      console.log(`🗺️ URLパラメータから地図移動: ${latitude}, ${longitude}, zoom: ${zoomLevel}`);
-
-      // 少し遅延させて地図の準備を確実にする
-      setTimeout(() => {
-        if (!mapInstanceRef.current) return;
-
-        mapInstanceRef.current.setView([latitude, longitude], zoomLevel, {
-          animate: true,
-          duration: 1,
-        });
-
-        // 対象位置にマーカーを追加
-        const targetMarker = L.marker([latitude, longitude], {
-          icon: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41],
-          }),
-        }).addTo(mapInstanceRef.current);
-
-        // マーカーを10秒後に削除
-        setTimeout(() => {
-          if (mapInstanceRef.current) {
-            mapInstanceRef.current.removeLayer(targetMarker);
-          }
-        }, 10000);
-      }, 500);
-
-      // URLパラメータをクリア（次回のために）
-      setSearchParams({});
-    }
-  }, [searchParams, setSearchParams, isLoadingLocation]);
 
   // 何を: 電柱マーカークリック時の処理
   // なぜ: 電柱の詳細情報を表示するため
@@ -660,7 +625,7 @@ export default function Home() {
   return (
     <div className="h-screen w-full flex flex-col">
       {/* PC用ヘッダー */}
-      <Header />
+      <Header onSearchClick={() => setShowSearchPanel(true)} />
 
       {/* モバイル用ヘッダー */}
       <header className="md:hidden bg-white border-b px-4 py-3 flex items-center justify-between">

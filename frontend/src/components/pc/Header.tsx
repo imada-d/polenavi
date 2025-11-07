@@ -4,7 +4,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-export default function Header() {
+interface HeaderProps {
+  onSearchClick?: () => void;
+}
+
+export default function Header({ onSearchClick }: HeaderProps = {}) {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -29,12 +33,21 @@ export default function Header() {
           >
             地図
           </Link>
-          <Link
-            to="/search"
-            className="text-gray-700 hover:text-blue-600 font-semibold transition-colors"
-          >
-            検索
-          </Link>
+          {onSearchClick ? (
+            <button
+              onClick={onSearchClick}
+              className="text-gray-700 hover:text-blue-600 font-semibold transition-colors"
+            >
+              検索
+            </button>
+          ) : (
+            <Link
+              to="/search"
+              className="text-gray-700 hover:text-blue-600 font-semibold transition-colors"
+            >
+              検索
+            </Link>
+          )}
           <Link
             to="/groups"
             className="text-gray-700 hover:text-blue-600 font-semibold transition-colors"
