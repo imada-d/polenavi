@@ -202,7 +202,7 @@ export default function AccountSettings() {
               <strong>残るデータ：</strong>
             </p>
             <ul className="text-sm text-gray-600 list-disc list-inside ml-2">
-              <li>電柱データ（位置情報、電柱番号など）は公共情報として残ります</li>
+              <li>電柱データ（位置情報、電柱番号など）はサービス上に残ります</li>
             </ul>
             <p className="text-sm text-red-600 font-semibold mt-3">
               ⚠️ 削除したデータは復元できません。

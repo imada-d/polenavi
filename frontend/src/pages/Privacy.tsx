@@ -113,7 +113,7 @@ export default function Privacy() {
 
           {/* 制定日 */}
           <div className="pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center">制定日：2025年1月10日</p>
+            <p className="text-sm text-gray-600 text-center">制定日：2025年11月7日</p>
           </div>
 
           {/* 運営情報 */}
