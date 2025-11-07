@@ -42,9 +42,10 @@ export default function HashtagPoles() {
     try {
       setLoading(true);
       const response = await apiClient.get(`/poles/hashtag/${tag}`);
+      console.log('✅ ハッシュタグ電柱取得:', response.data);
       setPoles(response.data.data);
     } catch (error) {
-      console.error('電柱の取得に失敗:', error);
+      console.error('❌ 電柱の取得に失敗:', error);
     } finally {
       setLoading(false);
     }
