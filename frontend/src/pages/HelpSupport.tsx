@@ -51,7 +51,12 @@ export default function HelpSupport() {
 
       {/* コンテンツ */}
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
-        <h1 className="hidden md:block text-3xl font-bold text-gray-800 mb-8">❓ ヘルプ・サポート</h1>
+        <div className="hidden md:flex items-center mb-8">
+          <button onClick={() => navigate(-1)} className="mr-4 text-gray-600 hover:text-gray-800">
+            ← 戻る
+          </button>
+          <h1 className="text-3xl font-bold text-gray-800">❓ ヘルプ・サポート</h1>
+        </div>
 
         {/* よくある質問 */}
         <div className="bg-white rounded-xl shadow-sm border p-6 md:p-8">
