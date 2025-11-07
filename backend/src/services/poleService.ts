@@ -433,12 +433,15 @@ export async function updatePoleLocation(poleId: number, latitude: number, longi
  * ハッシュタグで電柱を検索
  */
 export async function getPolesByHashtag(tag: string, userId?: number) {
+  // タグに#を付ける（フロントエンドから#なしで来るため）
+  const hashtagWithHash = tag.startsWith('#') ? tag : `#${tag}`;
+
   const poles = await prisma.pole.findMany({
     where: {
       memos: {
         some: {
           hashtags: {
-            has: tag,
+            has: hashtagWithHash,
           },
           ...(userId && { createdBy: userId }),
         },
@@ -448,7 +451,7 @@ export async function getPolesByHashtag(tag: string, userId?: number) {
       memos: {
         where: {
           hashtags: {
-            has: tag,
+            has: hashtagWithHash,
           },
           ...(userId && { createdBy: userId }),
         },
