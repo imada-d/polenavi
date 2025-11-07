@@ -4,9 +4,10 @@ import axios from 'axios';
 const apiClient = axios.create({
   // 環境変数が設定されていない場合は相対パス（/api）を使用
   // 開発環境: vite.config.tsのproxyで localhost:3000 に転送
-  // 本番環境: 同じドメインの /api に接続
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  // 本番環境: VITE_API_URL + /api に接続（例: https://api.polenavi.com/api）
+  baseURL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api',
   timeout: 10000,
+  withCredentials: true, // httpOnly Cookie認証を有効化
   headers: {
     'Content-Type': 'application/json',
   },
