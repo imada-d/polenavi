@@ -127,8 +127,7 @@ export default function MyDataPC() {
                     poles.map((poleNumber: any) => (
                       <div
                         key={poleNumber.id}
-                        className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/pole/${poleNumber.pole.id}`)}
+                        className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow"
                       >
                         <div className="font-bold text-blue-600 mb-2 text-lg">
                           {poleNumber.poleNumber}
@@ -136,8 +135,22 @@ export default function MyDataPC() {
                         <div className="text-gray-600 mb-3">
                           {poleNumber.operatorName}
                         </div>
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-gray-400 mb-4">
                           {new Date(poleNumber.createdAt).toLocaleDateString('ja-JP')}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/?lat=${poleNumber.pole.latitude}&lng=${poleNumber.pole.longitude}&zoom=18`)}
+                            className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                          >
+                            🗺️ 地図で見る
+                          </button>
+                          <button
+                            onClick={() => navigate(`/pole/${poleNumber.pole.id}`)}
+                            className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+                          >
+                            詳細
+                          </button>
                         </div>
                       </div>
                     ))
@@ -156,8 +169,7 @@ export default function MyDataPC() {
                     memos.map((memo: any) => (
                       <div
                         key={memo.id}
-                        className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/pole/${memo.pole.id}`)}
+                        className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow"
                       >
                         <div className="flex flex-wrap gap-2 mb-3">
                           {memo.hashtags.map((tag: string, idx: number) => (
@@ -174,9 +186,23 @@ export default function MyDataPC() {
                             {memo.memoText}
                           </div>
                         )}
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-gray-400 mb-4">
                           {memo.pole.poleNumbers?.[0]?.poleNumber || '電柱番号不明'} •{' '}
                           {new Date(memo.createdAt).toLocaleDateString('ja-JP')}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/?lat=${memo.pole.latitude}&lng=${memo.pole.longitude}&zoom=18`)}
+                            className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                          >
+                            🗺️ 地図で見る
+                          </button>
+                          <button
+                            onClick={() => navigate(`/pole/${memo.pole.id}`)}
+                            className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+                          >
+                            詳細
+                          </button>
                         </div>
                       </div>
                     ))
@@ -195,20 +221,34 @@ export default function MyDataPC() {
                     photos.map((photo: any) => (
                       <div
                         key={photo.id}
-                        className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/pole/${photo.pole.id}`)}
+                        className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
                       >
                         <img
                           src={photo.photoUrl}
                           alt="電柱写真"
-                          className="w-full h-48 object-cover"
+                          className="w-full h-48 object-cover cursor-pointer"
+                          onClick={() => navigate(`/pole/${photo.pole.id}`)}
                         />
                         <div className="p-4">
                           <div className="text-sm text-gray-600 truncate mb-1">
                             {photo.pole.poleNumbers?.[0]?.poleNumber || '電柱番号不明'}
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-400 mb-3">
                             {new Date(photo.createdAt).toLocaleDateString('ja-JP')}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => navigate(`/?lat=${photo.pole.latitude}&lng=${photo.pole.longitude}&zoom=18`)}
+                              className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                            >
+                              🗺️ 地図
+                            </button>
+                            <button
+                              onClick={() => navigate(`/pole/${photo.pole.id}`)}
+                              className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+                            >
+                              詳細
+                            </button>
                           </div>
                         </div>
                       </div>

@@ -124,7 +124,6 @@ export default function MyData() {
                     <div
                       key={poleNumber.id}
                       className="bg-white rounded-lg shadow-sm border p-4"
-                      onClick={() => navigate(`/pole/${poleNumber.pole.id}`)}
                     >
                       <div className="font-bold text-blue-600 mb-1">
                         {poleNumber.poleNumber}
@@ -134,6 +133,20 @@ export default function MyData() {
                       </div>
                       <div className="text-xs text-gray-400 mt-2">
                         {new Date(poleNumber.createdAt).toLocaleDateString('ja-JP')}
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => navigate(`/?lat=${poleNumber.pole.latitude}&lng=${poleNumber.pole.longitude}&zoom=18`)}
+                          className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700"
+                        >
+                          🗺️ 地図で見る
+                        </button>
+                        <button
+                          onClick={() => navigate(`/pole/${poleNumber.pole.id}`)}
+                          className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200"
+                        >
+                          詳細
+                        </button>
                       </div>
                     </div>
                   ))
@@ -153,7 +166,6 @@ export default function MyData() {
                     <div
                       key={memo.id}
                       className="bg-white rounded-lg shadow-sm border p-4"
-                      onClick={() => navigate(`/pole/${memo.pole.id}`)}
                     >
                       <div className="flex flex-wrap gap-1 mb-2">
                         {memo.hashtags.map((tag: string, idx: number) => (
@@ -170,9 +182,23 @@ export default function MyData() {
                           {memo.memoText}
                         </div>
                       )}
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-gray-400 mb-3">
                         {memo.pole.poleNumbers?.[0]?.poleNumber || '電柱番号不明'} •{' '}
                         {new Date(memo.createdAt).toLocaleDateString('ja-JP')}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/?lat=${memo.pole.latitude}&lng=${memo.pole.longitude}&zoom=18`)}
+                          className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700"
+                        >
+                          🗺️ 地図で見る
+                        </button>
+                        <button
+                          onClick={() => navigate(`/pole/${memo.pole.id}`)}
+                          className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200"
+                        >
+                          詳細
+                        </button>
                       </div>
                     </div>
                   ))
@@ -192,19 +218,33 @@ export default function MyData() {
                     <div
                       key={photo.id}
                       className="bg-white rounded-lg shadow-sm border overflow-hidden"
-                      onClick={() => navigate(`/pole/${photo.pole.id}`)}
                     >
                       <img
                         src={photo.photoUrl}
                         alt="電柱写真"
-                        className="w-full h-32 object-cover"
+                        className="w-full h-32 object-cover cursor-pointer"
+                        onClick={() => navigate(`/pole/${photo.pole.id}`)}
                       />
                       <div className="p-2">
                         <div className="text-xs text-gray-600 truncate">
                           {photo.pole.poleNumbers?.[0]?.poleNumber || '電柱番号不明'}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-gray-400 mb-2">
                           {new Date(photo.createdAt).toLocaleDateString('ja-JP')}
+                        </div>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => navigate(`/?lat=${photo.pole.latitude}&lng=${photo.pole.longitude}&zoom=18`)}
+                            className="flex-1 bg-blue-600 text-white py-1.5 rounded text-xs font-semibold hover:bg-blue-700"
+                          >
+                            🗺️ 地図
+                          </button>
+                          <button
+                            onClick={() => navigate(`/pole/${photo.pole.id}`)}
+                            className="flex-1 bg-gray-100 text-gray-700 py-1.5 rounded text-xs font-semibold hover:bg-gray-200"
+                          >
+                            詳細
+                          </button>
                         </div>
                       </div>
                     </div>

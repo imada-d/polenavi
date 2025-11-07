@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Map, { poleIcons } from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
 import PoleDetailPanel from '../components/pc/PoleDetailPanel';
@@ -25,6 +25,7 @@ const getPoleIcon = (poleTypeName: string, poleSubType?: string) => {
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const currentLocationMarkerRef = useRef<L.Marker | null>(null);
 
@@ -176,6 +177,48 @@ export default function Home() {
       }, 10000);
     }
   }, [location.state, navigate]);
+
+  // URLパラメータから地図の位置を変更（マイデータからの遷移用）
+  useEffect(() => {
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
+    const zoom = searchParams.get('zoom');
+
+    if (lat && lng && mapInstanceRef.current) {
+      const latitude = parseFloat(lat);
+      const longitude = parseFloat(lng);
+      const zoomLevel = zoom ? parseInt(zoom, 10) : 18;
+
+      console.log(`🗺️ URLパラメータから地図移動: ${latitude}, ${longitude}, zoom: ${zoomLevel}`);
+
+      mapInstanceRef.current.setView([latitude, longitude], zoomLevel, {
+        animate: true,
+        duration: 1,
+      });
+
+      // 対象位置にマーカーを追加
+      const targetMarker = L.marker([latitude, longitude], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41],
+        }),
+      }).addTo(mapInstanceRef.current);
+
+      // URLパラメータをクリア（次回のために）
+      setSearchParams({});
+
+      // マーカーを10秒後に削除
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.removeLayer(targetMarker);
+        }
+      }, 10000);
+    }
+  }, [searchParams, setSearchParams]);
 
   // 何を: 電柱マーカークリック時の処理
   // なぜ: 電柱の詳細情報を表示するため
