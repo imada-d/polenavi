@@ -14,7 +14,7 @@ export default function AdminReportDetailPC() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [resolution, setResolution] = useState('');
-  const [action, setAction] = useState<'delete' | 'hide' | 'no_action'>('no_action');
+  const [selectedAction, setSelectedAction] = useState<'keep' | 'reject' | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -34,20 +34,32 @@ export default function AdminReportDetailPC() {
     }
   };
 
-  const handleResolve = async () => {
-    if (!report || !resolution.trim()) {
-      alert('解決コメントを入力してください');
-      return;
-    }
+  const handleResolve = async (action: 'keep' | 'reject') => {
+    if (!report) return;
+
+    const confirmMsg = action === 'keep'
+      ? '写真を残して通報を却下しますか？'
+      : '写真を削除して投稿者に警告を発行しますか？\n（警告5回で投稿禁止になります）';
+
+    if (!confirm(confirmMsg)) return;
+
+    const autoResolution = action === 'keep'
+      ? '写真に問題なし。通報を却下しました。'
+      : '不適切なコンテンツとして写真を削除し、投稿者に警告を発行しました。';
 
     try {
       setProcessing(true);
-      await reviewReport(report.id, {
+      const result = await reviewReport(report.id, {
         status: 'resolved',
-        resolution,
+        resolution: resolution.trim() || autoResolution,
         action,
       });
-      alert('通報を処理しました');
+
+      if (action === 'reject' && result.uploaderWarningCount) {
+        alert(`処理完了しました。投稿者の警告数: ${result.uploaderWarningCount}/5`);
+      } else {
+        alert('処理完了しました');
+      }
       navigate('/admin/reports');
     } catch (error) {
       console.error('処理に失敗:', error);
@@ -167,6 +179,13 @@ export default function AdminReportDetailPC() {
                 <h2 className="text-xl font-bold text-gray-800 mb-4">通報対象</h2>
                 {report.reportType === 'photo' && report.targetData.photoUrl && (
                   <div>
+                    {report.autoHidden && (
+                      <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                          ⚠️ この写真は自動的に非表示になっています
+                        </p>
+                      </div>
+                    )}
                     <img
                       src={report.targetData.photoUrl}
                       alt="通報対象の写真"
@@ -175,6 +194,24 @@ export default function AdminReportDetailPC() {
                     <p className="mt-2 text-sm text-gray-600">
                       投稿者: {report.targetData.uploadedByUser?.displayName || report.targetData.uploadedByName}
                     </p>
+                    {report.targetData.uploadedBy && (
+                      <button
+                        onClick={() => navigate(`/admin/users/${report.targetData.uploadedBy}`)}
+                        className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-semibold"
+                      >
+                        → 投稿者の詳細を見る
+                      </button>
+                    )}
+                    {report.targetData.poleId && (
+                      <div className="mt-3">
+                        <button
+                          onClick={() => navigate(`/pole/${report.targetData.poleId}`)}
+                          className="text-blue-600 hover:text-blue-700 text-sm font-semibold"
+                        >
+                          📍 この電柱の詳細を見る
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
                 {report.reportType === 'number' && (
@@ -188,6 +225,16 @@ export default function AdminReportDetailPC() {
                         className="mt-3 w-full max-w-md rounded-lg"
                       />
                     )}
+                    {report.targetData.pole?.id && (
+                      <div className="mt-3">
+                        <button
+                          onClick={() => navigate(`/pole/${report.targetData.pole.id}`)}
+                          className="text-blue-600 hover:text-blue-700 text-sm font-semibold"
+                        >
+                          📍 この電柱の詳細を見る
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -198,71 +245,73 @@ export default function AdminReportDetailPC() {
               <div className="bg-white rounded-xl shadow-sm border p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">処理アクション</h2>
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm text-gray-600 mb-2 block">解決コメント *</label>
-                    <textarea
-                      value={resolution}
-                      onChange={(e) => setResolution(e.target.value)}
-                      placeholder="処理内容を記録してください"
-                      className="w-full border rounded-lg px-4 py-3 min-h-[120px]"
-                    />
-                  </div>
                   {report.reportType === 'photo' && (
-                    <div>
-                      <label className="text-sm text-gray-600 mb-2 block">対象への対応</label>
-                      <div className="space-y-2">
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                          <input
-                            type="radio"
-                            name="action"
-                            value="no_action"
-                            checked={action === 'no_action'}
-                            onChange={() => setAction('no_action')}
-                            className="mr-3"
-                          />
-                          <div>
-                            <div className="font-semibold">対応なし</div>
-                            <div className="text-sm text-gray-600">通報を却下</div>
-                          </div>
-                        </label>
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                          <input
-                            type="radio"
-                            name="action"
-                            value="hide"
-                            checked={action === 'hide'}
-                            onChange={() => setAction('hide')}
-                            className="mr-3"
-                          />
-                          <div>
-                            <div className="font-semibold">非表示</div>
-                            <div className="text-sm text-gray-600">写真を非表示にする</div>
-                          </div>
-                        </label>
-                        <label className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                          <input
-                            type="radio"
-                            name="action"
-                            value="delete"
-                            checked={action === 'delete'}
-                            onChange={() => setAction('delete')}
-                            className="mr-3"
-                          />
-                          <div>
-                            <div className="font-semibold text-red-600">削除</div>
-                            <div className="text-sm text-gray-600">写真を削除する</div>
-                          </div>
-                        </label>
+                    <>
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                          ℹ️ 不適切なコンテンツの通報の場合：<br />
+                          <strong>OK判定</strong>: 写真を残して通報を却下<br />
+                          <strong>NG判定</strong>: 写真を削除して投稿者に警告（5回で投稿禁止）
+                        </p>
                       </div>
-                    </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <button
+                          onClick={() => handleResolve('keep')}
+                          disabled={processing}
+                          className="bg-green-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:bg-green-700 disabled:opacity-50 transition"
+                        >
+                          ✓ OK<br />
+                          <span className="text-sm font-normal">写真を残す</span>
+                        </button>
+                        <button
+                          onClick={() => handleResolve('reject')}
+                          disabled={processing}
+                          className="bg-red-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:bg-red-700 disabled:opacity-50 transition"
+                        >
+                          ✗ NG<br />
+                          <span className="text-sm font-normal">削除 & 警告</span>
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="text-sm text-gray-600 mb-2 block">補足コメント（任意）</label>
+                        <textarea
+                          value={resolution}
+                          onChange={(e) => setResolution(e.target.value)}
+                          placeholder="必要に応じて処理内容の詳細を記録できます"
+                          className="w-full border rounded-lg px-4 py-3 min-h-[100px]"
+                        />
+                      </div>
+                    </>
                   )}
-                  <button
-                    onClick={handleResolve}
-                    disabled={processing}
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {processing ? '処理中...' : '処理を完了する'}
-                  </button>
+
+                  {report.reportType !== 'photo' && (
+                    <>
+                      <div>
+                        <label className="text-sm text-gray-600 mb-2 block">解決コメント *</label>
+                        <textarea
+                          value={resolution}
+                          onChange={(e) => setResolution(e.target.value)}
+                          placeholder="処理内容を記録してください"
+                          className="w-full border rounded-lg px-4 py-3 min-h-[120px]"
+                        />
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!resolution.trim()) {
+                            alert('解決コメントを入力してください');
+                            return;
+                          }
+                          handleResolve('keep');
+                        }}
+                        disabled={processing}
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {processing ? '処理中...' : '処理を完了する'}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}

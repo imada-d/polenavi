@@ -173,6 +173,10 @@ model User {
   isActive           Boolean  @default(true) @map("is_active")
   emailNotifications Boolean  @default(true) @map("email_notifications") // メール通知設定
   dataVisibility     String   @default("public") @map("data_visibility") @db.VarChar(20) // public, private
+  warningCount       Int      @default(0) @map("warning_count") // 警告数（5回でアップロード禁止）
+  uploadBanned       Boolean  @default(false) @map("upload_banned") // アップロード禁止フラグ
+  bannedAt           DateTime? @map("banned_at") // 禁止日時
+  banReason          String?  @map("ban_reason") @db.VarChar(500) // 禁止理由
   createdAt          DateTime @default(now()) @map("created_at")
 
   poleNumbers        PoleNumber[]

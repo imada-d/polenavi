@@ -460,15 +460,29 @@ export async function reviewReport(
   data: {
     status: 'reviewed' | 'resolved';
     resolution: string;
-    action?: 'delete' | 'hide' | 'no_action';
+    action?: 'approve' | 'reject' | 'keep' | 'delete' | 'hide' | 'no_action';
+    issueWarning?: boolean; // 警告を発行するか
   }
 ) {
   const report = await prisma.report.findUnique({
     where: { id: reportId },
+    include: {
+      reportedByUser: true,
+    },
   });
 
   if (!report) {
     throw new NotFoundError('通報が見つかりません');
+  }
+
+  // 写真の投稿者を取得
+  let photoUploader: any = null;
+  if (report.reportType === 'photo') {
+    const photo = await prisma.polePhoto.findUnique({
+      where: { id: report.targetId },
+      include: { uploadedByUser: true },
+    });
+    photoUploader = photo?.uploadedByUser;
   }
 
   // 通報ステータスを更新
@@ -483,26 +497,89 @@ export async function reviewReport(
   });
 
   // アクションを実行
-  if (data.action === 'delete' && report.reportType === 'photo') {
-    await prisma.polePhoto.update({
-      where: { id: report.targetId },
-      data: {
-        deletedAt: new Date(),
-        deletedBy: reviewedBy,
-        deletedReason: `通報により削除: ${data.resolution}`,
-      },
-    });
-  } else if (data.action === 'hide' && report.reportType === 'photo') {
-    await prisma.polePhoto.update({
-      where: { id: report.targetId },
-      data: {
-        isHidden: true,
-        hiddenReason: `通報により非表示: ${data.resolution}`,
-      },
-    });
+  if (report.reportType === 'photo') {
+    // OK判定（通報を却下、写真を残す）
+    if (data.action === 'keep') {
+      // 既に非表示になっている場合は表示に戻す
+      await prisma.polePhoto.update({
+        where: { id: report.targetId },
+        data: {
+          isHidden: false,
+          hiddenReason: null,
+        },
+      });
+    }
+    // NG判定（写真を削除し、投稿者に警告）
+    else if (data.action === 'reject') {
+      await prisma.polePhoto.update({
+        where: { id: report.targetId },
+        data: {
+          deletedAt: new Date(),
+          deletedBy: reviewedBy,
+          deletedReason: `不適切なコンテンツとして削除: ${data.resolution}`,
+        },
+      });
+
+      // 投稿者に警告を発行
+      if (photoUploader) {
+        const newWarningCount = (photoUploader.warningCount || 0) + 1;
+        const shouldBan = newWarningCount >= 5;
+
+        await prisma.user.update({
+          where: { id: photoUploader.id },
+          data: {
+            warningCount: newWarningCount,
+            uploadBanned: shouldBan,
+            bannedAt: shouldBan ? new Date() : undefined,
+            banReason: shouldBan ? `不適切なコンテンツの投稿により警告が5回に達しました` : undefined,
+          },
+        });
+      }
+    }
+    // 従来の削除アクション（下位互換）
+    else if (data.action === 'delete') {
+      await prisma.polePhoto.update({
+        where: { id: report.targetId },
+        data: {
+          deletedAt: new Date(),
+          deletedBy: reviewedBy,
+          deletedReason: `通報により削除: ${data.resolution}`,
+        },
+      });
+
+      // 警告を発行する場合
+      if (data.issueWarning && photoUploader) {
+        const newWarningCount = (photoUploader.warningCount || 0) + 1;
+        const shouldBan = newWarningCount >= 5;
+
+        await prisma.user.update({
+          where: { id: photoUploader.id },
+          data: {
+            warningCount: newWarningCount,
+            uploadBanned: shouldBan,
+            bannedAt: shouldBan ? new Date() : undefined,
+            banReason: shouldBan ? `不適切なコンテンツの投稿により警告が5回に達しました` : undefined,
+          },
+        });
+      }
+    }
+    // 非表示
+    else if (data.action === 'hide') {
+      await prisma.polePhoto.update({
+        where: { id: report.targetId },
+        data: {
+          isHidden: true,
+          hiddenReason: `通報により非表示: ${data.resolution}`,
+        },
+      });
+    }
   }
 
-  return updatedReport;
+  return {
+    ...updatedReport,
+    uploaderWarningCount: photoUploader?.warningCount,
+    uploaderBanned: photoUploader?.uploadBanned,
+  };
 }
 
 /**
@@ -524,6 +601,17 @@ export async function createReport(data: {
     if (!photo) {
       throw new NotFoundError('通報対象の写真が見つかりません');
     }
+
+    // 不適切なコンテンツの通報の場合、自動で非表示にする
+    if (data.reason === 'inappropriate') {
+      await prisma.polePhoto.update({
+        where: { id: data.targetId },
+        data: {
+          isHidden: true,
+          hiddenReason: '不適切なコンテンツとして通報されたため、管理者の確認まで非表示',
+        },
+      });
+    }
   } else if (data.reportType === 'number') {
     const poleNumber = await prisma.poleNumber.findUnique({
       where: { id: data.targetId },
@@ -541,7 +629,10 @@ export async function createReport(data: {
   }
 
   const report = await prisma.report.create({
-    data,
+    data: {
+      ...data,
+      autoHidden: data.reportType === 'photo' && data.reason === 'inappropriate',
+    },
   });
 
   return report;
