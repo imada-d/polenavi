@@ -84,7 +84,8 @@ export default function AdminUsers() {
             {users.map((user) => (
               <div
                 key={user.id}
-                className="bg-white rounded-lg shadow-sm border p-4"
+                onClick={() => navigate(`/admin/users/${user.id}`)}
+                className="bg-white rounded-lg shadow-sm border p-4 cursor-pointer hover:bg-gray-50"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

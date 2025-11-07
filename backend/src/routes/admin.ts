@@ -17,4 +17,9 @@ router.get('/users/:id', adminController.getUserDetail);
 router.patch('/users/:id', adminController.updateUser);
 router.get('/users/:id/activity', adminController.getUserActivity);
 
+// 通報管理
+router.get('/reports', adminController.getReports);
+router.get('/reports/:id', adminController.getReportDetail);
+router.patch('/reports/:id', adminController.reviewReport);
+
 export default router;

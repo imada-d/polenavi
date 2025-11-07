@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Access Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>PoleNavi Admin Access Test</h1>
+
+    <div class="section">
+        <h2>Step 1: Login</h2>
+        <input type="email" id="email" placeholder="Email" value="yaginokandume@gmail.com" style="width: 300px; padding: 5px;">
+        <input type="password" id="password" placeholder="Password" style="width: 300px; padding: 5px;">
+        <br><br>
+        <button onclick="testLogin()">Login</button>
+        <pre id="loginResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Check Current User</h2>
+        <button onclick="checkCurrentUser()">Check Current User (with stored token)</button>
+        <pre id="userResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Test Admin Endpoint</h2>
+        <button onclick="testAdminStats()">Test /api/stats/admin</button>
+        <pre id="adminResult"></pre>
+    </div>
+
+    <div class="section">
+        <h2>Step 4: Logout</h2>
+        <button onclick="testLogout()">Logout</button>
+        <pre id="logoutResult"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.polenavi.com/api';
+        let accessToken = localStorage.getItem('accessToken');
+
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('loginResult');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    accessToken = data.accessToken;
+                    localStorage.setItem('accessToken', accessToken);
+
+                    // Decode JWT to show role
+                    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+
+                    result.innerHTML = `<span class="success">✓ Login Success</span>\n\n` +
+                        `User Info:\n${JSON.stringify(data.user, null, 2)}\n\n` +
+                        `JWT Payload:\n${JSON.stringify(payload, null, 2)}`;
+                } else {
+                    result.innerHTML = `<span class="error">✗ Login Failed</span>\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function checkCurrentUser() {
+            const result = document.getElementById('userResult');
+
+            if (!accessToken) {
+                result.innerHTML = '<span class="error">✗ No access token found. Please login first.</span>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.innerHTML = `<span class="success">✓ Current User Retrieved</span>\n\n` +
+                        `${JSON.stringify(data, null, 2)}`;
+                } else {
+                    result.innerHTML = `<span class="error">✗ Failed (${response.status})</span>\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function testAdminStats() {
+            const result = document.getElementById('adminResult');
+
+            if (!accessToken) {
+                result.innerHTML = '<span class="error">✗ No access token found. Please login first.</span>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/stats/admin`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.innerHTML = `<span class="success">✓ Admin Stats Retrieved</span>\n\n` +
+                        `${JSON.stringify(data, null, 2)}`;
+                } else {
+                    result.innerHTML = `<span class="error">✗ Failed (${response.status})</span>\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        async function testLogout() {
+            const result = document.getElementById('logoutResult');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    accessToken = null;
+                    localStorage.removeItem('accessToken');
+                    result.innerHTML = `<span class="success">✓ Logout Success</span>\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    result.innerHTML = `<span class="error">✗ Logout Failed</span>\n${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+            }
+        }
+
+        // Check if token exists on load
+        window.onload = function() {
+            if (accessToken) {
+                try {
+                    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                    console.log('Stored token payload:', payload);
+                } catch (e) {
+                    console.log('Invalid stored token');
+                }
+            }
+        };
+    </script>
+</body>
+</html>

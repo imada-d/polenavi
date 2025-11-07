@@ -292,3 +292,257 @@ export async function getUserActivity(userId: number, days: number = 30) {
 
   return activities;
 }
+
+/**
+ * 通報一覧を取得
+ */
+export async function getReports(params: {
+  page?: number;
+  limit?: number;
+  status?: 'pending' | 'reviewed' | 'resolved';
+  reportType?: 'photo' | 'pole' | 'number';
+  search?: string;
+}) {
+  const {
+    page = 1,
+    limit = 20,
+    status,
+    reportType,
+    search,
+  } = params;
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (reportType) {
+    where.reportType = reportType;
+  }
+
+  if (search) {
+    where.OR = [
+      { reportedByName: { contains: search, mode: 'insensitive' } },
+      { reason: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [reports, total] = await Promise.all([
+    prisma.report.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        reportedByUser: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+          },
+        },
+        reviewedByUser: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+          },
+        },
+      },
+    }),
+    prisma.report.count({ where }),
+  ]);
+
+  return {
+    reports,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+/**
+ * 通報詳細を取得
+ */
+export async function getReportDetail(reportId: number) {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+    include: {
+      reportedByUser: {
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          email: true,
+        },
+      },
+      reviewedByUser: {
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+        },
+      },
+    },
+  });
+
+  if (!report) {
+    throw new NotFoundError('通報が見つかりません');
+  }
+
+  // 通報対象のデータを取得
+  let targetData = null;
+  if (report.reportType === 'photo') {
+    targetData = await prisma.polePhoto.findUnique({
+      where: { id: report.targetId },
+      include: {
+        uploadedByUser: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+          },
+        },
+        pole: {
+          select: {
+            latitude: true,
+            longitude: true,
+            prefecture: true,
+          },
+        },
+      },
+    });
+  } else if (report.reportType === 'number') {
+    targetData = await prisma.poleNumber.findUnique({
+      where: { id: report.targetId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+          },
+        },
+        pole: {
+          select: {
+            latitude: true,
+            longitude: true,
+            prefecture: true,
+          },
+        },
+      },
+    });
+  } else if (report.reportType === 'pole') {
+    targetData = await prisma.pole.findUnique({
+      where: { id: report.targetId },
+    });
+  }
+
+  return {
+    ...report,
+    targetData,
+  };
+}
+
+/**
+ * 通報を処理
+ */
+export async function reviewReport(
+  reportId: number,
+  reviewedBy: number,
+  data: {
+    status: 'reviewed' | 'resolved';
+    resolution: string;
+    action?: 'delete' | 'hide' | 'no_action';
+  }
+) {
+  const report = await prisma.report.findUnique({
+    where: { id: reportId },
+  });
+
+  if (!report) {
+    throw new NotFoundError('通報が見つかりません');
+  }
+
+  // 通報ステータスを更新
+  const updatedReport = await prisma.report.update({
+    where: { id: reportId },
+    data: {
+      status: data.status,
+      resolution: data.resolution,
+      reviewedBy,
+      reviewedAt: new Date(),
+    },
+  });
+
+  // アクションを実行
+  if (data.action === 'delete' && report.reportType === 'photo') {
+    await prisma.polePhoto.update({
+      where: { id: report.targetId },
+      data: {
+        deletedAt: new Date(),
+        deletedBy: reviewedBy,
+        deletedReason: `通報により削除: ${data.resolution}`,
+      },
+    });
+  } else if (data.action === 'hide' && report.reportType === 'photo') {
+    await prisma.polePhoto.update({
+      where: { id: report.targetId },
+      data: {
+        isHidden: true,
+        hiddenReason: `通報により非表示: ${data.resolution}`,
+      },
+    });
+  }
+
+  return updatedReport;
+}
+
+/**
+ * 通報を作成（ユーザーからの通報）
+ */
+export async function createReport(data: {
+  reportType: 'photo' | 'pole' | 'number';
+  targetId: number;
+  reason: string;
+  description?: string;
+  reportedBy?: number;
+  reportedByName: string;
+}) {
+  // 対象が存在するか確認
+  if (data.reportType === 'photo') {
+    const photo = await prisma.polePhoto.findUnique({
+      where: { id: data.targetId },
+    });
+    if (!photo) {
+      throw new NotFoundError('通報対象の写真が見つかりません');
+    }
+  } else if (data.reportType === 'number') {
+    const poleNumber = await prisma.poleNumber.findUnique({
+      where: { id: data.targetId },
+    });
+    if (!poleNumber) {
+      throw new NotFoundError('通報対象の電柱番号が見つかりません');
+    }
+  } else if (data.reportType === 'pole') {
+    const pole = await prisma.pole.findUnique({
+      where: { id: data.targetId },
+    });
+    if (!pole) {
+      throw new NotFoundError('通報対象の電柱が見つかりません');
+    }
+  }
+
+  const report = await prisma.report.create({
+    data,
+  });
+
+  return report;
+}

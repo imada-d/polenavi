@@ -116,3 +116,82 @@ export async function getUserActivity(
   });
   return response.data.data;
 }
+
+// ========================================
+// 通報管理
+// ========================================
+
+export interface Report {
+  id: number;
+  reportType: 'photo' | 'pole' | 'number';
+  targetId: number;
+  reason: string;
+  description: string | null;
+  reportedBy: number | null;
+  reportedByName: string;
+  reportedByUser: {
+    id: number;
+    username: string;
+    displayName: string | null;
+  } | null;
+  status: 'pending' | 'reviewed' | 'resolved';
+  autoHidden: boolean;
+  reviewedBy: number | null;
+  reviewedByUser: {
+    id: number;
+    username: string;
+    displayName: string | null;
+  } | null;
+  resolution: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+}
+
+export interface ReportDetail extends Report {
+  targetData: any;
+}
+
+/**
+ * 通報一覧を取得
+ */
+export async function getReports(params?: {
+  page?: number;
+  limit?: number;
+  status?: 'pending' | 'reviewed' | 'resolved';
+  reportType?: 'photo' | 'pole' | 'number';
+  search?: string;
+}) {
+  const response = await apiClient.get('/admin/reports', { params });
+  return response.data.data as {
+    reports: Report[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  };
+}
+
+/**
+ * 通報詳細を取得
+ */
+export async function getReportDetail(reportId: number): Promise<ReportDetail> {
+  const response = await apiClient.get(`/admin/reports/${reportId}`);
+  return response.data.data;
+}
+
+/**
+ * 通報を処理
+ */
+export async function reviewReport(
+  reportId: number,
+  data: {
+    status: 'reviewed' | 'resolved';
+    resolution: string;
+    action?: 'delete' | 'hide' | 'no_action';
+  }
+) {
+  const response = await apiClient.patch(`/admin/reports/${reportId}`, data);
+  return response.data;
+}

@@ -83,7 +83,7 @@ export default function AdminDashboardPC() {
               <span className="text-blue-600 text-2xl">→</span>
             </button>
             <button
-              onClick={() => alert('Phase 2で実装予定')}
+              onClick={() => navigate('/admin/reports')}
               className="bg-gray-50 text-gray-600 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center justify-between px-6"
             >
               <span className="text-lg">🚨 通報管理</span>

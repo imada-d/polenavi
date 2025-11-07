@@ -11,7 +11,14 @@
       "Bash(npm install)",
       "Bash(npm install:*)",
       "Bash(git reset:*)",
-      "Bash(ssh imada@imada-server \"cat ~/polenavi/backend/src/controllers/authController.ts | grep -A 8 ''catch (error: any)'' | head -20\")"
+      "Bash(ssh imada@imada-server \"cat ~/polenavi/backend/src/controllers/authController.ts | grep -A 8 ''catch (error: any)'' | head -20\")",
+      "Bash(git show:*)",
+      "Bash(npm run build:*)",
+      "Bash(git push:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)"
     ],
     "deny": [],
     "ask": []

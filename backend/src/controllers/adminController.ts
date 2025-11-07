@@ -113,3 +113,87 @@ export async function getUserActivity(
     next(error);
   }
 }
+
+/**
+ * 通報一覧を取得
+ */
+export async function getReports(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const {
+      page,
+      limit,
+      status,
+      reportType,
+      search,
+    } = req.query;
+
+    const result = await adminService.getReports({
+      page: page ? parseInt(page as string) : undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+      status: status as 'pending' | 'reviewed' | 'resolved' | undefined,
+      reportType: reportType as 'photo' | 'pole' | 'number' | undefined,
+      search: search as string,
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * 通報詳細を取得
+ */
+export async function getReportDetail(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const reportId = parseInt(req.params.id);
+    const report = await adminService.getReportDetail(reportId);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * 通報を処理
+ */
+export async function reviewReport(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const reportId = parseInt(req.params.id);
+    const reviewedBy = (req as any).user.userId;
+    const { status, resolution, action } = req.body;
+
+    const report = await adminService.reviewReport(reportId, reviewedBy, {
+      status,
+      resolution,
+      action,
+    });
+
+    res.json({
+      success: true,
+      data: report,
+      message: '通報を処理しました',
+    });
+  } catch (error) {
+    next(error);
+  }
+}

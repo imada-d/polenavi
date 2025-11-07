@@ -110,7 +110,8 @@ export default function AdminUsersPC() {
                   {users.map((user) => (
                     <tr
                       key={user.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={() => navigate(`/admin/users/${user.id}`)}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       <td className="px-6 py-4">
                         <div>

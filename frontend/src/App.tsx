@@ -22,6 +22,10 @@ import AdminDashboardMobile from './pages/mobile/AdminDashboard';
 import AdminDashboardPC from './pages/pc/AdminDashboardPC';
 import AdminUsersMobile from './pages/mobile/AdminUsers';
 import AdminUsersPC from './pages/pc/AdminUsersPC';
+import AdminUserDetailMobile from './pages/mobile/AdminUserDetail';
+import AdminUserDetailPC from './pages/pc/AdminUserDetailPC';
+import AdminReportsMobile from './pages/mobile/AdminReports';
+import AdminReportsPC from './pages/pc/AdminReportsPC';
 import SearchPC from './pages/pc/SearchPC';
 import ProtectedRoute from './components/ProtectedRoute';
 import GroupsPC from './pages/pc/GroupsPC';
@@ -95,6 +99,8 @@ function AppContent() {
         <Route path="/stats" element={<ResponsiveWrapper mobile={StatsMobile} pc={StatsPC} />} />
         <Route path="/admin" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminDashboardMobile} pc={AdminDashboardPC} /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminUsersMobile} pc={AdminUsersPC} /></ProtectedRoute>} />
+        <Route path="/admin/users/:id" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminUserDetailMobile} pc={AdminUserDetailPC} /></ProtectedRoute>} />
+        <Route path="/admin/reports" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminReportsMobile} pc={AdminReportsPC} /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
