@@ -24,6 +24,8 @@ export interface User {
   homePrefecture?: string | null;
   planType?: string;
   emailVerified?: boolean;
+  emailNotifications?: boolean;
+  dataVisibility?: string;
   createdAt: string;
 }
 

@@ -338,3 +338,132 @@ export const getMyHashtags = async (req: Request, res: Response) => {
     });
   }
 };
+
+// 通知設定を更新
+export const updateNotificationSettings = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    const { emailNotifications } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { emailNotifications },
+      select: {
+        id: true,
+        emailNotifications: true
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: '通知設定を更新しました',
+      user: updatedUser
+    });
+  } catch (error: any) {
+    console.error('Update notification settings error:', error);
+    return res.status(500).json({
+      success: false,
+      message: '通知設定の更新に失敗しました',
+      error: error.message
+    });
+  }
+};
+
+// プライバシー設定を更新
+export const updatePrivacySettings = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    const { dataVisibility } = req.body;
+
+    // バリデーション
+    if (!['public', 'private'].includes(dataVisibility)) {
+      return res.status(400).json({
+        success: false,
+        message: '無効なプライバシー設定です'
+      });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { dataVisibility },
+      select: {
+        id: true,
+        dataVisibility: true
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'プライバシー設定を更新しました',
+      user: updatedUser
+    });
+  } catch (error: any) {
+    console.error('Update privacy settings error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'プライバシー設定の更新に失敗しました',
+      error: error.message
+    });
+  }
+};
+
+// アカウントを削除（論理削除）
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: '認証が必要です'
+      });
+    }
+
+    // アカウントを無効化（論理削除）
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isActive: false,
+        email: `deleted_${userId}_${Date.now()}@deleted.com`, // メールアドレスを変更して重複を防ぐ
+        username: `deleted_${userId}_${Date.now()}` // ユーザー名も変更
+      }
+    });
+
+    // リフレッシュトークンを無効化
+    await prisma.refreshToken.updateMany({
+      where: { userId },
+      data: {
+        revoked: true,
+        revokedAt: new Date()
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'アカウントを削除しました'
+    });
+  } catch (error: any) {
+    console.error('Delete account error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'アカウントの削除に失敗しました',
+      error: error.message
+    });
+  }
+};

@@ -171,6 +171,8 @@ model User {
   subscriptionStatus String?  @map("subscription_status") @db.VarChar(20)
   role               String   @default("user") @db.VarChar(20) // user, moderator, admin
   isActive           Boolean  @default(true) @map("is_active")
+  emailNotifications Boolean  @default(true) @map("email_notifications") // メール通知設定
+  dataVisibility     String   @default("public") @map("data_visibility") @db.VarChar(20) // public, private
   createdAt          DateTime @default(now()) @map("created_at")
 
   poleNumbers        PoleNumber[]

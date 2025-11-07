@@ -192,23 +192,31 @@ export default function MyPage() {
           <div className="bg-white rounded-lg shadow-sm border">
             <h3 className="font-bold p-4 border-b">⚙️ 設定</h3>
             <div className="divide-y">
-              <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between">
-                <span>プロフィール編集</span>
-                <span className="text-gray-400">→</span>
-              </button>
-              <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between">
+              <button
+                onClick={() => navigate('/notification-settings')}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+              >
                 <span>通知設定</span>
                 <span className="text-gray-400">→</span>
               </button>
-              <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between">
+              <button
+                onClick={() => navigate('/privacy-settings')}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+              >
                 <span>プライバシー設定</span>
                 <span className="text-gray-400">→</span>
               </button>
-              <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between">
+              <button
+                onClick={() => navigate('/account-settings')}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+              >
                 <span>アカウント設定</span>
                 <span className="text-gray-400">→</span>
               </button>
-              <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between">
+              <button
+                onClick={() => navigate('/help-support')}
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+              >
                 <span>ヘルプ・サポート</span>
                 <span className="text-gray-400">→</span>
               </button>

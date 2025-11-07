@@ -2,7 +2,7 @@
 // なぜ: ユーザー統計、プロフィール編集などのエンドポイントを定義するため
 
 import express from 'express';
-import { getUserStats, updateProfile, getMyPoles, getMyMemos, getMyPhotos, getMyHashtags } from '../controllers/userController';
+import { getUserStats, updateProfile, getMyPoles, getMyMemos, getMyPhotos, getMyHashtags, updateNotificationSettings, updatePrivacySettings, deleteAccount } from '../controllers/userController';
 import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -24,5 +24,14 @@ router.get('/my-data/photos', authenticateToken, getMyPhotos);
 
 // GET /api/users/my-data/hashtags - 使用したハッシュタグ一覧（認証必須）
 router.get('/my-data/hashtags', authenticateToken, getMyHashtags);
+
+// PUT /api/users/notification-settings - 通知設定更新（認証必須）
+router.put('/notification-settings', authenticateToken, updateNotificationSettings);
+
+// PUT /api/users/privacy-settings - プライバシー設定更新（認証必須）
+router.put('/privacy-settings', authenticateToken, updatePrivacySettings);
+
+// DELETE /api/users/account - アカウント削除（認証必須）
+router.delete('/account', authenticateToken, deleteAccount);
 
 export default router;

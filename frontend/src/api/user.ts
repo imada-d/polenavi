@@ -99,3 +99,42 @@ export const getMyHashtags = async (): Promise<any[]> => {
     return [];
   }
 };
+
+// 通知設定を更新
+export const updateNotificationSettings = async (emailNotifications: boolean): Promise<any> => {
+  try {
+    const response = await apiClient.put('/users/notification-settings', { emailNotifications });
+    console.log('✅ 通知設定更新成功:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ 通知設定更新エラー:', error);
+    const errorMessage = error.response?.data?.message || '通知設定の更新に失敗しました';
+    throw new Error(errorMessage);
+  }
+};
+
+// プライバシー設定を更新
+export const updatePrivacySettings = async (dataVisibility: string): Promise<any> => {
+  try {
+    const response = await apiClient.put('/users/privacy-settings', { dataVisibility });
+    console.log('✅ プライバシー設定更新成功:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ プライバシー設定更新エラー:', error);
+    const errorMessage = error.response?.data?.message || 'プライバシー設定の更新に失敗しました';
+    throw new Error(errorMessage);
+  }
+};
+
+// アカウントを削除
+export const deleteUserAccount = async (): Promise<any> => {
+  try {
+    const response = await apiClient.delete('/users/account');
+    console.log('✅ アカウント削除成功:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ アカウント削除エラー:', error);
+    const errorMessage = error.response?.data?.message || 'アカウントの削除に失敗しました';
+    throw new Error(errorMessage);
+  }
+};

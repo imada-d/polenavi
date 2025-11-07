@@ -197,23 +197,31 @@ export default function MyPagePC() {
             <div className="bg-white rounded-xl shadow-sm border">
               <h3 className="font-bold p-4 border-b text-lg">⚙️ 設定</h3>
               <div className="divide-y">
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
-                  <span>プロフィール編集</span>
-                  <span className="text-gray-400">→</span>
-                </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
+                <button
+                  onClick={() => navigate('/notification-settings')}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors"
+                >
                   <span>通知設定</span>
                   <span className="text-gray-400">→</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
+                <button
+                  onClick={() => navigate('/privacy-settings')}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors"
+                >
                   <span>プライバシー設定</span>
                   <span className="text-gray-400">→</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
+                <button
+                  onClick={() => navigate('/account-settings')}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors"
+                >
                   <span>アカウント設定</span>
                   <span className="text-gray-400">→</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
+                <button
+                  onClick={() => navigate('/help-support')}
+                  className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors"
+                >
                   <span>ヘルプ・サポート</span>
                   <span className="text-gray-400">→</span>
                 </button>

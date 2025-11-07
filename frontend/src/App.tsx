@@ -8,6 +8,10 @@ import GroupsMobile from './pages/mobile/Groups';
 import MyPageMobile from './pages/mobile/MyPage';
 import ProfileEditMobile from './pages/mobile/ProfileEdit';
 import MyDataMobile from './pages/mobile/MyData';
+import NotificationSettings from './pages/NotificationSettings';
+import PrivacySettings from './pages/PrivacySettings';
+import AccountSettings from './pages/AccountSettings';
+import HelpSupport from './pages/HelpSupport';
 import SearchPC from './pages/pc/SearchPC';
 import GroupsPC from './pages/pc/GroupsPC';
 import MyPagePC from './pages/pc/MyPagePC';
@@ -50,7 +54,11 @@ function AppContent() {
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/profile/edit' ||
-    location.pathname === '/mydata';
+    location.pathname === '/mydata' ||
+    location.pathname === '/notification-settings' ||
+    location.pathname === '/privacy-settings' ||
+    location.pathname === '/account-settings' ||
+    location.pathname === '/help-support';
 
   return (
     <div className="relative">
@@ -61,6 +69,10 @@ function AppContent() {
         <Route path="/mypage" element={<ResponsiveWrapper mobile={MyPageMobile} pc={MyPagePC} />} />
         <Route path="/profile/edit" element={<ResponsiveWrapper mobile={ProfileEditMobile} pc={ProfileEditPC} />} />
         <Route path="/mydata" element={<ResponsiveWrapper mobile={MyDataMobile} pc={MyDataPC} />} />
+        <Route path="/notification-settings" element={<NotificationSettings />} />
+        <Route path="/privacy-settings" element={<PrivacySettings />} />
+        <Route path="/account-settings" element={<AccountSettings />} />
+        <Route path="/help-support" element={<HelpSupport />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />

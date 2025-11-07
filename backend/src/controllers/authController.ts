@@ -152,19 +152,24 @@ export const login = async (req: Request, res: Response) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'メールアドレスとパスワードは必須です'
+        message: 'メールアドレス/IDとパスワードは必須です'
       });
     }
 
-    // ユーザー検索
-    const user = await prisma.user.findUnique({
-      where: { email },
+    // ユーザー検索（メールアドレスまたはユーザー名で検索）
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: email },
+          { username: email }, // emailフィールドにusernameが入る可能性
+        ],
+      },
     });
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'メールアドレスまたはパスワードが正しくありません'
+        message: 'メールアドレス/IDまたはパスワードが正しくありません'
       });
     }
 
@@ -182,7 +187,7 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'メールアドレスまたはパスワードが正しくありません'
+        message: 'メールアドレス/IDまたはパスワードが正しくありません'
       });
     }
 
