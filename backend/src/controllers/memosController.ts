@@ -11,23 +11,24 @@ import { ValidationError } from '../utils/AppError';
  */
 export const createMemo = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { poleId, hashtags, memoText, createdBy, createdByName, isPublic } = req.body;
+    const { poleId, hashtags, memoText, isPublic } = req.body;
+
+    // 認証ユーザー情報を取得
+    const userId = (req as any).user?.userId;
+    const username = (req as any).user?.username;
 
     // バリデーション
     if (!poleId) {
       throw new ValidationError('poleIdは必須です');
-    }
-    if (!createdByName) {
-      throw new ValidationError('createdByNameは必須です');
     }
 
     const memo = await memoService.createMemo({
       poleId: parseInt(poleId, 10),
       hashtags: hashtags || [],
       memoText,
-      createdBy,
-      createdByName,
-      isPublic,
+      createdBy: userId,
+      createdByName: username || 'guest',
+      isPublic: isPublic !== undefined ? isPublic : true,
     });
 
     res.status(201).json({

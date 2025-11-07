@@ -12,6 +12,10 @@ export async function uploadPhoto(req: Request, res: Response, next: NextFunctio
   try {
     const poleId = parseInt(req.params.poleId, 10);
 
+    // 認証ユーザー情報を取得
+    const userId = (req as any).user?.userId;
+    const username = (req as any).user?.username;
+
     if (!req.file) {
       res.status(400).json({
         success: false,
@@ -27,7 +31,8 @@ export async function uploadPhoto(req: Request, res: Response, next: NextFunctio
       poleId,
       file: req.file,
       photoType: req.body.photoType || 'full',
-      uploadedByName: req.body.uploadedByName || 'guest',
+      uploadedBy: userId,
+      uploadedByName: username || 'guest',
     });
 
     res.status(201).json({

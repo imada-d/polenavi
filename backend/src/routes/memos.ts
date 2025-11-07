@@ -3,11 +3,12 @@
 
 import { Router } from 'express';
 import * as memosController from '../controllers/memosController';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// メモを作成
-router.post('/pole-memos', memosController.createMemo);
+// メモを作成（認証必須）
+router.post('/pole-memos', authenticateToken, memosController.createMemo);
 
 // 電柱のメモ一覧を取得
 router.get('/pole-memos/:poleId', memosController.getMemosByPoleId);
