@@ -11,7 +11,18 @@ import * as poleService from '../services/poleService';
  */
 export async function createPole(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const result = await poleService.createPole(req.body);
+    // 認証ユーザー情報を取得
+    const userId = (req as any).user?.userId;
+    const username = (req as any).user?.username;
+
+    // ユーザー情報をリクエストボディに追加
+    const poleData = {
+      ...req.body,
+      registeredBy: userId,
+      registeredByName: username || 'guest'
+    };
+
+    const result = await poleService.createPole(poleData);
 
     res.status(201).json({
       success: true,
