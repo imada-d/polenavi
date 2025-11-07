@@ -11,7 +11,7 @@ type Tab = 'poles' | 'memos' | 'photos' | 'hashtags';
 
 export default function MyDataPC() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('poles');
   const [loading, setLoading] = useState(true);
 
@@ -268,7 +268,7 @@ export default function MyDataPC() {
                     hashtags.map((hashtag: any, idx: number) => (
                       <button
                         key={idx}
-                        onClick={() => navigate(`/hashtag/${hashtag.tag.replace('#', '')}`)}
+                        onClick={() => navigate(`/hashtag/${hashtag.tag.replace('#', '')}?userId=${user?.id}`)}
                         className="w-full bg-white rounded-xl shadow-sm border p-6 flex items-center justify-between hover:shadow-lg transition-shadow text-left"
                       >
                         <div className="flex items-center space-x-3">

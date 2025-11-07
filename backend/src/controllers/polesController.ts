@@ -268,7 +268,12 @@ export async function getPolesByHashtag(
 ): Promise<void> {
   try {
     const { tag } = req.params;
-    const result = await poleService.getPolesByHashtag(tag);
+    const { userId } = req.query;
+
+    const result = await poleService.getPolesByHashtag(
+      tag,
+      userId ? parseInt(userId as string) : undefined
+    );
 
     res.json({
       success: true,

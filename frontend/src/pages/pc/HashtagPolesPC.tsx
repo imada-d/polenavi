@@ -2,7 +2,7 @@
 // なぜ: 特定のハッシュタグが付いた電柱を一覧表示するため
 
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../components/pc/Header';
 import { apiClient } from '../../api/client';
 
@@ -32,17 +32,22 @@ interface Pole {
 export default function HashtagPolesPC() {
   const { tag } = useParams<{ tag: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const userId = searchParams.get('userId');
   const [poles, setPoles] = useState<Pole[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadPoles();
-  }, [tag]);
+  }, [tag, userId]);
 
   const loadPoles = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/poles/hashtag/${tag}`);
+      const url = userId
+        ? `/poles/hashtag/${tag}?userId=${userId}`
+        : `/poles/hashtag/${tag}`;
+      const response = await apiClient.get(url);
       console.log('✅ ハッシュタグ電柱取得:', response.data);
       setPoles(response.data.data);
     } catch (error) {
