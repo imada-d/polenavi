@@ -157,6 +157,23 @@ export default function MyPagePC() {
               )}
             </div>
 
+            {/* マイデータカード */}
+            <button
+              onClick={() => navigate('/mydata')}
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-md p-6 text-white hover:from-blue-600 hover:to-indigo-700 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl">📊</div>
+                  <div className="text-left">
+                    <h3 className="font-bold text-xl">マイデータ</h3>
+                    <p className="text-blue-100 mt-1">登録した電柱・メモ・写真・ハッシュタグを見る</p>
+                  </div>
+                </div>
+                <div className="text-3xl">→</div>
+              </div>
+            </button>
+
             {/* プラン情報 */}
             {user.planType && (
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
@@ -180,13 +197,6 @@ export default function MyPagePC() {
             <div className="bg-white rounded-xl shadow-sm border">
               <h3 className="font-bold p-4 border-b text-lg">⚙️ 設定</h3>
               <div className="divide-y">
-                <button
-                  onClick={() => navigate('/mydata')}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors"
-                >
-                  <span>マイデータ</span>
-                  <span className="text-gray-400">→</span>
-                </button>
                 <button className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between transition-colors">
                   <span>プロフィール編集</span>
                   <span className="text-gray-400">→</span>

@@ -180,45 +180,55 @@ export default function Home() {
 
   // URLパラメータから地図の位置を変更（マイデータからの遷移用）
   useEffect(() => {
+    // 地図がまだ読み込み中の場合は待つ
+    if (isLoadingLocation || !mapInstanceRef.current) {
+      return;
+    }
+
     const lat = searchParams.get('lat');
     const lng = searchParams.get('lng');
     const zoom = searchParams.get('zoom');
 
-    if (lat && lng && mapInstanceRef.current) {
+    if (lat && lng) {
       const latitude = parseFloat(lat);
       const longitude = parseFloat(lng);
       const zoomLevel = zoom ? parseInt(zoom, 10) : 18;
 
       console.log(`🗺️ URLパラメータから地図移動: ${latitude}, ${longitude}, zoom: ${zoomLevel}`);
 
-      mapInstanceRef.current.setView([latitude, longitude], zoomLevel, {
-        animate: true,
-        duration: 1,
-      });
+      // 少し遅延させて地図の準備を確実にする
+      setTimeout(() => {
+        if (!mapInstanceRef.current) return;
 
-      // 対象位置にマーカーを追加
-      const targetMarker = L.marker([latitude, longitude], {
-        icon: L.icon({
-          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41],
-        }),
-      }).addTo(mapInstanceRef.current);
+        mapInstanceRef.current.setView([latitude, longitude], zoomLevel, {
+          animate: true,
+          duration: 1,
+        });
+
+        // 対象位置にマーカーを追加
+        const targetMarker = L.marker([latitude, longitude], {
+          icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+          }),
+        }).addTo(mapInstanceRef.current);
+
+        // マーカーを10秒後に削除
+        setTimeout(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.removeLayer(targetMarker);
+          }
+        }, 10000);
+      }, 500);
 
       // URLパラメータをクリア（次回のために）
       setSearchParams({});
-
-      // マーカーを10秒後に削除
-      setTimeout(() => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.removeLayer(targetMarker);
-        }
-      }, 10000);
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, isLoadingLocation]);
 
   // 何を: 電柱マーカークリック時の処理
   // なぜ: 電柱の詳細情報を表示するため

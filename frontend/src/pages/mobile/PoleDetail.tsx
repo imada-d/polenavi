@@ -186,7 +186,13 @@ export default function PoleDetail() {
         >
           ←
         </button>
-        <h1 className="text-lg font-bold">📍 電柱詳細</h1>
+        <h1 className="text-lg font-bold flex-1">📍 電柱詳細</h1>
+        <button
+          onClick={() => navigate(`/?lat=${poleData.latitude}&lng=${poleData.longitude}&zoom=18`)}
+          className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700"
+        >
+          🗺️ 地図
+        </button>
       </header>
 
       {/* 地図エリア */}
