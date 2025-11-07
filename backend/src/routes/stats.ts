@@ -3,7 +3,7 @@
 
 import express from 'express';
 import * as statsController from '../controllers/statsController';
-import { requireAdmin } from '../middleware/authMiddleware';
+import { authenticateToken, requireAdmin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
@@ -11,6 +11,6 @@ const router = express.Router();
 router.get('/public', statsController.getPublicStats);
 
 // 管理者統計（管理者のみ）
-router.get('/admin', requireAdmin, statsController.getAdminStats);
+router.get('/admin', authenticateToken, requireAdmin, statsController.getAdminStats);
 
 export default router;

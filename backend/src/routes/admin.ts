@@ -3,11 +3,12 @@
 
 import express from 'express';
 import * as adminController from '../controllers/adminController';
-import { requireAdmin } from '../middleware/authMiddleware';
+import { authenticateToken, requireAdmin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // 全てのルートで管理者認証が必要
+router.use(authenticateToken);
 router.use(requireAdmin);
 
 // ユーザー管理
