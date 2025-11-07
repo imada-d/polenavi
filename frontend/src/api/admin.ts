@@ -195,3 +195,15 @@ export async function reviewReport(
   const response = await apiClient.patch(`/admin/reports/${reportId}`, data);
   return response.data;
 }
+
+// ========================================
+// 電柱管理
+// ========================================
+
+/**
+ * 電柱を削除（管理者のみ）
+ */
+export async function deletePole(poleId: number) {
+  const response = await apiClient.delete(`/admin/poles/${poleId}`);
+  return response.data;
+}

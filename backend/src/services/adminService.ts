@@ -546,3 +546,35 @@ export async function createReport(data: {
 
   return report;
 }
+
+/**
+ * 電柱を削除（管理者のみ）
+ */
+export async function deletePole(poleId: number) {
+  const pole = await prisma.pole.findUnique({
+    where: { id: poleId },
+  });
+
+  if (!pole) {
+    throw new NotFoundError('電柱が見つかりません');
+  }
+
+  // 関連する写真を論理削除
+  await prisma.polePhoto.updateMany({
+    where: { poleId },
+    data: {
+      deletedAt: new Date(),
+      deletedReason: '管理者により電柱が削除されたため',
+      autoDeleted: true,
+    },
+  });
+
+  // 電柱番号、メモは物理削除（またはカスケード削除）
+  await prisma.poleMemo.deleteMany({ where: { poleId } });
+  await prisma.poleNumber.deleteMany({ where: { poleId } });
+
+  // 電柱を物理削除
+  await prisma.pole.delete({ where: { id: poleId } });
+
+  return { success: true };
+}

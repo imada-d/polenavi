@@ -7,11 +7,14 @@ import L from 'leaflet';
 import Accordion from '../../components/common/Accordion';
 import { FEATURES } from '../../config/features';
 import { getPoleById } from '../../api/poles';
+import { deletePole } from '../../api/admin';
 import { calculateDistance } from '../../utils/distance';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function PoleDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -20,6 +23,27 @@ export default function PoleDetail() {
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+
+  // 管理者かどうか
+  const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
+
+  // 管理者用: 電柱削除ハンドラー
+  const handleDelete = async () => {
+    if (!poleData || !id) return;
+
+    if (!confirm('この電柱を削除しますか？\n関連する写真、メモ、電柱番号も全て削除されます。')) {
+      return;
+    }
+
+    try {
+      await deletePole(parseInt(id));
+      alert('電柱を削除しました');
+      navigate('/');
+    } catch (error) {
+      console.error('削除に失敗:', error);
+      alert('削除に失敗しました');
+    }
+  };
 
   // 何を: 検証ボタンのクリックハンドラー
   // なぜ: ユーザーが実際にその場所に行って検証できるようにするため
@@ -187,6 +211,14 @@ export default function PoleDetail() {
           ←
         </button>
         <h1 className="text-lg font-bold flex-1">📍 電柱詳細</h1>
+        {isAdmin && (
+          <button
+            onClick={handleDelete}
+            className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700"
+          >
+            削除
+          </button>
+        )}
         <button
           onClick={() => navigate(`/?lat=${poleData.latitude}&lng=${poleData.longitude}&zoom=18`)}
           className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700"

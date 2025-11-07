@@ -197,3 +197,25 @@ export async function reviewReport(
     next(error);
   }
 }
+
+/**
+ * 電柱を削除
+ */
+export async function deletePole(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const poleId = parseInt(req.params.id);
+
+    await adminService.deletePole(poleId);
+
+    res.json({
+      success: true,
+      message: '電柱を削除しました',
+    });
+  } catch (error) {
+    next(error);
+  }
+}
