@@ -13,6 +13,8 @@ import authRouter from './routes/authRoutes';
 import userRouter from './routes/userRoutes';
 import statsRouter from './routes/stats';
 import adminRouter from './routes/admin';
+import groupsRouter from './routes/groups';
+import invitationsRouter from './routes/invitations';
 import { errorHandler } from './middlewares/errorHandler';
 
 // 環境変数を読み込み
@@ -60,6 +62,8 @@ app.use('/api', memosRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/groups', groupsRouter);
+app.use('/api/invitations', invitationsRouter);
 
 // 404ハンドラー
 app.use((req, res) => {

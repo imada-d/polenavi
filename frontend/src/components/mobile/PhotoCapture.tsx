@@ -79,6 +79,7 @@ export default function PhotoCapture({
       }
     } catch (error) {
       console.error('ギャラリー選択エラー:', error);
+      alert('ギャラリーからの選択に失敗しました。');
     } finally {
       setIsProcessing(false);
     }
@@ -94,13 +95,31 @@ export default function PhotoCapture({
         const photos = await Camera.pickImages({
           quality: 90,
         });
-        
+
         if (photos.photos && photos.photos.length > 0) {
-          const dataUrls = photos.photos
-            .map(p => p.webPath ? `data:image/jpeg;base64,${p.webPath}` : null)
-            .filter((url): url is string => url !== null);
-          
-          if (onMultiplePhotoCapture) {
+          // webPathをそのまま使用（既にdata URLまたはfile pathになっている）
+          const dataUrls: string[] = [];
+
+          for (const photo of photos.photos) {
+            if (photo.webPath) {
+              // webPathがdata URLでない場合はfetchして変換
+              if (photo.webPath.startsWith('data:')) {
+                dataUrls.push(photo.webPath);
+              } else {
+                // file pathの場合はfetchしてdata URLに変換
+                const response = await fetch(photo.webPath);
+                const blob = await response.blob();
+                const dataUrl = await new Promise<string>((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result as string);
+                  reader.readAsDataURL(blob);
+                });
+                dataUrls.push(dataUrl);
+              }
+            }
+          }
+
+          if (onMultiplePhotoCapture && dataUrls.length > 0) {
             onMultiplePhotoCapture(dataUrls);
           }
         }
@@ -158,8 +177,13 @@ export default function PhotoCapture({
       }
     } catch (error) {
       console.error('複数選択エラー:', error);
-      alert('写真の選択に失敗しました。');
+      alert(`写真の選択に失敗しました。\nエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
       setIsProcessing(false);
+    } finally {
+      if (!Capacitor.isNativePlatform()) {
+        // Web版は上記のinput.oncancelやinput.onchangeでsetIsProcessing(false)するが
+        // エラー時のため念のため
+      }
     }
   };
 

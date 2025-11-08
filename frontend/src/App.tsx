@@ -45,6 +45,7 @@ import RegisterNumberInput from './pages/mobile/RegisterNumberInput';
 import RegisterMemo from './pages/mobile/RegisterMemo';
 import RegisterConfirm from './pages/mobile/RegisterConfirm';
 import RegisterComplete from './pages/mobile/RegisterComplete';
+import GroupDetail from './pages/mobile/GroupDetail';
 
 
 
@@ -68,6 +69,7 @@ function AppContent() {
   const hideBottomNav =
     location.pathname.startsWith('/register') ||
     location.pathname.startsWith('/pole/') ||
+    location.pathname.startsWith('/groups/') ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
     location.pathname === '/profile/edit' ||
@@ -88,6 +90,7 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<ResponsiveWrapper mobile={SearchMobile} pc={SearchPC} />} />
         <Route path="/groups" element={<ResponsiveWrapper mobile={GroupsMobile} pc={GroupsPC} />} />
+        <Route path="/groups/:id" element={<GroupDetail />} />
         <Route path="/mypage" element={<ResponsiveWrapper mobile={MyPageMobile} pc={MyPagePC} />} />
         <Route path="/profile/edit" element={<ResponsiveWrapper mobile={ProfileEditMobile} pc={ProfileEditPC} />} />
         <Route path="/mydata" element={<ResponsiveWrapper mobile={MyDataMobile} pc={MyDataPC} />} />

@@ -1,31 +1,67 @@
 // 何を: PC用グループ画面
 // なぜ: PC画面でグループ管理機能を提供するため
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../../components/pc/Header';
+import { getUserGroups, createGroup, type Group } from '../../api/groups';
 
 export default function GroupsPC() {
-  // TODO: バックエンドAPIが実装されたら、実際のグループデータを取得
-  const [groups] = useState([
-    {
-      id: 1,
-      name: 'A市管理街路灯',
-      description: 'A市内の防犯灯・街路灯の管理グループ。定期点検と修繕記録を共有しています。',
-      memberCount: 12,
-      poleCount: 245,
-      role: 'admin',
-      createdAt: '2024-01-15',
-    },
-    {
-      id: 2,
-      name: 'B電気工事 東エリア',
-      description: 'B電気工事株式会社の東エリア担当チーム。作業記録とメンテナンス情報を管理。',
-      memberCount: 8,
-      poleCount: 156,
-      role: 'member',
-      createdAt: '2024-02-20',
-    },
-  ]);
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupDescription, setNewGroupDescription] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  // グループ一覧を取得
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const data = await getUserGroups();
+        setGroups(data);
+      } catch (error) {
+        console.error('グループ一覧取得エラー:', error);
+        alert('グループ一覧の取得に失敗しました');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  // グループ作成
+  const handleCreateGroup = async () => {
+    if (!newGroupName.trim()) {
+      alert('グループ名を入力してください');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const newGroup = await createGroup({
+        name: newGroupName.trim(),
+        description: newGroupDescription.trim() || undefined,
+      });
+      setGroups([newGroup, ...groups]);
+      setShowCreateModal(false);
+      setNewGroupName('');
+      setNewGroupDescription('');
+      alert('グループを作成しました！');
+    } catch (error: any) {
+      console.error('グループ作成エラー:', error);
+      alert(error.message || 'グループの作成に失敗しました');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // グループを開く
+  const handleOpenGroup = (groupId: number) => {
+    navigate(`/groups/${groupId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -40,12 +76,17 @@ export default function GroupsPC() {
               チームや組織で電柱を管理し、情報を共有しましょう
             </p>
           </div>
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
             ＋ 新規グループ作成
           </button>
         </div>
 
-        {groups.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">読み込み中...</div>
+        ) : groups.length === 0 ? (
           /* 空の状態 */
           <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
             <div className="text-6xl mb-4">👥</div>
@@ -55,7 +96,10 @@ export default function GroupsPC() {
             <p className="text-gray-600 mb-8">
               グループを作成して、チームで電柱情報を共有しましょう
             </p>
-            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
               ＋ グループを作成
             </button>
           </div>
@@ -63,58 +107,61 @@ export default function GroupsPC() {
           <>
             {/* グループ一覧 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {groups.map((group) => (
-                <div
-                  key={group.id}
-                  className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-800">{group.name}</h3>
-                        {group.role === 'admin' && (
-                          <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-semibold">
-                            管理者
-                          </span>
-                        )}
+              {groups.map((group) => {
+                // メンバーの中から自分のロールを探す
+                const myMembership = group.members?.find(m => m.userId === (window as any).userId);
+                const myRole = myMembership?.role;
+
+                return (
+                  <div
+                    key={group.id}
+                    className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-xl font-bold text-gray-800">{group.name}</h3>
+                          {myRole === 'admin' && (
+                            <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-semibold">
+                              管理者
+                            </span>
+                          )}
+                          {myRole === 'editor' && (
+                            <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-semibold">
+                              編集者
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-600 text-sm">{group.description}</p>
                       </div>
-                      <p className="text-gray-600 text-sm">{group.description}</p>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <p className="text-2xl font-bold text-blue-600">{group.memberCount}</p>
-                      <p className="text-xs text-gray-600 mt-1">メンバー</p>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-600">{group._count?.members || 0}</p>
+                        <p className="text-xs text-gray-600 mt-1">メンバー</p>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-600">{group._count?.memos || 0}</p>
+                        <p className="text-xs text-gray-600 mt-1">メモ</p>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-600">{group._count?.photos || 0}</p>
+                        <p className="text-xs text-gray-600 mt-1">写真</p>
+                      </div>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">{group.poleCount}</p>
-                      <p className="text-xs text-gray-600 mt-1">登録電柱</p>
-                    </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-lg">
-                      <p className="text-xs text-gray-600 mb-1">作成日</p>
-                      <p className="text-sm font-semibold text-purple-600">
-                        {new Date(group.createdAt).toLocaleDateString('ja-JP', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                        })}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex gap-2">
-                    <button className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                      グループを開く →
-                    </button>
-                    {group.role === 'admin' && (
-                      <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
-                        ⚙️
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleOpenGroup(group.id)}
+                        className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                      >
+                        グループを開く →
                       </button>
-                    )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* グループ機能の説明 */}
@@ -162,6 +209,66 @@ export default function GroupsPC() {
           </>
         )}
       </div>
+
+      {/* グループ作成モーダル */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-lg p-8 shadow-2xl">
+            <h2 className="text-2xl font-bold mb-6">グループを作成</h2>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  グループ名 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder="例: A市管理街路灯"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  maxLength={100}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  説明（任意）
+                </label>
+                <textarea
+                  value={newGroupDescription}
+                  onChange={(e) => setNewGroupDescription(e.target.value)}
+                  placeholder="グループの目的や管理対象を記入してください"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  maxLength={500}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewGroupName('');
+                  setNewGroupDescription('');
+                }}
+                disabled={creating}
+                className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleCreateGroup}
+                disabled={creating || !newGroupName.trim()}
+                className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {creating ? '作成中...' : '作成'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

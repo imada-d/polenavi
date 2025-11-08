@@ -7,17 +7,41 @@ import apiClient from './client';
  * Base64画像をBlobに変換
  */
 function base64ToBlob(base64: string): Blob {
-  const parts = base64.split(';base64,');
-  const contentType = parts[0].split(':')[1];
-  const raw = window.atob(parts[1]);
-  const rawLength = raw.length;
-  const uInt8Array = new Uint8Array(rawLength);
-
-  for (let i = 0; i < rawLength; ++i) {
-    uInt8Array[i] = raw.charCodeAt(i);
+  // base64文字列の形式チェック
+  if (!base64 || typeof base64 !== 'string') {
+    throw new Error('無効なbase64データです');
   }
 
-  return new Blob([uInt8Array], { type: contentType });
+  if (!base64.includes(';base64,')) {
+    throw new Error('base64形式が正しくありません。data:image/xxx;base64,... の形式である必要があります');
+  }
+
+  const parts = base64.split(';base64,');
+
+  if (parts.length !== 2) {
+    throw new Error('base64データの形式が不正です');
+  }
+
+  const contentTypeParts = parts[0].split(':');
+  if (contentTypeParts.length < 2) {
+    throw new Error('content-typeが取得できません');
+  }
+
+  const contentType = contentTypeParts[1];
+
+  try {
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+
+    for (let i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], { type: contentType });
+  } catch (error) {
+    throw new Error(`base64のデコードに失敗しました: ${error instanceof Error ? error.message : '不明なエラー'}`);
+  }
 }
 
 /**

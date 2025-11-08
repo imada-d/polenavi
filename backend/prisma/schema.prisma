@@ -18,16 +18,16 @@ datasource db {
 
 // 柱の種類マスタ（電柱、照明柱など）
 model PoleType {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(50)
-  parentId  Int?      @map("parent_id")
-  parent    PoleType? @relation("PoleTypeHierarchy", fields: [parentId], references: [id])
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(50)
+  parentId  Int?       @map("parent_id")
+  parent    PoleType?  @relation("PoleTypeHierarchy", fields: [parentId], references: [id])
   children  PoleType[] @relation("PoleTypeHierarchy")
-  icon      String?   @db.VarChar(10)
-  sortOrder Int?      @map("sort_order")
-  createdAt DateTime  @default(now()) @map("created_at")
-  
-  poles     Pole[]
+  icon      String?    @db.VarChar(10)
+  sortOrder Int?       @map("sort_order")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  poles Pole[]
 
   @@map("pole_types")
 }
@@ -44,8 +44,8 @@ model PoleOperator {
   isActive      Boolean  @default(true) @map("is_active")
   sortOrder     Int?     @map("sort_order")
   createdAt     DateTime @default(now()) @map("created_at")
-  
-  poleNumbers   PoleNumber[]
+
+  poleNumbers PoleNumber[]
 
   @@map("pole_operators")
 }
@@ -78,9 +78,9 @@ model Pole {
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  poleNumbers     PoleNumber[]
-  photos          PolePhoto[]
-  memos           PoleMemo[]
+  poleNumbers PoleNumber[]
+  photos      PolePhoto[]
+  memos       PoleMemo[]
 
   @@map("poles")
 }
@@ -112,8 +112,8 @@ model PoleNumber {
   originalGpsLat     Decimal?      @map("original_gps_lat") @db.Decimal(10, 8)
   originalGpsLng     Decimal?      @map("original_gps_lng") @db.Decimal(11, 8)
   createdAt          DateTime      @default(now()) @map("created_at")
-  
-  photos             PolePhoto[]
+
+  photos PolePhoto[]
 
   @@index([poleId])
   @@index([poleNumber])
@@ -123,70 +123,83 @@ model PoleNumber {
 
 // 写真テーブル
 model PolePhoto {
-  id                  Int         @id @default(autoincrement())
-  poleId              Int?        @map("pole_id")
-  pole                Pole?       @relation(fields: [poleId], references: [id])
-  poleNumberId        Int?        @map("pole_number_id")
-  poleNumber          PoleNumber? @relation(fields: [poleNumberId], references: [id])
-  photoUrl            String      @map("photo_url") @db.VarChar(500)
-  photoThumbnailUrl   String      @map("photo_thumbnail_url") @db.VarChar(500)
-  photoType           String      @map("photo_type") @db.VarChar(20) // plate, full, detail
-  isPrimary           Boolean     @default(false) @map("is_primary")
-  likeCount           Int         @default(0) @map("like_count")
-  officialLikeCount   Int         @default(0) @map("official_like_count")
-  isHallOfFame        Boolean     @default(false) @map("is_hall_of_fame")
-  pointsActiveUntil   DateTime?   @map("points_active_until")
-  isHidden            Boolean     @default(false) @map("is_hidden")
-  hiddenReason        String?     @map("hidden_reason") @db.VarChar(100)
-  deletedAt           DateTime?   @map("deleted_at")
-  deletedBy           Int?        @map("deleted_by")
-  deletedByUser       User?       @relation("PhotoDeletedBy", fields: [deletedBy], references: [id])
-  deletedReason       String?     @map("deleted_reason") @db.VarChar(100)
-  autoDeleted         Boolean     @default(false) @map("auto_deleted")
-  deletionExpiresAt   DateTime?   @map("deletion_expires_at")
-  uploadedBy          Int?        @map("uploaded_by")
-  uploadedByUser      User?       @relation("PhotoUploadedBy", fields: [uploadedBy], references: [id])
-  uploadedByName      String?     @map("uploaded_by_name") @db.VarChar(100)
-  createdAt           DateTime    @default(now()) @map("created_at")
+  id                Int         @id @default(autoincrement())
+  poleId            Int?        @map("pole_id")
+  pole              Pole?       @relation(fields: [poleId], references: [id])
+  poleNumberId      Int?        @map("pole_number_id")
+  poleNumber        PoleNumber? @relation(fields: [poleNumberId], references: [id])
+  photoUrl          String      @map("photo_url") @db.VarChar(500)
+  photoThumbnailUrl String      @map("photo_thumbnail_url") @db.VarChar(500)
+  photoType         String      @map("photo_type") @db.VarChar(20) // plate, full, detail
+  isPrimary         Boolean     @default(false) @map("is_primary")
+  likeCount         Int         @default(0) @map("like_count")
+  officialLikeCount Int         @default(0) @map("official_like_count")
+  isHallOfFame      Boolean     @default(false) @map("is_hall_of_fame")
+  pointsActiveUntil DateTime?   @map("points_active_until")
+  isHidden          Boolean     @default(false) @map("is_hidden")
+  hiddenReason      String?     @map("hidden_reason") @db.VarChar(100)
+  deletedAt         DateTime?   @map("deleted_at")
+  deletedBy         Int?        @map("deleted_by")
+  deletedByUser     User?       @relation("PhotoDeletedBy", fields: [deletedBy], references: [id])
+  deletedReason     String?     @map("deleted_reason") @db.VarChar(100)
+  autoDeleted       Boolean     @default(false) @map("auto_deleted")
+  deletionExpiresAt DateTime?   @map("deletion_expires_at")
+  uploadedBy        Int?        @map("uploaded_by")
+  uploadedByUser    User?       @relation("PhotoUploadedBy", fields: [uploadedBy], references: [id])
+  uploadedByName    String?     @map("uploaded_by_name") @db.VarChar(100)
+
+  // グループ機能追加
+  visibility String @default("public") @db.VarChar(20) // public, private, group
+  groupId    Int?   @map("group_id")
+  group      Group? @relation(fields: [groupId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([poleId])
   @@index([photoType])
   @@index([deletedAt])
+  @@index([visibility, groupId])
   @@map("pole_photos")
 }
 
 // ユーザーテーブル
 model User {
-  id                 Int      @id @default(autoincrement())
-  email              String   @unique @db.VarChar(255)
-  passwordHash       String   @map("password_hash") @db.VarChar(255)
-  username           String   @unique @db.VarChar(100)
-  displayName        String?  @map("display_name") @db.VarChar(100)
-  emailVerified      Boolean  @default(false) @map("email_verified")
-  giftCardEmail      String?  @map("gift_card_email") @db.VarChar(255)
-  homePrefecture     String?  @map("home_prefecture") @db.VarChar(10)
-  homePrefectureId   Int?     @map("home_prefecture_id")
-  planType           String   @default("free") @map("plan_type") @db.VarChar(20)
-  stripeCustomerId   String?  @map("stripe_customer_id") @db.VarChar(100)
-  subscriptionStatus String?  @map("subscription_status") @db.VarChar(20)
-  role               String   @default("user") @db.VarChar(20) // user, moderator, admin
-  isActive           Boolean  @default(true) @map("is_active")
-  emailNotifications Boolean  @default(true) @map("email_notifications") // メール通知設定
-  dataVisibility     String   @default("public") @map("data_visibility") @db.VarChar(20) // public, private
-  warningCount       Int      @default(0) @map("warning_count") // 警告数（5回でアップロード禁止）
-  uploadBanned       Boolean  @default(false) @map("upload_banned") // アップロード禁止フラグ
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique @db.VarChar(255)
+  passwordHash       String    @map("password_hash") @db.VarChar(255)
+  username           String    @unique @db.VarChar(100)
+  displayName        String?   @map("display_name") @db.VarChar(100)
+  emailVerified      Boolean   @default(false) @map("email_verified")
+  giftCardEmail      String?   @map("gift_card_email") @db.VarChar(255)
+  homePrefecture     String?   @map("home_prefecture") @db.VarChar(10)
+  homePrefectureId   Int?      @map("home_prefecture_id")
+  planType           String    @default("free") @map("plan_type") @db.VarChar(20)
+  stripeCustomerId   String?   @map("stripe_customer_id") @db.VarChar(100)
+  subscriptionStatus String?   @map("subscription_status") @db.VarChar(20)
+  role               String    @default("user") @db.VarChar(20) // user, moderator, admin
+  isActive           Boolean   @default(true) @map("is_active")
+  emailNotifications Boolean   @default(true) @map("email_notifications") // メール通知設定
+  dataVisibility     String    @default("public") @map("data_visibility") @db.VarChar(20) // public, private
+  warningCount       Int       @default(0) @map("warning_count") // 警告数（5回でアップロード禁止）
+  uploadBanned       Boolean   @default(false) @map("upload_banned") // アップロード禁止フラグ
   bannedAt           DateTime? @map("banned_at") // 禁止日時
-  banReason          String?  @map("ban_reason") @db.VarChar(500) // 禁止理由
-  createdAt          DateTime @default(now()) @map("created_at")
+  banReason          String?   @map("ban_reason") @db.VarChar(500) // 禁止理由
+  createdAt          DateTime  @default(now()) @map("created_at")
 
-  poleNumbers        PoleNumber[]
-  uploadedPhotos     PolePhoto[]  @relation("PhotoUploadedBy")
-  deletedPhotos      PolePhoto[]  @relation("PhotoDeletedBy")
-  memos              PoleMemo[]
-  reportsCreated     Report[]     @relation("ReportedBy")
-  reportsReviewed    Report[]     @relation("ReviewedBy")
-  refreshTokens      RefreshToken[]
-  hashtags           UserHashtag[]
+  poleNumbers     PoleNumber[]
+  uploadedPhotos  PolePhoto[]    @relation("PhotoUploadedBy")
+  deletedPhotos   PolePhoto[]    @relation("PhotoDeletedBy")
+  memos           PoleMemo[]
+  reportsCreated  Report[]       @relation("ReportedBy")
+  reportsReviewed Report[]       @relation("ReviewedBy")
+  refreshTokens   RefreshToken[]
+  hashtags        UserHashtag[]
+
+  // グループ機能追加
+  createdGroups       Group[]           @relation("GroupCreator")
+  groupMemberships    GroupMember[]
+  createdInvitations  GroupInvitation[] @relation("InvitationCreator")
+  receivedInvitations GroupInvitation[] @relation("InvitationRecipient")
 
   @@map("users")
 }
@@ -228,10 +241,17 @@ model PoleMemo {
   createdByUser User?    @relation(fields: [createdBy], references: [id])
   createdByName String   @map("created_by_name") @db.VarChar(100)
   isPublic      Boolean  @default(true) @map("is_public")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // グループ機能追加
+  visibility String @default("public") @db.VarChar(20) // public, private, group
+  groupId    Int?   @map("group_id")
+  group      Group? @relation(fields: [groupId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([poleId])
+  @@index([visibility, groupId])
   @@map("pole_memos")
 }
 
@@ -264,19 +284,80 @@ model Report {
 
 // ユーザー別ハッシュタグマスタ
 model UserHashtag {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag        String   @db.VarChar(50) // 正規化されたタグ（#なし、小文字）
+  displayTag String   @map("display_tag") @db.VarChar(50) // 表示用（初回入力時の形式）
+  color      String?  @db.VarChar(20) // プリセットカラー: blue, green, red, yellow, purple, pink, orange, gray
+  icon       String?  @db.VarChar(20) // 絵文字アイコン（例: 💡, 🔧）
+  usageCount Int      @default(0) @map("usage_count") // 使用回数
+  sortOrder  Int?     @map("sort_order") // 並び順（ユーザーがカスタマイズ可能）
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, tag]) // 同じユーザーで同じタグは1つだけ
+  @@index([userId, usageCount(sort: Desc)]) // 使用頻度順の取得用
+  @@map("user_hashtags")
+}
+
+// ========================================
+// Phase 2: グループ機能
+// ========================================
+
+// グループテーブル
+model Group {
   id          Int      @id @default(autoincrement())
-  userId      Int      @map("user_id")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tag         String   @db.VarChar(50)    // 正規化されたタグ（#なし、小文字）
-  displayTag  String   @map("display_tag") @db.VarChar(50)  // 表示用（初回入力時の形式）
-  color       String?  @db.VarChar(20)    // プリセットカラー: blue, green, red, yellow, purple, pink, orange, gray
-  icon        String?  @db.VarChar(20)    // 絵文字アイコン（例: 💡, 🔧）
-  usageCount  Int      @default(0) @map("usage_count")      // 使用回数
-  sortOrder   Int?     @map("sort_order") // 並び順（ユーザーがカスタマイズ可能）
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  createdBy   Int      @map("created_by")
+  creator     User     @relation("GroupCreator", fields: [createdBy], references: [id])
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@unique([userId, tag])  // 同じユーザーで同じタグは1つだけ
-  @@index([userId, usageCount(sort: Desc)])  // 使用頻度順の取得用
-  @@map("user_hashtags")
+  members     GroupMember[]
+  invitations GroupInvitation[]
+  memos       PoleMemo[]
+  photos      PolePhoto[]
+
+  @@map("groups")
+}
+
+// グループメンバーテーブル
+model GroupMember {
+  id       Int      @id @default(autoincrement())
+  groupId  Int      @map("group_id")
+  group    Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId   Int      @map("user_id")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String   @default("viewer") @db.VarChar(20) // admin, editor, viewer
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+  @@map("group_members")
+}
+
+// グループ招待テーブル
+model GroupInvitation {
+  id           Int       @id @default(autoincrement())
+  groupId      Int       @map("group_id")
+  group        Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  inviterId    Int       @map("inviter_id")
+  inviter      User      @relation("InvitationCreator", fields: [inviterId], references: [id])
+  inviteeEmail String    @map("invitee_email") @db.VarChar(255)
+  inviteeId    Int?      @map("invitee_id")
+  invitee      User?     @relation("InvitationRecipient", fields: [inviteeId], references: [id])
+  status       String    @default("pending") @db.VarChar(20) // pending, accepted, rejected, expired
+  token        String    @unique @db.VarChar(100)
+  role         String    @default("viewer") @db.VarChar(20) // admin, editor, viewer
+  expiresAt    DateTime  @map("expires_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  respondedAt  DateTime? @map("responded_at")
+
+  @@unique([groupId, inviteeEmail])
+  @@index([token])
+  @@index([inviteeEmail])
+  @@map("group_invitations")
 }

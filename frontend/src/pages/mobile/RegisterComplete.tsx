@@ -22,16 +22,6 @@ export default function RegisterComplete() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ポイント計算（簡易版）
-  const calculatePoints = () => {
-    // GPS登録 + 写真: 10pt
-    // 写真追加: 3pt × 枚数
-    const basePoints = 10;
-    const photoPoints = photoCount > 1 ? (photoCount - 1) * 3 : 0;
-    return basePoints + photoPoints;
-  };
-
-  const points = calculatePoints();
 
   // 統計情報を取得
   useEffect(() => {
@@ -71,40 +61,20 @@ export default function RegisterComplete() {
         <h1 className="text-3xl font-bold mb-2">登録完了！</h1>
         <p className="text-gray-600 mb-8">電柱を登録しました</p>
 
-        {/* ポイント表示 */}
+        {/* 統計表示 */}
         <div className="bg-white rounded-lg p-6 mb-8 shadow-lg w-full max-w-md">
-          <div className="text-center mb-4">
-            <p className="text-gray-600 mb-2">🎁 獲得ポイント</p>
-            <p className="text-5xl font-bold text-blue-600">+{points || 10}pt</p>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-gray-600">累計登録数</span>
+            <span className="text-xl font-bold">
+              {loading ? '...' : `${stats?.registeredPoles || 0}本`}
+            </span>
           </div>
-
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-600">累計登録数</span>
-              <span className="text-xl font-bold">
-                {loading ? '...' : `${stats?.registeredPoles || 0}本`}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">累計写真数</span>
-              <span className="text-xl font-bold">
-                {loading ? '...' : `${stats?.photos || 0}枚`}
-              </span>
-            </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600">累計写真数</span>
+            <span className="text-xl font-bold">
+              {loading ? '...' : `${stats?.photos || 0}枚`}
+            </span>
           </div>
-        </div>
-
-        {/* ヒント */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 w-full max-w-md">
-          <p className="text-sm text-gray-700">
-            💡 <strong>次のステップ</strong>
-            <br />
-            ・続けて登録するとポイントが貯まります
-            <br />
-            ・連続登録でボーナスポイントがもらえます
-            <br />
-            ・月間ランキングで上位を目指そう！
-          </p>
         </div>
 
         {/* ボタンエリア */}
