@@ -1,8 +1,10 @@
-import { Filter } from 'bad-words';
+import * as filter from 'leo-profanity';
 import { CUSTOM_BANNED_WORDS } from '../config/bannedWords';
 
-// bad-wordsフィルターのインスタンスを作成
-const filter = new Filter();
+// カスタム禁止語をleo-profanityに追加
+CUSTOM_BANNED_WORDS.forEach(word => {
+  filter.add(word.toLowerCase());
+});
 
 /**
  * ユーザー名のバリデーション結果
@@ -19,8 +21,7 @@ interface ValidationResult {
  * 【検証内容】
  * 1. 長さチェック (3-20文字)
  * 2. 文字種チェック (英数字、アンダースコア、ハイフン、ピリオドのみ)
- * 3. 不適切語チェック (bad-wordsライブラリ)
- * 4. カスタム禁止語チェック (CUSTOM_BANNED_WORDS)
+ * 3. 不適切語チェック (leo-profanityライブラリ + カスタム禁止語)
  *
  * @param username - 検証するユーザー名
  * @returns バリデーション結果
@@ -83,30 +84,14 @@ export function validateUsername(username: string): ValidationResult {
     };
   }
 
-  // 6. bad-wordsライブラリによる不適切語チェック（英語）
-  try {
-    if (filter.isProfane(trimmedUsername)) {
-      return {
-        isValid: false,
-        error: 'このユーザーIDは使用できません',
-        errorCode: 'USERNAME_CONTAINS_PROFANITY',
-      };
-    }
-  } catch (error) {
-    // bad-wordsライブラリのエラーは無視して続行
-    console.warn('bad-words filter error:', error);
-  }
-
-  // 7. カスタム禁止語チェック（大文字小文字を区別しない、部分一致）
-  const lowerUsername = trimmedUsername.toLowerCase();
-  for (const bannedWord of CUSTOM_BANNED_WORDS) {
-    if (lowerUsername.includes(bannedWord.toLowerCase())) {
-      return {
-        isValid: false,
-        error: 'このユーザーIDは使用できません',
-        errorCode: 'USERNAME_CONTAINS_BANNED_WORD',
-      };
-    }
+  // 6. 不適切語チェック（leo-profanity + カスタム禁止語）
+  // カスタム禁止語は初期化時にfilter.add()で追加済み
+  if (filter.check(trimmedUsername.toLowerCase())) {
+    return {
+      isValid: false,
+      error: 'このユーザーIDは使用できません',
+      errorCode: 'USERNAME_CONTAINS_PROFANITY',
+    };
   }
 
   // すべてのチェックをパス
