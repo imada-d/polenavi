@@ -15,13 +15,57 @@ export default function Signup() {
     displayName: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // ユーザー名のフロントエンドバリデーション
+  const validateUsernameField = (username: string): string | null => {
+    if (!username) {
+      return null; // 空の場合はエラーなし（必須チェックはHTML5に任せる）
+    }
+
+    const trimmed = username.trim();
+
+    // 長さチェック
+    if (trimmed.length > 0 && trimmed.length < 3) {
+      return '3文字以上で入力してください';
+    }
+    if (trimmed.length > 20) {
+      return '20文字以内で入力してください';
+    }
+
+    // 文字種チェック（英数字、アンダースコア、ハイフン、ピリオドのみ）
+    const validCharactersRegex = /^[a-zA-Z0-9_.-]+$/;
+    if (!validCharactersRegex.test(trimmed)) {
+      return '英数字、アンダースコア(_)、ハイフン(-)、ピリオド(.)のみ使用できます';
+    }
+
+    // 先頭・末尾が記号でないかチェック
+    if (/^[._-]|[._-]$/.test(trimmed)) {
+      return '記号で始めたり終わったりすることはできません';
+    }
+
+    // 連続する記号のチェック
+    if (/[._-]{2,}/.test(trimmed)) {
+      return '連続する記号は使用できません';
+    }
+
+    return null; // バリデーション成功
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // ユーザー名の場合はリアルタイムバリデーション
+    if (name === 'username') {
+      const validationError = validateUsernameField(value);
+      setUsernameError(validationError);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,10 +142,22 @@ export default function Signup() {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="username123"
+                  minLength={3}
+                  maxLength={20}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent ${
+                    usernameError
+                      ? 'border-red-300 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-green-500'
+                  }`}
+                  placeholder="user_name123"
                 />
-                <p className="text-xs text-gray-500 mt-1">ログインに使用します（英数字のみ）</p>
+                {usernameError ? (
+                  <p className="text-xs text-red-600 mt-1">{usernameError}</p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1">
+                    3〜20文字、英数字と記号（_ - .）のみ使用できます
+                  </p>
+                )}
               </div>
 
               <div>
@@ -139,7 +195,7 @@ export default function Signup() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !!usernameError}
                 className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 {isLoading ? '登録中...' : 'アカウント作成'}

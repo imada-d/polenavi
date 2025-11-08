@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
+import { validateUsername } from '../utils/validateUsername';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -61,6 +62,15 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: 'パスワードは6文字以上である必要があります'
+      });
+    }
+
+    // ユーザー名のバリデーション（文字種、長さ、不適切語チェック）
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: usernameValidation.error
       });
     }
 
