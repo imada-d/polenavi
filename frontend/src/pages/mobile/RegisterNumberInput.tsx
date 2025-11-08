@@ -25,12 +25,12 @@ export default function RegisterNumberInput() {
   const location = useLocation();
   
   // 前の画面から受け取ったデータ
-  const { 
-    //location: pinLocation, 
-    poleType, 
-    poleSubType, 
+  const {
+    location: pinLocation,
+    poleType,
+    poleSubType,
     plateCount,
-    //photos 
+    photos
   } = location.state || {};
   
   // 入力された番号の配列
@@ -208,16 +208,16 @@ export default function RegisterNumberInput() {
     localStorage.setItem(LAST_REG_KEY, JSON.stringify(regData));
     
     // 次の画面へ（メモ・ハッシュタグ）
-    alert(`番号: ${finalNumbers.join(', ')}\n次の画面へ（未実装）`);
-    // TODO: navigate('/register/memo', { 
-    //   state: { 
-    //     location: pinLocation,
-    //     poleType,
-    //     poleSubType,
-    //     numbers: finalNumbers,
-    //     photos
-    //   } 
-    // });
+    navigate('/register/memo', {
+      state: {
+        location: pinLocation,
+        poleType,
+        poleSubType,
+        plateCount,
+        numbers: finalNumbers,
+        photos
+      }
+    });
   };
 
   // 表示用のサブタイプ名

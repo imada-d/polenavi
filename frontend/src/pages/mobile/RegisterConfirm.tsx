@@ -1,13 +1,16 @@
 // 何を: 登録確認画面（モバイル版）
 // なぜ: 登録前に内容を確認して、間違いを防ぐため
 
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { usePoleRegistration } from '../../hooks/usePoleRegistration';
+import { uploadPhoto } from '../../api/photos';
 
 export default function RegisterConfirm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { register, loading } = usePoleRegistration();
+  const [uploadProgress, setUploadProgress] = useState<string>('');
 
   // 前の画面から受け取ったデータ
   const state = location.state || {};
@@ -34,6 +37,9 @@ export default function RegisterConfirm() {
   // 登録実行
   const handleRegister = async () => {
     try {
+      setUploadProgress('電柱情報を登録中...');
+
+      // 1. 電柱を登録
       const result = await register({
         location: pinLocation,
         poleType,
@@ -44,15 +50,64 @@ export default function RegisterConfirm() {
         hashtag: hashtags,
       });
 
-      // 登録完了画面へ
+      const poleId = result.poleId;
+      console.log('✅ 電柱登録完了:', poleId);
+
+      // 2. 写真をアップロード（もしあれば）
+      if (photos && Object.keys(photos).length > 0) {
+        const photoUploads = [];
+
+        // プレート写真
+        if (photos.plate) {
+          setUploadProgress('番号札写真をアップロード中...');
+          photoUploads.push(
+            uploadPhoto(poleId, photos.plate, 'plate')
+          );
+        }
+
+        // 全体写真
+        if (photos.full && photos.full.length > 0) {
+          setUploadProgress(`全体写真をアップロード中... (${photos.full.length}枚)`);
+          for (const fullPhoto of photos.full) {
+            photoUploads.push(
+              uploadPhoto(poleId, fullPhoto, 'full')
+            );
+          }
+        }
+
+        // 詳細写真
+        if (photos.detail && photos.detail.length > 0) {
+          setUploadProgress(`詳細写真をアップロード中... (${photos.detail.length}枚)`);
+          for (const detailPhoto of photos.detail) {
+            photoUploads.push(
+              uploadPhoto(poleId, detailPhoto, 'detail')
+            );
+          }
+        }
+
+        // 全ての写真を並列アップロード
+        if (photoUploads.length > 0) {
+          await Promise.all(photoUploads);
+          console.log(`✅ 写真アップロード完了: ${photoUploads.length}枚`);
+        }
+      }
+
+      setUploadProgress('完了！');
+
+      // 3. 登録完了画面へ
       navigate('/register/complete', {
         state: {
-          poleId: result.poleId,
-          points: 10, // TODO: バックエンドからポイント情報を返すように実装
+          poleId: poleId,
+          photoCount: photos ? (
+            (photos.plate ? 1 : 0) +
+            (photos.full?.length || 0) +
+            (photos.detail?.length || 0)
+          ) : 0,
         },
       });
     } catch (error) {
       console.error('登録エラー:', error);
+      setUploadProgress('');
       alert('登録に失敗しました。もう一度お試しください。');
     }
   };
@@ -149,12 +204,17 @@ export default function RegisterConfirm() {
 
       {/* ボタンエリア */}
       <div className="p-4 bg-white border-t space-y-3">
+        {uploadProgress && (
+          <div className="text-center text-sm text-blue-600 font-medium">
+            {uploadProgress}
+          </div>
+        )}
         <button
           onClick={handleRegister}
           disabled={loading}
           className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400"
         >
-          {loading ? '登録中...' : '登録する'}
+          {loading ? uploadProgress || '登録中...' : '登録する'}
         </button>
         <button
           onClick={() => navigate(-1)}

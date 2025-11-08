@@ -107,9 +107,11 @@ export const CUSTOM_BANNED_WORDS = [
   // ============================================================
   'manko',        // ま○こ
   'chinko',       // ち○こ
+  'tinko',
   'chinpo',       // ち○ぽ
   'oppai',        // おっぱい
   'ochinchin',    // おちんちん
+  'otintin',
   'sekkusu',      // セックス
   'sex',          // セックス
   'sekusu',       // セックス
@@ -118,7 +120,9 @@ export const CUSTOM_BANNED_WORDS = [
   'ero',          // エロ
   'hentai',       // 変態
   'shiko',        // シコ
+  'siko',
   'shikoru',      // シコる
+  'sikoru',
   'onanie',       // オナニー
   'onani',        // オナニー
   'paizuri',      // パイズリ
