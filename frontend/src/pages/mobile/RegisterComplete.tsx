@@ -2,15 +2,11 @@
 // なぜ: 登録成功を伝え、次のアクションに誘導するため
 
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getUserStats } from '../../api/users';
 
 export default function RegisterComplete() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // 前の画面から受け取ったデータ
-  const state = location.state || {};
 
   // ユーザー統計
   const [stats, setStats] = useState<{
