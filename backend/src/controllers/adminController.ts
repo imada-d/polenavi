@@ -219,3 +219,38 @@ export async function deletePole(
     next(error);
   }
 }
+
+/**
+ * ユーザーを削除（アカウントのみ、データは残す）
+ */
+export async function deleteUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = parseInt(req.params.id);
+    const adminUserId = (req as any).user?.userId;
+
+    // 自分自身は削除できない
+    if (userId === adminUserId) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'CANNOT_DELETE_SELF',
+          message: '自分自身を削除することはできません',
+        },
+      });
+      return;
+    }
+
+    await adminService.deleteUser(userId);
+
+    res.json({
+      success: true,
+      message: 'ユーザーを削除しました',
+    });
+  } catch (error) {
+    next(error);
+  }
+}

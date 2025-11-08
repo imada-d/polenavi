@@ -16,6 +16,7 @@ router.get('/users', adminController.getUsers);
 router.get('/users/:id', adminController.getUserDetail);
 router.patch('/users/:id', adminController.updateUser);
 router.get('/users/:id/activity', adminController.getUserActivity);
+router.delete('/users/:id', adminController.deleteUser);
 
 // 通報管理
 router.get('/reports', adminController.getReports);

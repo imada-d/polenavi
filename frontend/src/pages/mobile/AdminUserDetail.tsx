@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getUserDetail, updateUser } from '../../api/admin';
+import { getUserDetail, updateUser, deleteUser } from '../../api/admin';
 import type { UserDetail } from '../../api/admin';
 
 export default function AdminUserDetail() {
@@ -52,6 +52,29 @@ export default function AdminUserDetail() {
     } catch (error) {
       console.error('更新に失敗:', error);
       alert('更新に失敗しました');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user) return;
+
+    const confirmed = window.confirm(
+      `ユーザー「${user.username}」を削除してもよろしいですか？\n\n` +
+      '⚠️ この操作は取り消せません。\n' +
+      '❌ ユーザーアカウント、メモ、ハッシュタグは削除されます。\n' +
+      '✅ 投稿した電柱・写真は残ります。'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteUser(user.id);
+      alert('ユーザーを削除しました');
+      navigate('/admin/users');
+    } catch (error: any) {
+      console.error('削除に失敗:', error);
+      const errorMessage = error.response?.data?.error?.message || '削除に失敗しました';
+      alert(errorMessage);
     }
   };
 
@@ -262,6 +285,22 @@ export default function AdminUserDetail() {
             </div>
           )}
         </div>
+
+        {/* 危険な操作 */}
+        {!editing && (
+          <div className="bg-white rounded-lg shadow-sm border border-red-200 p-4 mb-20">
+            <h2 className="font-bold text-red-600 mb-2">危険な操作</h2>
+            <p className="text-sm text-gray-600 mb-3">
+              このユーザーアカウント、メモ、ハッシュタグを削除します。投稿した電柱・写真は残ります。
+            </p>
+            <button
+              onClick={handleDelete}
+              className="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700"
+            >
+              ユーザーを削除
+            </button>
+          </div>
+        )}
 
         {/* 編集ボタン */}
         {editing && (

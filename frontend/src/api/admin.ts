@@ -105,6 +105,14 @@ export async function updateUser(
 }
 
 /**
+ * ユーザーを削除（アカウントのみ、投稿データは残す）
+ */
+export async function deleteUser(userId: number) {
+  const response = await apiClient.delete(`/admin/users/${userId}`);
+  return response.data;
+}
+
+/**
  * ユーザーのアクティビティを取得
  */
 export async function getUserActivity(

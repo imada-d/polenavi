@@ -669,3 +669,50 @@ export async function deletePole(poleId: number) {
 
   return { success: true };
 }
+
+/**
+ * ユーザーを削除（管理者のみ）
+ * アカウント、メモ、ハッシュタグを削除し、投稿データ（電柱、写真）は残す
+ */
+export async function deleteUser(userId: number) {
+  // ユーザーが存在するか確認
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new NotFoundError('ユーザーが見つかりません');
+  }
+
+  // トランザクションで削除
+  await prisma.$transaction(async (tx) => {
+    // 1. リフレッシュトークンを削除
+    await tx.refreshToken.deleteMany({
+      where: { userId },
+    });
+
+    // 2. ユーザーレポートを削除（通報者として）
+    await tx.report.deleteMany({
+      where: { reportedBy: userId },
+    });
+
+    // 3. ユーザーハッシュタグを削除
+    await tx.userHashtag.deleteMany({
+      where: { userId },
+    });
+
+    // 4. ユーザーのメモを削除（ハッシュタグはメモ内に配列として保存されている）
+    await tx.poleMemo.deleteMany({
+      where: { createdBy: userId },
+    });
+
+    // 5. ユーザーアカウントを削除
+    // 注意: registeredBy, uploadedBy等の外部キーは
+    // nullableまたはonDelete: SetNullに設定されている前提
+    await tx.user.delete({
+      where: { id: userId },
+    });
+  });
+
+  return { success: true, message: 'ユーザーを削除しました（電柱・写真は保持されます）' };
+}

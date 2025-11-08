@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUsers } from '../../api/admin';
+import { getUsers, deleteUser } from '../../api/admin';
 import type { AdminUser } from '../../api/admin';
 
 export default function AdminUsers() {
@@ -38,6 +38,29 @@ export default function AdminUsers() {
   const handleSearch = (value: string) => {
     setSearch(value);
     setPage(1);
+  };
+
+  const handleDelete = async (e: React.MouseEvent, user: AdminUser) => {
+    e.stopPropagation(); // カードのクリックイベントを止める
+
+    const confirmed = window.confirm(
+      `ユーザー「${user.username}」を削除してもよろしいですか？\n\n` +
+      '⚠️ この操作は取り消せません。\n' +
+      '❌ ユーザーアカウント、メモ、ハッシュタグは削除されます。\n' +
+      '✅ 投稿した電柱・写真は残ります。'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteUser(user.id);
+      alert('ユーザーを削除しました');
+      loadUsers(); // リストを再読み込み
+    } catch (error: any) {
+      console.error('削除に失敗:', error);
+      const errorMessage = error.response?.data?.error?.message || '削除に失敗しました';
+      alert(errorMessage);
+    }
   };
 
   return (
@@ -133,8 +156,16 @@ export default function AdminUsers() {
                   </div>
                 </div>
 
-                <div className="mt-3 text-xs text-gray-500">
-                  登録日: {new Date(user.createdAt).toLocaleDateString('ja-JP')}
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="text-xs text-gray-500">
+                    登録日: {new Date(user.createdAt).toLocaleDateString('ja-JP')}
+                  </div>
+                  <button
+                    onClick={(e) => handleDelete(e, user)}
+                    className="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1 border border-red-300 rounded hover:bg-red-50"
+                  >
+                    削除
+                  </button>
                 </div>
 
                 {!user.isActive && (
