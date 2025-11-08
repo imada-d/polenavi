@@ -3,7 +3,7 @@
 
 import express from 'express';
 import * as groupController from '../controllers/groupController';
-import { authenticateToken } from '../middleware/auth';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
