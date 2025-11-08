@@ -11,7 +11,6 @@ export default function RegisterComplete() {
 
   // 前の画面から受け取ったデータ
   const state = location.state || {};
-  const { photoCount } = state;
 
   // ユーザー統計
   const [stats, setStats] = useState<{
