@@ -134,17 +134,18 @@ export default function Groups() {
               </>
             )}
 
-          {/* グループ機能の説明 */}
-          <div className="bg-blue-50 rounded-lg p-4 mt-4">
-            <h3 className="font-bold text-blue-900 mb-2">💡 グループ機能とは？</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• チームや組織で電柱を管理</li>
-              <li>• グループ専用のメモ・タグ</li>
-              <li>• 役割に応じた権限設定</li>
-              <li>• CSVエクスポートで報告書作成</li>
-            </ul>
+            {/* グループ機能の説明 */}
+            <div className="bg-blue-50 rounded-lg p-4 mt-4">
+              <h3 className="font-bold text-blue-900 mb-2">💡 グループ機能とは？</h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• チームや組織で電柱を管理</li>
+                <li>• グループ専用のメモ・タグ</li>
+                <li>• 役割に応じた権限設定</li>
+                <li>• CSVエクスポートで報告書作成</li>
+              </ul>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ボトムナビ */}
