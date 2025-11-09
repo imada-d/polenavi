@@ -3,6 +3,8 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import HashtagSelector from '../../components/hashtag/HashtagSelector';
+import HashtagChip from '../../components/hashtag/HashtagChip';
 
 export default function RegisterMemo() {
   const navigate = useNavigate();
@@ -12,8 +14,9 @@ export default function RegisterMemo() {
   const state = location.state || {};
 
   // メモ・ハッシュタグの状態
-  const [hashtags, setHashtags] = useState<string>('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [memoText, setMemoText] = useState<string>('');
+  const [showHashtagSelector, setShowHashtagSelector] = useState(false);
 
   // スキップ（メモなしで次へ）
   const handleSkip = () => {
@@ -28,12 +31,10 @@ export default function RegisterMemo() {
 
   // 次へ（メモありで次へ）
   const handleNext = () => {
-    // ハッシュタグを配列に変換
-    const hashtagArray = hashtags
-      .split(/[,、\s]+/) // カンマ、全角カンマ、スペースで分割
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0)
-      .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`)); // #を自動追加
+    // ハッシュタグ配列を#付きに変換
+    const hashtagArray = selectedTags.map((tag) =>
+      tag.startsWith('#') ? tag : `#${tag}`
+    );
 
     navigate('/register/confirm', {
       state: {
@@ -56,18 +57,46 @@ export default function RegisterMemo() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
-        {/* ハッシュタグ入力 */}
+        {/* ハッシュタグ選択 */}
         <div className="mb-6">
-          <label className="block text-lg font-bold mb-2">🏷️ ハッシュタグ</label>
-          <input
-            type="text"
-            value={hashtags}
-            onChange={(e) => setHashtags(e.target.value)}
-            placeholder="#防犯灯 #LED"
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-lg font-bold">🏷️ ハッシュタグ</label>
+            <button
+              onClick={() => setShowHashtagSelector(true)}
+              className="text-blue-600 text-sm font-semibold hover:text-blue-700"
+            >
+              タグを選択
+            </button>
+          </div>
+
+          {/* 選択されたタグ */}
+          {selectedTags.length > 0 ? (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {selectedTags.map((tag) => (
+                <HashtagChip
+                  key={tag}
+                  hashtag={tag}
+                  onRemove={() =>
+                    setSelectedTags(selectedTags.filter((t) => t !== tag))
+                  }
+                  size="md"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-gray-100 rounded-lg p-4 text-center mb-3">
+              <p className="text-gray-500 text-sm">タグが選択されていません</p>
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowHashtagSelector(true)}
+            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors"
+          >
+            ＋ タグを選択・作成
+          </button>
           <p className="text-sm text-gray-500 mt-2">
-            💡 カンマ、スペースで区切って複数入力できます
+            💡 ハッシュタグで検索・分類がしやすくなります
           </p>
         </div>
 
@@ -91,7 +120,9 @@ export default function RegisterMemo() {
           <p className="text-sm text-gray-700">
             <strong>💡 ヒント</strong>
             <br />
-            ・ハッシュタグで検索しやすくなります
+            ・ハッシュタグで検索・絞り込みができます
+            <br />
+            ・独自のタグを作成して色分けできます
             <br />
             ・メモは個人的な管理用に使えます
             <br />
@@ -99,6 +130,15 @@ export default function RegisterMemo() {
           </p>
         </div>
       </main>
+
+      {/* ハッシュタグ選択モーダル */}
+      {showHashtagSelector && (
+        <HashtagSelector
+          selectedTags={selectedTags}
+          onTagsChange={setSelectedTags}
+          onClose={() => setShowHashtagSelector(false)}
+        />
+      )}
 
       {/* ボタンエリア */}
       <div className="p-4 bg-white border-t space-y-3">

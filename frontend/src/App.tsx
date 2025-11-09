@@ -46,6 +46,7 @@ import RegisterMemo from './pages/mobile/RegisterMemo';
 import RegisterConfirm from './pages/mobile/RegisterConfirm';
 import RegisterComplete from './pages/mobile/RegisterComplete';
 import GroupDetail from './pages/mobile/GroupDetail';
+import HashtagManager from './pages/mobile/HashtagManager';
 
 
 
@@ -81,6 +82,7 @@ function AppContent() {
     location.pathname === '/terms' ||
     location.pathname === '/privacy' ||
     location.pathname.startsWith('/hashtag/') ||
+    location.pathname === '/hashtags' ||
     location.pathname === '/stats' ||
     location.pathname.startsWith('/admin');
 
@@ -91,6 +93,7 @@ function AppContent() {
         <Route path="/search" element={<ResponsiveWrapper mobile={SearchMobile} pc={SearchPC} />} />
         <Route path="/groups" element={<ResponsiveWrapper mobile={GroupsMobile} pc={GroupsPC} />} />
         <Route path="/groups/:id" element={<GroupDetail />} />
+        <Route path="/hashtags" element={<HashtagManager />} />
         <Route path="/mypage" element={<ResponsiveWrapper mobile={MyPageMobile} pc={MyPagePC} />} />
         <Route path="/profile/edit" element={<ResponsiveWrapper mobile={ProfileEditMobile} pc={ProfileEditPC} />} />
         <Route path="/mydata" element={<ResponsiveWrapper mobile={MyDataMobile} pc={MyDataPC} />} />
