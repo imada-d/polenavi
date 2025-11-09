@@ -34,10 +34,16 @@ app.use(express.urlencoded({ extended: true })); // URLエンコード
 app.use(cookieParser()); // Cookie解析
 
 // 静的ファイル配信（アップロード画像）
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+const uploadsPath = path.join(__dirname, '../public/uploads');
+console.log('📁 Uploads path:', uploadsPath);
+app.use('/uploads', (req, _res, next) => {
+  console.log('🖼️ [Backend] 画像リクエスト:', req.path);
+  next();
+}, express.static(uploadsPath));
 
 // フロントエンドの静的ファイル配信（本番環境用）
 const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+console.log('📁 Frontend dist path:', frontendDistPath);
 app.use(express.static(frontendDistPath));
 
 // ヘルスチェック
