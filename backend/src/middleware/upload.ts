@@ -17,9 +17,9 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 // なぜ: uploadsフォルダに整理して保存し、ファイル名の重複を防ぐため
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    // 何を: uploadsフォルダに保存
-    // なぜ: アップロードされたファイルを一箇所にまとめるため
-    cb(null, 'uploads/');
+    // 何を: public/uploads/polesフォルダに保存
+    // なぜ: Expressの静的ファイル配信と合わせるため
+    cb(null, 'public/uploads/poles/');
   },
   filename: (_req, file, cb) => {
     // 何を: タイムスタンプとランダム文字列でファイル名を生成
