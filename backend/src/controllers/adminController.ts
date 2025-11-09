@@ -254,3 +254,41 @@ export async function deleteUser(
     next(error);
   }
 }
+
+/**
+ * 電柱一覧を取得
+ */
+export async function getPoles(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const {
+      page,
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+      prefecture,
+      poleType,
+    } = req.query;
+
+    const result = await adminService.getPoles({
+      page: page ? parseInt(page as string) : undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+      search: search as string,
+      sortBy: sortBy as 'createdAt' | 'photoCount' | 'numberCount' | 'updatedAt' | undefined,
+      sortOrder: sortOrder as 'asc' | 'desc' | undefined,
+      prefecture: prefecture as string,
+      poleType: poleType as string,
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+}

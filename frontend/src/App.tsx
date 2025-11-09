@@ -28,6 +28,8 @@ import AdminReportsMobile from './pages/mobile/AdminReports';
 import AdminReportsPC from './pages/pc/AdminReportsPC';
 import AdminReportDetailMobile from './pages/mobile/AdminReportDetail';
 import AdminReportDetailPC from './pages/pc/AdminReportDetailPC';
+import AdminPolesMobile from './pages/mobile/AdminPoles';
+import AdminPolesPC from './pages/pc/AdminPolesPC';
 import SearchPC from './pages/pc/SearchPC';
 import ProtectedRoute from './components/ProtectedRoute';
 import GroupsPC from './pages/pc/GroupsPC';
@@ -110,6 +112,7 @@ function AppContent() {
         <Route path="/admin/users/:id" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminUserDetailMobile} pc={AdminUserDetailPC} /></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminReportsMobile} pc={AdminReportsPC} /></ProtectedRoute>} />
         <Route path="/admin/reports/:id" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminReportDetailMobile} pc={AdminReportDetailPC} /></ProtectedRoute>} />
+        <Route path="/admin/poles" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminPolesMobile} pc={AdminPolesPC} /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pole/:id" element={<PoleDetail />} />

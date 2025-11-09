@@ -74,13 +74,20 @@ export default function AdminDashboardPC() {
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             クイックアクション
           </h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <button
               onClick={() => navigate('/admin/users')}
               className="bg-blue-50 text-blue-700 py-4 rounded-lg font-semibold hover:bg-blue-100 transition-colors flex items-center justify-between px-6"
             >
               <span className="text-lg">👥 ユーザー管理</span>
               <span className="text-blue-600 text-2xl">→</span>
+            </button>
+            <button
+              onClick={() => navigate('/admin/poles')}
+              className="bg-green-50 text-green-700 py-4 rounded-lg font-semibold hover:bg-green-100 transition-colors flex items-center justify-between px-6"
+            >
+              <span className="text-lg">📍 電柱管理</span>
+              <span className="text-green-600 text-2xl">→</span>
             </button>
             <button
               onClick={() => navigate('/admin/reports')}

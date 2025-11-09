@@ -671,6 +671,116 @@ export async function deletePole(poleId: number) {
 }
 
 /**
+ * 電柱一覧を取得（管理者用）
+ */
+export async function getPoles(params: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: 'createdAt' | 'photoCount' | 'numberCount' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
+  prefecture?: string;
+  poleType?: string;
+}) {
+  const {
+    page = 1,
+    limit = 20,
+    search,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+    prefecture,
+    poleType,
+  } = params;
+
+  const skip = (page - 1) * limit;
+
+  // 検索条件の構築
+  const where: any = {};
+
+  // 電柱番号または都道府県で検索
+  if (search) {
+    where.OR = [
+      {
+        poleNumbers: {
+          some: {
+            poleNumber: { contains: search, mode: 'insensitive' },
+          },
+        },
+      },
+      {
+        prefecture: { contains: search, mode: 'insensitive' },
+      },
+    ];
+  }
+
+  // 都道府県フィルター
+  if (prefecture) {
+    where.prefecture = prefecture;
+  }
+
+  // 柱の種類フィルター
+  if (poleType) {
+    where.poleTypeName = poleType;
+  }
+
+  // 電柱一覧とトータル件数を並列取得
+  const [poles, total] = await Promise.all([
+    prisma.pole.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { [sortBy]: sortOrder },
+      select: {
+        id: true,
+        latitude: true,
+        longitude: true,
+        prefecture: true,
+        poleTypeName: true,
+        primaryPhotoUrl: true,
+        photoCount: true,
+        numberCount: true,
+        createdAt: true,
+        updatedAt: true,
+        poleNumbers: {
+          take: 3, // 最初の3件のみ
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            poleNumber: true,
+            operatorName: true,
+            registeredByName: true,
+            createdAt: true,
+          },
+        },
+        _count: {
+          select: {
+            photos: {
+              where: { deletedAt: null },
+            },
+            memos: true,
+          },
+        },
+      },
+    }),
+    prisma.pole.count({ where }),
+  ]);
+
+  return {
+    poles: poles.map((pole) => ({
+      ...pole,
+      memoCount: pole._count.memos,
+      _count: undefined, // _countを除外
+    })),
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+/**
  * ユーザーを削除（管理者のみ）
  * アカウント、メモ、ハッシュタグを削除し、投稿データ（電柱、写真）は残す
  */

@@ -208,6 +208,52 @@ export async function reviewReport(
 // 電柱管理
 // ========================================
 
+export interface AdminPole {
+  id: number;
+  latitude: number;
+  longitude: number;
+  prefecture: string | null;
+  estimatedAddress: string | null;
+  createdAt: string;
+  updatedAt: string;
+  photoCount: number;
+  memoCount: number;
+  poleNumbers: Array<{
+    id: number;
+    poleNumber: string;
+    operatorName: string;
+  }>;
+  user: {
+    id: number;
+    username: string;
+    displayName: string | null;
+  };
+}
+
+/**
+ * 電柱一覧を取得
+ */
+export async function getPoles(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: 'createdAt' | 'photoCount' | 'numberCount' | 'updatedAt';
+  sortOrder?: 'asc' | 'desc';
+  prefecture?: string;
+  poleType?: string;
+}) {
+  const response = await apiClient.get('/admin/poles', { params });
+  return response.data.data as {
+    poles: AdminPole[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  };
+}
+
 /**
  * 電柱を削除（管理者のみ）
  */

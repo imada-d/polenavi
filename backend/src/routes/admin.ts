@@ -24,6 +24,7 @@ router.get('/reports/:id', adminController.getReportDetail);
 router.patch('/reports/:id', adminController.reviewReport);
 
 // 電柱管理
+router.get('/poles', adminController.getPoles);
 router.delete('/poles/:id', adminController.deletePole);
 
 export default router;

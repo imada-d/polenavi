@@ -77,6 +77,13 @@ export default function AdminDashboard() {
               <span className="text-blue-600">→</span>
             </button>
             <button
+              onClick={() => navigate('/admin/poles')}
+              className="w-full bg-green-50 text-green-700 py-3 rounded-lg font-semibold text-sm hover:bg-green-100 transition-colors flex items-center justify-between px-4"
+            >
+              <span>📍 電柱管理</span>
+              <span className="text-green-600">→</span>
+            </button>
+            <button
               onClick={() => navigate('/admin/reports')}
               className="w-full bg-gray-50 text-gray-600 py-3 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors flex items-center justify-between px-4"
             >
