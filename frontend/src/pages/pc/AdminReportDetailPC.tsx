@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../../components/pc/Header';
 import { getReportDetail, reviewReport } from '../../api/admin';
 import type { ReportDetail } from '../../api/admin';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function AdminReportDetailPC() {
   const navigate = useNavigate();
@@ -186,7 +187,7 @@ export default function AdminReportDetailPC() {
                       </div>
                     )}
                     <img
-                      src={report.targetData.photoUrl}
+                      src={getFullImageUrl(report.targetData.photoUrl)}
                       alt="通報対象の写真"
                       className="w-full max-w-md rounded-lg"
                     />
@@ -219,7 +220,7 @@ export default function AdminReportDetailPC() {
                     <p className="text-sm text-gray-600">事業者: {report.targetData.operatorName}</p>
                     {report.targetData.photoUrl && (
                       <img
-                        src={report.targetData.photoUrl}
+                        src={getFullImageUrl(report.targetData.photoUrl)}
                         alt="電柱番号の写真"
                         className="mt-3 w-full max-w-md rounded-lg"
                       />

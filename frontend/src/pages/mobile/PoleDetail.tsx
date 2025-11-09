@@ -10,6 +10,7 @@ import { getPoleById } from '../../api/poles';
 import { deletePole } from '../../api/admin';
 import { calculateDistance } from '../../utils/distance';
 import { useAuth } from '../../contexts/AuthContext';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 export default function PoleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -285,9 +286,9 @@ export default function PoleDetail() {
                 {poleData.photos.map((photo: any, index: number) => (
                   <div key={index} className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden">
                     <img
-                      src={photo.photoUrl}
+                      src={getFullImageUrl(photo.photoUrl)}
                       alt={`写真${index + 1}`}
-                      onClick={() => setPreviewPhoto(photo.photoUrl)}
+                      onClick={() => setPreviewPhoto(getFullImageUrl(photo.photoUrl))}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     />
                     {FEATURES.LIKES_ENABLED && (

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getMyPoles, getMyMemos, getMyPhotos, getMyHashtags } from '../../api/user';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 type Tab = 'poles' | 'memos' | 'photos' | 'hashtags';
 
@@ -220,7 +221,7 @@ export default function MyData() {
                       className="bg-white rounded-lg shadow-sm border overflow-hidden"
                     >
                       <img
-                        src={photo.photoUrl}
+                        src={getFullImageUrl(photo.photoUrl)}
                         alt="電柱写真"
                         className="w-full h-32 object-cover cursor-pointer"
                         onClick={() => navigate(`/pole/${photo.pole.id}`)}

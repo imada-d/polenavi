@@ -10,6 +10,7 @@ import { calculateDistance } from '../../utils/distance';
 import { uploadPolePhoto, getPoleById, addPoleNumber, updatePoleLocation } from '../../api/poles';
 import { createMemo, deleteMemo } from '../../api/memos';
 import { createDeleteRequest } from '../../api/reports';
+import { getFullImageUrl } from '../../utils/imageUrl';
 
 interface PoleDetailPanelProps {
   poleId: number;
@@ -554,9 +555,9 @@ export default function PoleDetailPanel({
                 {poleData.photos.map((photo: any, index: number) => (
                   <div key={index} className="relative aspect-square bg-gray-200 rounded-lg overflow-hidden">
                     <img
-                      src={photo.photoUrl}
+                      src={getFullImageUrl(photo.photoUrl)}
                       alt={`写真${index + 1}`}
-                      onClick={() => setPreviewPhoto(photo.photoUrl)}
+                      onClick={() => setPreviewPhoto(getFullImageUrl(photo.photoUrl))}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                     />
                     {FEATURES.LIKES_ENABLED && (
