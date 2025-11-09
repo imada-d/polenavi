@@ -63,6 +63,13 @@ export default function AdminPolesPC() {
     return poleNumbers.length > 3 ? `${display}...` : display;
   };
 
+  const getSortIcon = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      return sortOrder === 'asc' ? ' ▲' : ' ▼';
+    }
+    return ' ⇅';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -109,8 +116,12 @@ export default function AdminPolesPC() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
-                        電柱番号
+                      <th
+                        className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        onClick={() => handleSort('numberCount')}
+                        title="クリックでソート"
+                      >
+                        電柱番号{getSortIcon('numberCount')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                         位置情報
@@ -119,10 +130,11 @@ export default function AdminPolesPC() {
                         緯度・経度
                       </th>
                       <th
-                        className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
+                        className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none"
                         onClick={() => handleSort('photoCount')}
+                        title="クリックでソート"
                       >
-                        写真 {sortBy === 'photoCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+                        写真{getSortIcon('photoCount')}
                       </th>
                       <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
                         メモ
@@ -131,10 +143,18 @@ export default function AdminPolesPC() {
                         登録者
                       </th>
                       <th
-                        className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100"
+                        className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none"
                         onClick={() => handleSort('createdAt')}
+                        title="クリックでソート"
                       >
-                        登録日 {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
+                        登録日{getSortIcon('createdAt')}
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                        onClick={() => handleSort('updatedAt')}
+                        title="クリックでソート"
+                      >
+                        更新日{getSortIcon('updatedAt')}
                       </th>
                     </tr>
                   </thead>
@@ -177,6 +197,9 @@ export default function AdminPolesPC() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">
                           {new Date(pole.createdAt).toLocaleDateString('ja-JP')}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {new Date(pole.updatedAt).toLocaleDateString('ja-JP')}
                         </td>
                       </tr>
                     ))}
