@@ -226,7 +226,17 @@ export default function Signup() {
 
           {/* 注意事項 */}
           <div className="mt-6 text-center text-xs text-gray-500">
-            <p>このサービスを利用することで、利用規約とプライバシーポリシーに同意したものとみなされます。</p>
+            <p>
+              このサービスを利用することで、
+              <Link to="/terms" className="text-green-600 hover:underline mx-1">
+                利用規約
+              </Link>
+              と
+              <Link to="/privacy" className="text-green-600 hover:underline mx-1">
+                プライバシーポリシー
+              </Link>
+              に同意したものとみなされます。
+            </p>
           </div>
         </div>
       </div>

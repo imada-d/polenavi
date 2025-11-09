@@ -105,6 +105,16 @@ export default function Terms() {
           <div className="text-center">
             <p className="text-sm text-gray-500">運営：imada-lab</p>
           </div>
+
+          {/* 関連リンク */}
+          <div className="pt-6 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-600">
+              関連リンク：
+              <a href="/privacy" className="text-blue-600 hover:underline mx-2">
+                プライバシーポリシー
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
