@@ -768,6 +768,8 @@ export async function getPoles(params: {
   return {
     poles: poles.map((pole) => ({
       ...pole,
+      latitude: Number(pole.latitude),
+      longitude: Number(pole.longitude),
       memoCount: pole._count.memos,
       _count: undefined, // _countを除外
     })),

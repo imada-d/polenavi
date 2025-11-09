@@ -103,9 +103,6 @@ export default function AdminPoles() {
                 <div className="mt-2 text-sm text-gray-700">
                   📍 {pole.prefecture || '不明'}
                 </div>
-                <div className="text-xs text-gray-500">
-                  {pole.estimatedAddress || '住所不明'}
-                </div>
 
                 {/* 緯度・経度 */}
                 <div className="mt-2 text-xs text-gray-500 font-mono">
@@ -129,14 +126,13 @@ export default function AdminPoles() {
                 </div>
 
                 {/* 登録者と日付 */}
-                <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
+                <div className="mt-3 text-xs text-gray-500">
                   <div>
-                    登録者: {pole.user.displayName || pole.user.username}
-                    <span className="ml-1 text-gray-400">@{pole.user.username}</span>
+                    登録者: {pole.poleNumbers[0]?.registeredByName || '不明'}
                   </div>
-                </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  登録日: {new Date(pole.createdAt).toLocaleDateString('ja-JP')}
+                  <div className="mt-1">
+                    登録日: {new Date(pole.createdAt).toLocaleDateString('ja-JP')}
+                  </div>
                 </div>
               </div>
             ))}

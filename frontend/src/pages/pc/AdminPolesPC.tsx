@@ -154,9 +154,6 @@ export default function AdminPolesPC() {
                           <div className="text-sm text-gray-800">
                             {pole.prefecture || '不明'}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {pole.estimatedAddress || '住所不明'}
-                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-xs text-gray-600 font-mono">
@@ -175,10 +172,7 @@ export default function AdminPolesPC() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm text-gray-800">
-                            {pole.user.displayName || pole.user.username}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            @{pole.user.username}
+                            {pole.poleNumbers[0]?.registeredByName || '不明'}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">

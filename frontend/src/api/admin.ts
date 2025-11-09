@@ -213,7 +213,6 @@ export interface AdminPole {
   latitude: number;
   longitude: number;
   prefecture: string | null;
-  estimatedAddress: string | null;
   createdAt: string;
   updatedAt: string;
   photoCount: number;
@@ -222,12 +221,8 @@ export interface AdminPole {
     id: number;
     poleNumber: string;
     operatorName: string;
+    registeredByName: string | null;
   }>;
-  user: {
-    id: number;
-    username: string;
-    displayName: string | null;
-  };
 }
 
 /**
