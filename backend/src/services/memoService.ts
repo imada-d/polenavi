@@ -49,6 +49,8 @@ export async function createMemo(data: CreateMemoRequest) {
       createdBy: data.createdBy,
       createdByName: data.createdByName,
       isPublic: data.isPublic ?? true,
+      visibility: 'public', // グループ機能対応
+      groupId: null,
     },
   });
 
