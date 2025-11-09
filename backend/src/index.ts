@@ -36,6 +36,10 @@ app.use(cookieParser()); // Cookie解析
 // 静的ファイル配信（アップロード画像）
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
+// フロントエンドの静的ファイル配信（本番環境用）
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDistPath));
+
 // ヘルスチェック
 app.get('/health', (_req, res) => {
   res.json({
@@ -67,7 +71,26 @@ app.use('/api/groups', groupsRouter);
 app.use('/api/invitations', invitationsRouter);
 app.use('/api/hashtags', hashtagsRouter);
 
-// 404ハンドラー
+// SPA用のフォールバック（すべてのGETリクエストをindex.htmlに）
+// APIルートは既に処理済みなので、残りはフロントエンドのルート
+app.get('*', (req, res): void => {
+  // APIリクエストの場合は404を返す
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({
+      success: false,
+      error: {
+        code: 'NOT_FOUND',
+        message: 'リクエストされたリソースが見つかりません',
+        path: req.path
+      }
+    });
+    return;
+  }
+  // それ以外はフロントエンドのindex.htmlを返す（SPAルーティング）
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
+
+// 404ハンドラー（APIのみ）
 app.use((req, res) => {
   res.status(404).json({
     success: false,

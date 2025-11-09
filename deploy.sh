@@ -44,7 +44,8 @@ echo ""
 echo "♻️  5/6: PM2再起動..."
 cd ..
 pm2 restart polenavi-backend
-pm2 restart polenavi-frontend
+# フロントエンドは不要（バックエンドで提供）
+# pm2 delete polenavi-frontend 2>/dev/null || true
 echo "✅ PM2再起動完了"
 echo ""
 
