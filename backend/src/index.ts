@@ -78,10 +78,10 @@ app.use('/api/invitations', invitationsRouter);
 app.use('/api/hashtags', hashtagsRouter);
 
 // SPA用のフォールバック（すべてのGETリクエストをindex.htmlに）
-// APIルートは既に処理済みなので、残りはフロントエンドのルート
+// APIルートと静的ファイルは既に処理済みなので、残りはフロントエンドのルート
 app.get('*', (req, res): void => {
-  // APIリクエストの場合は404を返す
-  if (req.path.startsWith('/api/')) {
+  // APIリクエストまたは静的ファイルの場合は処理しない（next()で次のミドルウェアへ）
+  if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
     res.status(404).json({
       success: false,
       error: {
