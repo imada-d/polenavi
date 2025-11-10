@@ -48,6 +48,19 @@ export default function RegisterNumberInput() {
   // デバッグ表示用
   const showDebugInfo = true;
 
+  // デバッグ用アラート（初回マウント時のみ）
+  useEffect(() => {
+    const receivedData = {
+      hasLocation: !!pinLocation,
+      poleType: poleType || 'なし',
+      plateCount: plateCount ?? 'なし',
+      hasPhotos: !!photos,
+      photosKeys: photos ? Object.keys(photos) : null,
+      registrationMethod: registrationMethod || 'なし',
+    };
+    alert('🐛 NumberInput 受け取ったデータ\n\n' + JSON.stringify(receivedData, null, 2));
+  }, []); // 初回マウント時のみ実行
+
   // 入力された番号の配列
   // 何を: 各番号札の番号を配列で管理
   // なぜ: 複数の番号札に対応するため
