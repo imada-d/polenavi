@@ -50,14 +50,29 @@ export default function PhotoRegisterPoleInfo() {
       return;
     }
 
-    // 写真データを確実に渡して番号入力画面へ
+    // 0枚の場合は番号入力をスキップしてメモ画面へ
+    if (plateCount === 0) {
+      navigate('/register/photo/memo', {
+        state: {
+          location: pinLocation,
+          poleType,
+          poleSubType,
+          plateCount,
+          numbers: [], // 空配列（自動生成される）
+          photos,
+        },
+      });
+      return;
+    }
+
+    // 1枚以上の場合は番号入力画面へ
     navigate('/register/photo/number-input', {
       state: {
         location: pinLocation,
         poleType,
         poleSubType,
         plateCount,
-        photos, // 写真データを確実に保持
+        photos,
       },
     });
   };
@@ -103,7 +118,7 @@ export default function PhotoRegisterPoleInfo() {
             onClick={handleNext}
             className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"
           >
-            次へ（番号入力）
+            {plateCount === 0 ? '次へ（メモ入力）' : '次へ（番号入力）'}
           </button>
         </div>
       )}

@@ -78,23 +78,39 @@ export default function RegisterPhotoClassify() {
     const platePhoto = photos.find(p => p.type === 'plate')?.dataUrl;
     const fullPhotos = photos.filter(p => p.type === 'full').map(p => p.dataUrl);
     const detailPhotos = photos.filter(p => p.type === 'detail').map(p => p.dataUrl);
-    
-    // 次の画面（番号入力）へ遷移
-  // alert を削除して navigate を有効化
-  navigate('/register/number-input', { 
-    state: { 
-      location: pinLocation,
-      poleType,
-      poleSubType,
-      plateCount,
-      photos: {
-        plate: platePhoto,
-        full: fullPhotos,
-        detail: detailPhotos
+
+    const photosData = {
+      plate: platePhoto,
+      full: fullPhotos,
+      detail: detailPhotos
+    };
+
+    // 番号札が0枚の場合は番号入力をスキップしてメモ画面へ
+    if (plateCount === 0) {
+      navigate('/register/memo', {
+        state: {
+          location: pinLocation,
+          poleType,
+          poleSubType,
+          plateCount,
+          numbers: [], // 空配列（自動生成される）
+          photos: photosData
+        }
+      });
+      return;
+    }
+
+    // 1枚以上の場合は番号入力画面へ
+    navigate('/register/number-input', {
+      state: {
+        location: pinLocation,
+        poleType,
+        poleSubType,
+        plateCount,
+        photos: photosData
       }
-    } 
-  });
-};
+    });
+  };
 
   // 番号札が選択されているか
   const hasPlatePhoto = photos.some(p => p.type === 'plate');
@@ -251,7 +267,7 @@ export default function RegisterPhotoClassify() {
           onClick={handleNext}
           className="w-full py-3 rounded-lg font-bold text-lg bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400"
         >
-          次へ（番号入力）
+          {plateCount === 0 ? '次へ（メモ入力）' : '次へ（番号入力）'}
         </button>
       </div>
     </div>
