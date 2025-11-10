@@ -30,7 +30,8 @@ export default function RegisterNumberInput() {
     poleType,
     poleSubType,
     plateCount,
-    photos
+    photos,
+    registrationMethod
   } = location.state || {};
   
   // 入力された番号の配列
@@ -215,7 +216,8 @@ export default function RegisterNumberInput() {
         poleSubType,
         plateCount,
         numbers: finalNumbers,
-        photos
+        photos,
+        registrationMethod
       }
     });
   };

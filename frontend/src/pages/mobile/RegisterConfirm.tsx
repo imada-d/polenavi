@@ -23,6 +23,7 @@ export default function RegisterConfirm() {
     photos,
     hashtags,
     memoText,
+    registrationMethod,
   } = state;
 
   // 柱の種類名を取得
@@ -61,7 +62,7 @@ export default function RegisterConfirm() {
         if (photos.plate) {
           setUploadProgress('番号札写真をアップロード中...');
           photoUploads.push(
-            uploadPhoto(poleId, photos.plate, 'plate')
+            uploadPhoto(poleId, photos.plate, 'plate', registrationMethod)
           );
         }
 
@@ -70,7 +71,7 @@ export default function RegisterConfirm() {
           setUploadProgress(`全体写真をアップロード中... (${photos.full.length}枚)`);
           for (const fullPhoto of photos.full) {
             photoUploads.push(
-              uploadPhoto(poleId, fullPhoto, 'full')
+              uploadPhoto(poleId, fullPhoto, 'full', registrationMethod)
             );
           }
         }
@@ -80,7 +81,7 @@ export default function RegisterConfirm() {
           setUploadProgress(`詳細写真をアップロード中... (${photos.detail.length}枚)`);
           for (const detailPhoto of photos.detail) {
             photoUploads.push(
-              uploadPhoto(poleId, detailPhoto, 'detail')
+              uploadPhoto(poleId, detailPhoto, 'detail', registrationMethod)
             );
           }
         }

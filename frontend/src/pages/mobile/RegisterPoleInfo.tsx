@@ -7,7 +7,7 @@ export default function RegisterPoleInfo() {
   
   // 前の画面（位置確認）から受け取ったデータ
   // pinLocation は [緯度, 経度] の配列
-  const { location: pinLocation } = location.state || {};
+  const { location: pinLocation, photos, registrationMethod } = location.state || {};
   
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
@@ -25,26 +25,40 @@ export default function RegisterPoleInfo() {
       alert('柱の種類を選択してください');
       return;
     }
-    
+
     if (poleType === 'other' && !poleSubType) {
       alert('詳細を選択してください');
       return;
     }
-    
+
     if (plateCount === null) {
       alert('番号札の枚数を選択してください');
       return;
     }
 
-    // 次の画面へ（写真分類）
-    // 0枚でも1枚以上でも同じ画面を使う
-    navigate('/register/photo-classify', { 
-      state: { 
+    // 写真から登録の場合は、写真分類画面をスキップして番号入力へ
+    if (photos && registrationMethod === 'photo-first') {
+      navigate('/register/number-input', {
+        state: {
+          location: pinLocation,
+          poleType,
+          poleSubType,
+          plateCount,
+          photos,
+          registrationMethod,
+        },
+      });
+      return;
+    }
+
+    // 通常の登録フロー：写真分類画面へ
+    navigate('/register/photo-classify', {
+      state: {
         location: pinLocation,  // 位置情報
         poleType,               // 柱の種類
         poleSubType,            // その他の詳細（poleType='other'の場合のみ）
         plateCount              // 番号札の枚数
-      } 
+      }
     });
 };
 

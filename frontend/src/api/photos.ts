@@ -51,7 +51,8 @@ function base64ToBlob(base64: string): Blob {
 export async function uploadPhoto(
   poleId: number,
   photoBase64: string,
-  photoType: 'plate' | 'full' | 'detail'
+  photoType: 'plate' | 'full' | 'detail',
+  registrationMethod?: 'location-first' | 'photo-first'
 ): Promise<any> {
   try {
     console.log(`📸 写真アップロード開始: poleId=${poleId}, type=${photoType}`);
@@ -63,6 +64,9 @@ export async function uploadPhoto(
     const formData = new FormData();
     formData.append('photo', blob, `${photoType}-${Date.now()}.jpg`);
     formData.append('photoType', photoType);
+    if (registrationMethod) {
+      formData.append('registrationMethod', registrationMethod);
+    }
 
     const response = await apiClient.post(`/poles/${poleId}/photos`, formData, {
       headers: {
