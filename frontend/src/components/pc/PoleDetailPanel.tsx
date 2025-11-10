@@ -446,11 +446,11 @@ export default function PoleDetailPanel({
 
     // 電柱マーカーを追加（位置修正モードではドラッグ可能に）
     const marker = L.marker([poleData.latitude, poleData.longitude], {
-      icon: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
+      icon: L.divIcon({
+        html: '<div style="background-color: #3b82f6; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+        className: 'custom-detail-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
       }),
       draggable: isEditingLocation,
     }).addTo(map);
