@@ -63,9 +63,8 @@ export default function RegisterPoleInfo() {
 
   // 「次へ」ボタンを表示する条件
   const canProceed =
-    poleType === 'electric'
-      ? plateCount !== null
-      : poleType === 'other' && poleSubType && plateCount !== null;
+    (poleType === 'electric' && plateCount !== null) ||
+    (poleType === 'other' && poleSubType !== null && plateCount !== null);
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50">
