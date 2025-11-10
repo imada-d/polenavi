@@ -20,6 +20,9 @@ export default function RegisterMemo() {
     photosKeys: state.photos ? Object.keys(state.photos) : null,
   });
 
+  // デバッグ表示用
+  const showDebugInfo = true;
+
   // メモ・ハッシュタグの状態
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [memoText, setMemoText] = useState<string>('');
@@ -64,6 +67,20 @@ export default function RegisterMemo() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
+        {/* デバッグ情報 */}
+        {showDebugInfo && (
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-3 mb-4">
+            <p className="text-xs font-bold text-yellow-800">🐛 Memo</p>
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-all">
+              {JSON.stringify({
+                hasPhotos: !!state.photos,
+                photosKeys: state.photos ? Object.keys(state.photos) : null,
+                registrationMethod: state.registrationMethod,
+              }, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* ハッシュタグ選択 */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">

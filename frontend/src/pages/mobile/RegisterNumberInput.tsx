@@ -44,7 +44,10 @@ export default function RegisterNumberInput() {
     photosKeys: photos ? Object.keys(photos) : null,
     registrationMethod,
   });
-  
+
+  // デバッグ表示用
+  const showDebugInfo = true;
+
   // 入力された番号の配列
   // 何を: 各番号札の番号を配列で管理
   // なぜ: 複数の番号札に対応するため
@@ -264,7 +267,21 @@ export default function RegisterNumberInput() {
       
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
-        
+
+        {/* デバッグ情報 */}
+        {showDebugInfo && (
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-3 mb-4">
+            <p className="text-xs font-bold text-yellow-800">🐛 NumberInput</p>
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-all">
+              {JSON.stringify({
+                hasPhotos: !!photos,
+                photosKeys: photos ? Object.keys(photos) : null,
+                registrationMethod,
+              }, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* 番号札0枚の場合：説明のみ */}
         {plateCount === 0 && (
           <div className="mb-6 max-w-md mx-auto">

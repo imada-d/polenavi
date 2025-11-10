@@ -27,6 +27,9 @@ export default function RegisterPoleInfo() {
     registrationMethod,
   });
 
+  // デバッグ表示用（開発中のみtrue）
+  const showDebugInfo = true;
+
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
 
@@ -105,7 +108,21 @@ export default function RegisterPoleInfo() {
       
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
-        
+
+        {/* デバッグ情報 */}
+        {showDebugInfo && (
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-3 mb-4">
+            <p className="text-xs font-bold text-yellow-800">🐛 PoleInfo</p>
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-all">
+              {JSON.stringify({
+                hasPhotos: !!photos,
+                photosKeys: photos ? Object.keys(photos) : null,
+                registrationMethod,
+              }, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* ========== ステップ1: 柱の種類 ========== */}
         <div className="mb-6">
           <h2 className="text-lg font-bold mb-3">📍 柱の種類を選択</h2>
