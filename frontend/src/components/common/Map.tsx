@@ -46,11 +46,11 @@ interface MapProps {
   onMapReady?: (map: L.Map) => void;
 }
 
-export default function Map({ 
-  center = [32.8031, 130.7079], 
-  zoom = 13, 
+export default function Map({
+  center = [36.5, 138.0],  // デフォルトは日本全体が見える位置
+  zoom = 5,  // 日本全体が見えるズームレベル
   mapType = 'street',
-  onMapReady 
+  onMapReady
 }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,8 +58,6 @@ export default function Map({
   const streetLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
   const labelsLayerRef = useRef<L.TileLayer | null>(null);
-  // テストマーカーを保存する ref
-  const testMarkersRef = useRef<L.Marker[]>([]);
 
   // 地図の初期化（初回のみ）
   useEffect(() => {
@@ -108,52 +106,6 @@ export default function Map({
       streetLayer.addTo(map);
     }
 
-    // ===== テストマーカーを追加（アイコンの動作確認用） =====
-    const testMarkers = [
-      // ⚡ 電柱（青） - 熊本城付近
-      {
-        position: [32.8065, 130.7055] as [number, number],
-        icon: poleIcons.electric,
-        label: '⚡ 電柱（テスト）',
-      },
-      // 💡 照明柱（黄） - 少し南
-      {
-        position: [32.8025, 130.7055] as [number, number],
-        icon: poleIcons.light,
-        label: '💡 照明柱（テスト）',
-      },
-      // 🚏 標識柱（赤） - 少し東
-      {
-        position: [32.8065, 130.7105] as [number, number],
-        icon: poleIcons.sign,
-        label: '🚏 標識柱（テスト）',
-      },
-      // 🚦 信号柱（赤） - 少し西
-      {
-        position: [32.8065, 130.7005] as [number, number],
-        icon: poleIcons.traffic,
-        label: '🚦 信号柱（テスト）',
-      },
-      // 📍 その他（灰） - 少し北
-      {
-        position: [32.8105, 130.7055] as [number, number],
-        icon: poleIcons.other,
-        label: '📍 その他（テスト）',
-      },
-    ];
-
-    // テストマーカーを地図に追加
-    const markers = testMarkers.map((markerData) => {
-      const marker = L.marker(markerData.position, { icon: markerData.icon })
-        .addTo(map)
-        .bindPopup(markerData.label);
-      return marker;
-    });
-
-    // ref に保存（後で削除できるように）
-    testMarkersRef.current = markers;
-    // ===== テストマーカーここまで =====
-
     // ref に保存
     mapRef.current = map;
     streetLayerRef.current = streetLayer;
@@ -168,10 +120,6 @@ export default function Map({
 
     // クリーンアップ
     return () => {
-      // テストマーカーを削除
-      testMarkersRef.current.forEach(marker => marker.remove());
-      testMarkersRef.current = [];
-      
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;

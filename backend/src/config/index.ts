@@ -23,8 +23,10 @@ export const config = {
     apiSecret: process.env.CLOUDINARY_API_SECRET || '',
   },
   
-  // Resend
+  // Resend (メール送信)
   resendApiKey: process.env.RESEND_API_KEY || '',
+  emailFrom: process.env.EMAIL_FROM || 'noreply@polenavi.com',
+  frontendUrl: process.env.FRONTEND_URL || 'https://polenavi.com',
   
   // Redis
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
