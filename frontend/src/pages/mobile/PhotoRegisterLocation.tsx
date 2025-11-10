@@ -18,6 +18,12 @@ export default function PhotoRegisterLocation() {
   // 前の画面から受け取ったデータ
   const { gpsLocation, photos } = location.state || {};
 
+  // デバッグ用
+  console.log('📍 PhotoRegisterLocation - 受け取ったデータ:', {
+    gpsLocation,
+    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
+  });
+
   const [photoLocation] = useState<[number, number]>(gpsLocation); // 写真のGPS（固定）
   const [pinLocation, setPinLocation] = useState<[number, number]>(gpsLocation); // 調整可能なピン位置
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street');

@@ -25,6 +25,12 @@ export default function RegisterDuplicateCheck() {
 
   const { gps, photos } = location.state || {};
 
+  // デバッグ用
+  console.log('⚠️ RegisterDuplicateCheck - 受け取ったデータ:', {
+    gps,
+    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
+  });
+
   const [nearbyPoles, setNearbyPoles] = useState<Pole[]>([]);
   const [loading, setLoading] = useState(true);
   const [distance, setDistance] = useState<number | null>(null);

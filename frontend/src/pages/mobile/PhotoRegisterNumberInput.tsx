@@ -34,6 +34,15 @@ export default function PhotoRegisterNumberInput() {
     photos,
   } = location.state || {};
 
+  // デバッグ用
+  console.log('🔢 PhotoRegisterNumberInput - 受け取ったデータ:', {
+    pinLocation,
+    poleType,
+    poleSubType,
+    plateCount,
+    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
+  });
+
   // 入力された番号の配列
   const [numbers, setNumbers] = useState<string[]>([]);
 

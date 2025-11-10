@@ -15,6 +15,12 @@ export default function PhotoRegisterPoleInfo() {
   // 前の画面から受け取ったデータ
   const { location: pinLocation, photos } = location.state || {};
 
+  // デバッグ用
+  console.log('🏗️ PhotoRegisterPoleInfo - 受け取ったデータ:', {
+    pinLocation,
+    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
+  });
+
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
 
