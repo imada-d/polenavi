@@ -75,7 +75,8 @@ export default function Signup() {
 
     try {
       await signup(formData);
-      navigate('/'); // 登録成功後はホームへ
+      // 登録成功後はメール検証待ち画面へ（メールアドレスを渡す）
+      navigate('/email-verification-pending', { state: { email: formData.email } });
     } catch (err: any) {
       setError(err.message || 'ユーザー登録に失敗しました');
     } finally {

@@ -25,7 +25,11 @@
       "WebFetch(domain:github.com)",
       "Bash(npx tsc:*)",
       "Bash(findstr:*)",
-      "Bash(npx prisma format:*)"
+      "Bash(npx prisma format:*)",
+      "Bash(pm2 list:*)",
+      "Bash(if not exist \"backend\\public\\uploads\\poles\" mkdir \"backend\\public\\uploads\\poles\")",
+      "Bash(npx prisma:*)",
+      "Bash(bash:*)"
     ],
     "deny": [],
     "ask": []

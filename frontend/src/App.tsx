@@ -38,6 +38,8 @@ import ProfileEditPC from './pages/pc/ProfileEditPC';
 import MyDataPC from './pages/pc/MyDataPC';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import VerifyEmail from './pages/VerifyEmail';
+import EmailVerificationPending from './pages/EmailVerificationPending';
 import PoleDetail from './pages/mobile/PoleDetail';
 import UploadPhoto from './pages/mobile/UploadPhoto';
 import RegisterLocation from './pages/RegisterLocation';
@@ -75,6 +77,8 @@ function AppContent() {
     location.pathname.startsWith('/groups/') ||
     location.pathname === '/login' ||
     location.pathname === '/signup' ||
+    location.pathname === '/verify-email' ||
+    location.pathname === '/email-verification-pending' ||
     location.pathname === '/profile/edit' ||
     location.pathname === '/mydata' ||
     location.pathname === '/notification-settings' ||
@@ -115,6 +119,8 @@ function AppContent() {
         <Route path="/admin/poles" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminPolesMobile} pc={AdminPolesPC} /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/email-verification-pending" element={<EmailVerificationPending />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
         <Route path="/pole/:id/upload" element={<UploadPhoto />} />
         <Route path="/register/location" element={<RegisterLocation />} />

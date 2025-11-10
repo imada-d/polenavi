@@ -111,8 +111,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signup = async (data: SignupData) => {
     try {
       const response = await apiSignup(data);
-      setToken(response.accessToken); // メモリに保存
-      setUser(response.user);
+      // メール検証が必要な場合、accessTokenは返されない
+      if (response.accessToken) {
+        setToken(response.accessToken); // メモリに保存
+        setUser(response.user);
+      }
+      // accessTokenがない場合は何もしない（メール検証待ち）
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'ユーザー登録に失敗しました');
     }
