@@ -38,7 +38,7 @@ app.use(helmet({
         "https://*.tile.openstreetmap.org",
         "https://*.openstreetmap.org",
         "https://server.arcgisonline.com",
-        "https://stamen-tiles.a.ssl.fastly.net"
+        "https://*.basemaps.cartocdn.com"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],

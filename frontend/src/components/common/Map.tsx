@@ -91,12 +91,12 @@ export default function Map({
     );
 
     // 地名・道路名レイヤー（航空写真の上に重ねる）
-    // Stamen Terrain Labelsを使用（ラベルのみを表示）
+    // CartoDB Positron ラベルレイヤーを使用
     const labelsLayer = L.tileLayer(
-      'https://stamen-tiles.a.ssl.fastly.net/terrain-labels/{z}/{x}/{y}.png',
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png',
       {
-        attribution: 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL',
-        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors, © CARTO',
+        maxZoom: 19,
       }
     );
 
