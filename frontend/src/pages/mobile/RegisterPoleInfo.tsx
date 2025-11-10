@@ -19,6 +19,14 @@ export default function RegisterPoleInfo() {
     }
   }
 
+  // デバッグ: 受け取ったデータをログ出力
+  console.log('📋 RegisterPoleInfo - 受け取ったデータ:', {
+    pinLocation,
+    photosType: typeof photos,
+    photosKeys: photos ? Object.keys(photos) : null,
+    registrationMethod,
+  });
+
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
 

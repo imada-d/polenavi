@@ -33,6 +33,17 @@ export default function RegisterNumberInput() {
     photos,
     registrationMethod
   } = location.state || {};
+
+  // デバッグ: 受け取ったデータをログ出力
+  console.log('📋 RegisterNumberInput - 受け取ったデータ:', {
+    pinLocation,
+    poleType,
+    poleSubType,
+    plateCount,
+    photosType: typeof photos,
+    photosKeys: photos ? Object.keys(photos) : null,
+    registrationMethod,
+  });
   
   // 入力された番号の配列
   // 何を: 各番号札の番号を配列で管理

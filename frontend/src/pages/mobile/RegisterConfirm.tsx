@@ -26,6 +26,20 @@ export default function RegisterConfirm() {
     registrationMethod,
   } = state;
 
+  // デバッグ: 受け取ったデータをログ出力
+  console.log('📋 RegisterConfirm - 受け取ったデータ:', {
+    pinLocation,
+    poleType,
+    poleSubType,
+    plateCount,
+    numbers,
+    photosType: typeof photos,
+    photosKeys: photos ? Object.keys(photos) : null,
+    hashtags,
+    memoText,
+    registrationMethod,
+  });
+
   // 柱の種類名を取得
   const getPoleTypeName = () => {
     if (poleType === 'electric') return '電柱';
@@ -160,18 +174,42 @@ export default function RegisterConfirm() {
         )}
 
         {/* 写真 */}
-        {photos && photos.length > 0 && (
+        {photos && (
           <div className="bg-white rounded-lg p-4 mb-4 shadow">
             <h2 className="text-lg font-bold mb-2">📸 写真</h2>
-            <p className="text-gray-700">{photos.length}枚</p>
             <div className="grid grid-cols-3 gap-2 mt-2">
-              {photos.map((photo: any, index: number) => (
-                <img
-                  key={index}
-                  src={photo.dataUrl}
-                  alt={`写真${index + 1}`}
-                  className="w-full h-24 object-cover rounded"
-                />
+              {/* 番号札 */}
+              {photos.plate && (
+                <div>
+                  <img
+                    src={photos.plate}
+                    alt="番号札"
+                    className="w-full h-24 object-cover rounded"
+                  />
+                  <p className="text-xs text-gray-500 text-center mt-1">📋 番号札</p>
+                </div>
+              )}
+              {/* 全体写真 */}
+              {photos.full && photos.full.map((photo: string, index: number) => (
+                <div key={`full-${index}`}>
+                  <img
+                    src={photo}
+                    alt={`全体${index + 1}`}
+                    className="w-full h-24 object-cover rounded"
+                  />
+                  <p className="text-xs text-gray-500 text-center mt-1">📷 全体</p>
+                </div>
+              ))}
+              {/* 詳細写真 */}
+              {photos.detail && photos.detail.map((photo: string, index: number) => (
+                <div key={`detail-${index}`}>
+                  <img
+                    src={photo}
+                    alt={`詳細${index + 1}`}
+                    className="w-full h-24 object-cover rounded"
+                  />
+                  <p className="text-xs text-gray-500 text-center mt-1">🔍 詳細</p>
+                </div>
               ))}
             </div>
           </div>

@@ -13,6 +13,13 @@ export default function RegisterMemo() {
   // 前の画面から受け取ったデータ
   const state = location.state || {};
 
+  // デバッグ: 受け取ったデータをログ出力
+  console.log('📋 RegisterMemo - 受け取ったデータ:', {
+    state,
+    photosType: typeof state.photos,
+    photosKeys: state.photos ? Object.keys(state.photos) : null,
+  });
+
   // メモ・ハッシュタグの状態
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [memoText, setMemoText] = useState<string>('');
