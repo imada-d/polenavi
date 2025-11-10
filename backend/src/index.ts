@@ -24,7 +24,28 @@ dotenv.config();
 const app = express();
 
 // ミドルウェア
-app.use(helmet()); // セキュリティヘッダー
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://static.cloudflareinsights.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"], // Leaflet requires inline styles
+      imgSrc: [
+        "'self'",
+        "data:",
+        "blob:",
+        "https://*.tile.openstreetmap.org",
+        "https://*.openstreetmap.org",
+        "https://server.arcgisonline.com"
+      ],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+})); // セキュリティヘッダー
 app.use(cors({
   origin: config.corsOrigin,
   credentials: true // Cookie送信を許可
