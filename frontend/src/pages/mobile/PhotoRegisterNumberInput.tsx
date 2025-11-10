@@ -1,6 +1,6 @@
 /**
- * 電柱登録 - 番号入力画面（モバイル版）
- * 手動入力フロー専用
+ * 写真から登録 - 番号入力画面（モバイル版）
+ * 写真データを確実に保持して次画面へ渡す
  */
 
 import { useState, useEffect } from 'react';
@@ -21,7 +21,7 @@ const getPoleTypeDisplay = (poleType: string): string => {
   return poleType === 'electric' ? '電柱' : 'その他';
 };
 
-export default function RegisterNumberInput() {
+export default function PhotoRegisterNumberInput() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -168,15 +168,15 @@ export default function RegisterNumberInput() {
     };
     localStorage.setItem(LAST_REG_KEY, JSON.stringify(regData));
 
-    // 次の画面へ（メモ・ハッシュタグ）
-    navigate('/register/memo', {
+    // 次の画面へ（メモ・ハッシュタグ）- 写真データを確実に渡す
+    navigate('/register/photo/memo', {
       state: {
         location: pinLocation,
         poleType,
         poleSubType,
         plateCount,
         numbers: finalNumbers,
-        photos,
+        photos, // 写真データを確実に保持
       },
     });
   };

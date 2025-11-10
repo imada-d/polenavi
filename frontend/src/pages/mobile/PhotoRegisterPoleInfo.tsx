@@ -1,6 +1,6 @@
 /**
- * 電柱登録 - 柱情報入力画面（モバイル版）
- * 手動入力フロー専用（位置選択 → 柱情報 → 写真撮影 → 番号入力）
+ * 写真から登録 - 柱情報入力画面（モバイル版）
+ * 写真データを確実に保持して次画面へ渡す
  */
 
 import { useState } from 'react';
@@ -8,12 +8,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import PoleTypeSelector from '../../components/register/PoleTypeSelector';
 import PlateCountSelector from '../../components/register/PlateCountSelector';
 
-export default function RegisterPoleInfo() {
+export default function PhotoRegisterPoleInfo() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 前の画面（位置確認）から受け取ったデータ
-  const { location: pinLocation } = location.state || {};
+  // 前の画面から受け取ったデータ
+  const { location: pinLocation, photos } = location.state || {};
 
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
@@ -50,13 +50,14 @@ export default function RegisterPoleInfo() {
       return;
     }
 
-    // 通常の登録フロー：写真分類画面へ
-    navigate('/register/photo-classify', {
+    // 写真データを確実に渡して番号入力画面へ
+    navigate('/register/photo/number-input', {
       state: {
         location: pinLocation,
         poleType,
         poleSubType,
         plateCount,
+        photos, // 写真データを確実に保持
       },
     });
   };
@@ -74,7 +75,7 @@ export default function RegisterPoleInfo() {
         <button onClick={() => navigate(-1)} className="text-2xl mr-3">
           ←
         </button>
-        <h1 className="text-xl font-bold">電柱登録</h1>
+        <h1 className="text-xl font-bold">電柱登録（写真から）</h1>
       </header>
 
       {/* メインコンテンツ */}
@@ -103,7 +104,7 @@ export default function RegisterPoleInfo() {
             onClick={handleNext}
             className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"
           >
-            次へ（写真撮影）
+            次へ（番号入力）
           </button>
         </div>
       )}

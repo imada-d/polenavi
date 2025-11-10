@@ -1,6 +1,6 @@
 /**
- * 電柱登録 - メモ・ハッシュタグ入力画面（モバイル版）
- * 手動入力フロー専用
+ * 写真から登録 - メモ・ハッシュタグ入力画面（モバイル版）
+ * 写真データを確実に保持して次画面へ渡す
  */
 
 import { useState } from 'react';
@@ -8,12 +8,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import HashtagSelector from '../../components/hashtag/HashtagSelector';
 import HashtagChip from '../../components/hashtag/HashtagChip';
 
-export default function RegisterMemo() {
+export default function PhotoRegisterMemo() {
   const navigate = useNavigate();
   const location = useLocation();
 
   // 前の画面から受け取ったデータ
-  const state = location.state || {};
+  const {
+    location: pinLocation,
+    poleType,
+    poleSubType,
+    plateCount,
+    numbers,
+    photos,
+  } = location.state || {};
 
   // メモ・ハッシュタグの状態
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -24,7 +31,13 @@ export default function RegisterMemo() {
   const handleSkip = () => {
     navigate('/register/confirm', {
       state: {
-        ...state,
+        location: pinLocation,
+        poleType,
+        poleSubType,
+        plateCount,
+        numbers,
+        photos, // 写真データを確実に保持
+        registrationMethod: 'photo-first',
         hashtags: [],
         memoText: '',
       },
@@ -40,7 +53,13 @@ export default function RegisterMemo() {
 
     navigate('/register/confirm', {
       state: {
-        ...state,
+        location: pinLocation,
+        poleType,
+        poleSubType,
+        plateCount,
+        numbers,
+        photos, // 写真データを確実に保持
+        registrationMethod: 'photo-first',
         hashtags: hashtagArray,
         memoText: memoText.trim(),
       },

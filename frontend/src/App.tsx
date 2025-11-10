@@ -54,6 +54,9 @@ import HashtagManager from './pages/mobile/HashtagManager';
 import RegisterFromPhotoMobile from './pages/mobile/RegisterFromPhoto';
 import RegisterFromPhotoPC from './pages/pc/RegisterFromPhoto';
 import RegisterDuplicateCheck from './pages/RegisterDuplicateCheck';
+import PhotoRegisterPoleInfo from './pages/mobile/PhotoRegisterPoleInfo';
+import PhotoRegisterNumberInput from './pages/mobile/PhotoRegisterNumberInput';
+import PhotoRegisterMemo from './pages/mobile/PhotoRegisterMemo';
 
 // レスポンシブラッパー：PC/モバイルで異なるコンポーネントを表示
 function ResponsiveWrapper({ mobile: Mobile, pc: PC }: { mobile: React.ComponentType; pc: React.ComponentType }) {
@@ -126,11 +129,17 @@ function AppContent() {
         <Route path="/pole/:id/upload" element={<UploadPhoto />} />
         <Route path="/register-from-photo" element={<ResponsiveWrapper mobile={RegisterFromPhotoMobile} pc={RegisterFromPhotoPC} />} />
         <Route path="/register/duplicate-check" element={<RegisterDuplicateCheck />} />
+        {/* 写真から登録専用フロー */}
+        <Route path="/register/photo/pole-info" element={<PhotoRegisterPoleInfo />} />
+        <Route path="/register/photo/number-input" element={<PhotoRegisterNumberInput />} />
+        <Route path="/register/photo/memo" element={<PhotoRegisterMemo />} />
+        {/* 手動入力フロー */}
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-info" element={<RegisterPoleInfo />} />
         <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} />
         <Route path="/register/number-input" element={<RegisterNumberInput />} />
         <Route path="/register/memo" element={<RegisterMemo />} />
+        {/* 共通 */}
         <Route path="/register/confirm" element={<RegisterConfirm />} />
         <Route path="/register/complete" element={<RegisterComplete />} />
       </Routes>

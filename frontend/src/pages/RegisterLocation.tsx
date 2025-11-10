@@ -14,23 +14,9 @@ export default function RegisterLocation() {
   const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street'); // 地図種類の切り替え
-  const [isFromPhotoGPS, setIsFromPhotoGPS] = useState(false); // 写真からのGPS座標かどうか
-
-  // 前の画面から受け取ったデータ
-  const { location: photoLocation, photos, registrationMethod, fromPhotoGPS } = location.state || {};
-
-  // 画面表示時にGPS自動取得 or 写真からのGPS使用
+  // 画面表示時にGPS自動取得
   useEffect(() => {
-    // 写真からのGPS座標がある場合はそれを使う
-    if (fromPhotoGPS && photoLocation) {
-      setCurrentLocation(photoLocation);
-      setPinLocation(photoLocation);
-      setIsFromPhotoGPS(true);
-      setIsLoading(false);
-      return;
-    }
-
-    // 通常の現在地取得
+    // 現在地取得
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -51,18 +37,15 @@ export default function RegisterLocation() {
       alert('お使いのブラウザは位置情報に対応していません。');
       setIsLoading(false);
     }
-  }, [fromPhotoGPS, photoLocation]);
+  }, []);
 
   const handleMapReady = (map: L.Map) => {
     mapInstanceRef.current = map;
 
     if (currentLocation && pinLocation) {
-      // 写真からのGPSか、現在地かで表示を変える
-      const locationLabel = isFromPhotoGPS ? '📸 写真の位置' : '📍 現在地';
-      const labelColor = isFromPhotoGPS ? '#10b981' : '#4285F4'; // 緑 or 青
-
+      // 現在地マーカー
       const currentLocationIcon = L.divIcon({
-        html: `<div style="background-color: ${labelColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">${locationLabel}</div>`,
+        html: `<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>`,
         className: 'current-location-label',
         iconSize: [80, 24],
         iconAnchor: [40, 12],
@@ -123,8 +106,6 @@ export default function RegisterLocation() {
       navigate('/register/pole-info', {
         state: {
           location: pinLocation,
-          photos,
-          registrationMethod,
         },
       });
     }
