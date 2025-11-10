@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Map from '../components/common/Map';
 import L from 'leaflet';
 
 export default function RegisterLocation() {
   const navigate = useNavigate();
-  const location = useLocation();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const draggablePinRef = useRef<L.Marker | null>(null);
   const currentLocationCircleRef = useRef<L.Circle | null>(null);
@@ -14,6 +13,7 @@ export default function RegisterLocation() {
   const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street'); // 地図種類の切り替え
+
   // 画面表示時にGPS自動取得
   useEffect(() => {
     // 現在地取得
@@ -134,9 +134,6 @@ export default function RegisterLocation() {
         </button>
         <div className="text-center">
           <h1 className="text-lg font-bold">位置を確認</h1>
-          {isFromPhotoGPS && (
-            <p className="text-xs text-blue-600">📸 写真から取得</p>
-          )}
         </div>
         <div className="w-10"></div> {/* 中央揃え用 */}
       </header>

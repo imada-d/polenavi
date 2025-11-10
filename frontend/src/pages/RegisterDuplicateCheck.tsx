@@ -23,7 +23,7 @@ export default function RegisterDuplicateCheck() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { gps, photos, registrationMethod } = location.state || {};
+  const { gps, photos } = location.state || {};
 
   const [nearbyPoles, setNearbyPoles] = useState<Pole[]>([]);
   const [loading, setLoading] = useState(true);
