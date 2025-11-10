@@ -74,7 +74,7 @@ export default function NotificationSettings() {
               <div>
                 <h3 className="font-semibold text-gray-800">メール通知</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  新しいコメントやグループ招待などの通知をメールで受け取ります
+                  ログイン通知やアカウント関連の重要な情報をメールで受け取ります
                 </p>
               </div>
               <label className="relative inline-block w-14 h-8">
