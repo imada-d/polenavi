@@ -16,6 +16,7 @@ import adminRouter from './routes/admin';
 import groupsRouter from './routes/groups';
 import invitationsRouter from './routes/invitations';
 import hashtagsRouter from './routes/hashtags';
+import emailVerificationRouter from './routes/emailVerificationRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 
 // 環境変数を読み込み
@@ -87,6 +88,7 @@ app.get('/', (_req, res) => {
 
 // APIルート
 app.use('/api/auth', authRouter);
+app.use('/api/email-verification', emailVerificationRouter);
 app.use('/api/users', userRouter);
 app.use('/api/poles', polesRouter);
 app.use('/api', photosRouter);

@@ -5,8 +5,10 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { validateUsername } from '../utils/validateUsername';
+import { sendVerificationEmail, sendLoginNotificationEmail } from '../services/emailService';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -102,7 +104,7 @@ export const signup = async (req: Request, res: Response) => {
     // パスワードのハッシュ化
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // ユーザー作成
+    // ユーザー作成（メール未検証状態で）
     const user = await prisma.user.create({
       data: {
         email,
@@ -111,37 +113,45 @@ export const signup = async (req: Request, res: Response) => {
         displayName: displayName || username,
         role: 'user',
         isActive: true,
+        emailVerified: false, // メール未検証
       },
     });
 
-    // トークン生成
-    const { accessToken, refreshToken } = await generateTokens(
-      user.id,
-      user.email,
-      user.username,
-      user.role
-    );
+    // メール検証トークンを生成
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24時間有効
 
-    // リフレッシュトークンをhttpOnly Cookieに設定
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true, // JavaScriptからアクセス不可（XSS対策）
-      secure: process.env.NODE_ENV === 'production', // HTTPS必須（本番環境）
-      sameSite: 'strict', // CSRF対策
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7日間
+    // トークンをデータベースに保存
+    await prisma.emailVerificationToken.create({
+      data: {
+        userId: user.id,
+        token: verificationToken,
+        tokenType: 'email_verification',
+        email: user.email,
+        expiresAt,
+      },
     });
 
+    // 検証メールを送信
+    try {
+      await sendVerificationEmail(user.email, user.username, verificationToken);
+      console.log(`✅ [Signup] 検証メール送信成功: ${user.email}`);
+    } catch (emailError: any) {
+      console.error(`❌ [Signup] 検証メール送信失敗:`, emailError);
+      // メール送信失敗してもユーザー作成は継続（後で再送信可能）
+    }
+
+    // 注意: メール検証が完了するまでログインできないため、トークンは発行しない
     return res.status(201).json({
       success: true,
-      message: 'ユーザー登録が完了しました',
-      accessToken, // フロントエンドはこれをメモリで管理
+      message: '登録完了！確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。',
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
         displayName: user.displayName,
-        role: user.role,
-        emailNotifications: user.emailNotifications,
-        createdAt: user.createdAt,
+        emailVerified: false,
       },
     });
   } catch (error: any) {
@@ -192,6 +202,16 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    // メールアドレス検証チェック（必須）
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'メールアドレスが未検証です。登録時に送信された確認メール内のリンクをクリックしてください。',
+        code: 'EMAIL_NOT_VERIFIED',
+        email: user.email,
+      });
+    }
+
     // パスワード検証
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
@@ -201,6 +221,12 @@ export const login = async (req: Request, res: Response) => {
         message: 'メールアドレス/IDまたはパスワードが正しくありません'
       });
     }
+
+    // 最終ログイン日時を更新
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
 
     // トークン生成
     const { accessToken, refreshToken } = await generateTokens(
@@ -218,6 +244,25 @@ export const login = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // ログイン通知メールを送信（emailNotificationsがtrueの場合のみ）
+    if (user.emailNotifications) {
+      try {
+        const ipAddress = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.ip || 'unknown';
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        await sendLoginNotificationEmail(
+          user.email,
+          user.username,
+          ipAddress,
+          userAgent,
+          new Date()
+        );
+        console.log(`✅ [Login] ログイン通知メール送信成功: ${user.email}`);
+      } catch (emailError: any) {
+        console.error(`❌ [Login] ログイン通知メール送信失敗:`, emailError);
+        // メール送信失敗してもログインは継続
+      }
+    }
+
     return res.json({
       success: true,
       message: 'ログインに成功しました',
@@ -229,6 +274,7 @@ export const login = async (req: Request, res: Response) => {
         displayName: user.displayName,
         role: user.role,
         emailNotifications: user.emailNotifications,
+        emailVerified: user.emailVerified,
         createdAt: user.createdAt,
       },
     });
