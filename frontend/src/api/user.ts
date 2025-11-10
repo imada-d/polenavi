@@ -114,9 +114,9 @@ export const updateNotificationSettings = async (emailNotifications: boolean): P
 };
 
 // プライバシー設定を更新
-export const updatePrivacySettings = async (dataVisibility: string): Promise<any> => {
+export const updatePrivacySettings = async (showUsername: boolean): Promise<any> => {
   try {
-    const response = await apiClient.put('/users/privacy-settings', { dataVisibility });
+    const response = await apiClient.put('/users/privacy-settings', { showUsername });
     console.log('✅ プライバシー設定更新成功:', response.data);
     return response.data;
   } catch (error: any) {

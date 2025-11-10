@@ -131,25 +131,68 @@ export async function getPoleById(poleId: number) {
   const pole = await prisma.pole.findUnique({
     where: { id: poleId },
     include: {
-      poleNumbers: true,
+      poleNumbers: {
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              showUsername: true,
+            },
+          },
+        } as any,
+      },
       photos: {
         where: {
           deletedAt: null,
         },
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              showUsername: true,
+            },
+          },
+        } as any,
       },
       memos: {
         orderBy: {
           createdAt: 'desc',
         },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              showUsername: true,
+            },
+          },
+        } as any,
       },
     },
-  });
+  }) as any;
 
   if (!pole) {
     throw new NotFoundError('電柱が見つかりません');
   }
 
-  return pole;
+  // 最初の番号の登録者を電柱の登録者として扱う
+  const firstNumber = pole.poleNumbers[0];
+  const createdBy = firstNumber?.createdBy;
+
+  // showUsernameがfalseの場合は匿名にする
+  const registeredByName = createdBy?.showUsername
+    ? (createdBy.displayName || createdBy.username || '匿名')
+    : '匿名';
+
+  return {
+    ...pole,
+    registeredByName,
+  };
 }
 
 /**

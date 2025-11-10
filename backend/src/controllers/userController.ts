@@ -389,10 +389,10 @@ export const updatePrivacySettings = async (req: Request, res: Response) => {
       });
     }
 
-    const { dataVisibility } = req.body;
+    const { showUsername } = req.body;
 
     // バリデーション
-    if (!['public', 'private'].includes(dataVisibility)) {
+    if (typeof showUsername !== 'boolean') {
       return res.status(400).json({
         success: false,
         message: '無効なプライバシー設定です'
@@ -401,10 +401,10 @@ export const updatePrivacySettings = async (req: Request, res: Response) => {
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { dataVisibility },
+      data: { showUsername },
       select: {
         id: true,
-        dataVisibility: true
+        showUsername: true
       }
     });
 

@@ -397,6 +397,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
         planType: true,
         emailVerified: true,
         emailNotifications: true,
+        showUsername: true,
         createdAt: true,
       },
     });
