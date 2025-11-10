@@ -7,12 +7,13 @@ export default function BottomNav() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // 何を: 4タブのナビゲーション（地図/検索/グループ/マイページ）
-  // なぜ: ゲーミフィケーション削除、グループ機能重視の新設計
+  // 何を: 5タブのナビゲーション（地図/検索/グループ/写真登録/マイページ）
+  // なぜ: 写真から登録機能を追加
   const navItems = [
     { path: '/', icon: '🗺️', label: '地図' },
     { path: '/search', icon: '🔍', label: '検索' },
     { path: '/groups', icon: '👥', label: 'グループ' },
+    { path: '/register-from-photo', icon: '📸', label: '写真登録' },
     { path: '/mypage', icon: '👤', label: 'マイページ' },
   ];
   
