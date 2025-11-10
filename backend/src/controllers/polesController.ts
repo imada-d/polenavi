@@ -72,7 +72,11 @@ export async function getNearbyPoles(req: Request, res: Response, next: NextFunc
     const lng = parseFloat(req.query.lng as string);
     const radius = req.query.radius ? parseInt(req.query.radius as string, 10) : undefined;
 
+    console.log(`🔍 電柱検索: lat=${lat}, lng=${lng}, radius=${radius}`);
+
     const poles = await poleService.findNearbyPoles(lat, lng, radius as any);
+
+    console.log(`📊 検索結果: ${poles.length}件の電柱が見つかりました`);
 
     res.json({
       success: true,

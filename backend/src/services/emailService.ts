@@ -373,8 +373,7 @@ export async function sendWelcomeEmail(
         <ul style="line-height: 1.8;">
           <li>📍 <strong>電柱を登録</strong> - 近くの電柱を写真付きで登録しよう</li>
           <li>🗺️ <strong>地図で探索</strong> - 登録された電柱を地図で確認</li>
-          <li>📸 <strong>写真を追加</strong> - 既存の電柱に写真を追加してポイントGET</li>
-          <li>✅ <strong>位置を検証</strong> - 他のユーザーの登録を検証してポイント獲得</li>
+          <li>📸 <strong>写真を追加</strong> - 既存の電柱に写真を追加できます</li>
         </ul>
 
         <div style="text-align: center; margin: 30px 0;">
@@ -405,8 +404,7 @@ PoleNavi のご登録が完了しました。ようこそ！
 次にできること：
 - 📍 電柱を登録 - 近くの電柱を写真付きで登録しよう
 - 🗺️ 地図で探索 - 登録された電柱を地図で確認
-- 📸 写真を追加 - 既存の電柱に写真を追加してポイントGET
-- ✅ 位置を検証 - 他のユーザーの登録を検証してポイント獲得
+- 📸 写真を追加 - 既存の電柱に写真を追加できます
 
 ${config.frontendUrl}
 
