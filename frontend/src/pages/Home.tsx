@@ -171,15 +171,13 @@ export default function Home() {
         duration: 1,
       });
 
-      // 検索結果の位置にマーカーを追加
+      // 検索結果の位置にマーカーを追加（緑のピン）
       const searchMarker = L.marker(state.center, {
-        icon: L.icon({
-          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41],
+        icon: L.divIcon({
+          html: '<div style="background-color: #22c55e; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+          className: 'custom-search-marker',
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
         }),
       }).addTo(mapInstanceRef.current);
 
@@ -526,18 +524,16 @@ export default function Home() {
       duration: 0.5,
     });
 
-    // 何を: ドラッグ可能なマーカーを作成
+    // 何を: ドラッグ可能なマーカーを作成（青のピン）
     // なぜ: ユーザーが大きな地図で位置を調整できるようにするため
     // 補足: Leafletはマーカードラッグ中は自動的に地図のドラッグを抑制する
     editingPoleMarkerRef.current = L.marker([lat, lng], {
       draggable: true,
-      icon: L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
+      icon: L.divIcon({
+        html: '<div style="background-color: #3b82f6; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+        className: 'custom-editing-marker',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
       })
     }).addTo(mapInstanceRef.current);
 
