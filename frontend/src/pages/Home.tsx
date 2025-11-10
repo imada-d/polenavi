@@ -290,7 +290,9 @@ export default function Home() {
         // 何を: 電柱番号を表示するツールチップ
         // なぜ: ズームレベル15以上では常に表示、それ以下ではホバー時のみ表示
         const numbers = pole.numbers || [];
-        const numberText = numbers.length > 0 ? numbers.join(', ') : '番号なし';
+        // #NoID-で始まる番号は管理用なので「番号なし」と表示
+        const validNumbers = numbers.filter((num: string) => !num.startsWith('#NoID-'));
+        const numberText = validNumbers.length > 0 ? validNumbers.join(', ') : '番号なし';
         marker.bindTooltip(numberText, {
           permanent: shouldShowLabels, // ズームレベルに応じて常に表示/ホバー時のみ
           direction: 'top',
