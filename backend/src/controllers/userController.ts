@@ -435,23 +435,44 @@ export const deleteAccount = async (req: Request, res: Response) => {
       });
     }
 
-    // アカウントを無効化（論理削除）
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        isActive: false,
-        email: `deleted_${userId}_${Date.now()}@deleted.com`, // メールアドレスを変更して重複を防ぐ
-        username: `deleted_${userId}_${Date.now()}` // ユーザー名も変更
-      }
-    });
+    // トランザクションで処理
+    await prisma.$transaction(async (tx: any) => {
+      // 1. 電柱番号の表示名を匿名化
+      await tx.poleNumber.updateMany({
+        where: { registeredBy: userId },
+        data: { registeredByName: '削除済みのアカウント' }
+      });
 
-    // リフレッシュトークンを無効化
-    await prisma.refreshToken.updateMany({
-      where: { userId },
-      data: {
-        revoked: true,
-        revokedAt: new Date()
-      }
+      // 2. 写真の表示名を匿名化
+      await tx.polePhoto.updateMany({
+        where: { uploadedBy: userId },
+        data: { uploadedByName: '削除済みのアカウント' }
+      });
+
+      // 3. メモの表示名を匿名化
+      await tx.poleMemo.updateMany({
+        where: { createdBy: userId },
+        data: { createdByName: '削除済みのアカウント' }
+      });
+
+      // 4. ユーザーアカウントを無効化（論理削除）
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          isActive: false,
+          email: `deleted_${userId}_${Date.now()}@deleted.com`, // メールアドレスを変更して重複を防ぐ
+          username: `deleted_${userId}_${Date.now()}` // ユーザー名も変更
+        }
+      });
+
+      // 5. リフレッシュトークンを無効化
+      await tx.refreshToken.updateMany({
+        where: { userId },
+        data: {
+          revoked: true,
+          revokedAt: new Date()
+        }
+      });
     });
 
     return res.json({
