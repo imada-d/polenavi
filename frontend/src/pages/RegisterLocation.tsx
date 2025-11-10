@@ -55,14 +55,17 @@ export default function RegisterLocation() {
 
   const handleMapReady = (map: L.Map) => {
     mapInstanceRef.current = map;
-    
+
     if (currentLocation && pinLocation) {
-      // 現在地を「現在地」というテキストで表示
+      // 写真からのGPSか、現在地かで表示を変える
+      const locationLabel = isFromPhotoGPS ? '📸 写真の位置' : '📍 現在地';
+      const labelColor = isFromPhotoGPS ? '#10b981' : '#4285F4'; // 緑 or 青
+
       const currentLocationIcon = L.divIcon({
-        html: '<div style="background-color: #4285F4; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📍 現在地</div>',
+        html: `<div style="background-color: ${labelColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">${locationLabel}</div>`,
         className: 'current-location-label',
-        iconSize: [60, 24],
-        iconAnchor: [30, 12],
+        iconSize: [80, 24],
+        iconAnchor: [40, 12],
       });
 
       currentLocationCircleRef.current = L.marker(currentLocation, {
