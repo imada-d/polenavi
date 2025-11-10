@@ -138,7 +138,7 @@ export default function HelpSupport() {
               <h3 className="font-semibold text-gray-800 mb-2">更新履歴</h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="p-3 bg-gray-50 rounded">
-                  <p className="font-semibold">v1.0.0 (2025-01-07)</p>
+                  <p className="font-semibold">v1.0.0 (2025-11-07)</p>
                   <ul className="list-disc list-inside mt-1">
                     <li>初回リリース</li>
                     <li>電柱登録・検索機能</li>
