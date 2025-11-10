@@ -56,6 +56,9 @@ export default function PhotoRegisterPoleInfo() {
       return;
     }
 
+    // デバッグ用アラート
+    alert(`次へボタン押下\nplateCount: ${plateCount}\n遷移先: ${plateCount === 0 ? 'メモ画面' : '番号入力画面'}\nphotos: ${photos ? 'あり' : 'なし'}`);
+
     // 0枚の場合は番号入力をスキップしてメモ画面へ
     if (plateCount === 0) {
       navigate('/register/photo/memo', {
@@ -100,6 +103,21 @@ export default function PhotoRegisterPoleInfo() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
+        {/* デバッグ情報 */}
+        <div className="bg-yellow-100 border-2 border-yellow-500 rounded-lg p-4 mb-4">
+          <h2 className="text-sm font-bold mb-2">🔧 デバッグ</h2>
+          <pre className="text-xs whitespace-pre-wrap">
+            {JSON.stringify({
+              pinLocation,
+              photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length + '個' : 'object'})` : '❌なし',
+              poleType,
+              poleSubType,
+              plateCount,
+              canProceed: (poleType === 'electric' && plateCount !== null) || (poleType === 'other' && poleSubType !== null && plateCount !== null)
+            }, null, 2)}
+          </pre>
+        </div>
+
         {/* 柱の種類選択 */}
         <PoleTypeSelector
           poleType={poleType}
