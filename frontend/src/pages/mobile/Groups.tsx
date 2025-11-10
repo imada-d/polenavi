@@ -83,15 +83,7 @@ export default function Groups() {
         ) : (
           <div className="space-y-3">
             {groups.length === 0 ? (
-              <div className="bg-white rounded-lg p-8 text-center">
-                <p className="text-gray-500 mb-4">まだグループに参加していません</p>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700"
-                >
-                  ＋ グループを作成
-                </button>
-              </div>
+              <></>
             ) : (
               <>
                 {groups.map((group) => {

@@ -87,22 +87,8 @@ export default function GroupsPC() {
         {loading ? (
           <div className="text-center py-12 text-gray-500">読み込み中...</div>
         ) : groups.length === 0 ? (
-          /* 空の状態 */
-          <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-            <div className="text-6xl mb-4">👥</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              まだグループに参加していません
-            </h2>
-            <p className="text-gray-600 mb-8">
-              グループを作成して、チームで電柱情報を共有しましょう
-            </p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              ＋ グループを作成
-            </button>
-          </div>
+          /* 空の状態 - 警告なし */
+          <></>
         ) : (
           <>
             {/* グループ一覧 */}
