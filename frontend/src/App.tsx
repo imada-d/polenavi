@@ -54,6 +54,7 @@ import HashtagManager from './pages/mobile/HashtagManager';
 import RegisterFromPhotoMobile from './pages/mobile/RegisterFromPhoto';
 import RegisterFromPhotoPC from './pages/pc/RegisterFromPhoto';
 import RegisterDuplicateCheck from './pages/RegisterDuplicateCheck';
+import PhotoRegisterLocation from './pages/mobile/PhotoRegisterLocation';
 import PhotoRegisterPoleInfo from './pages/mobile/PhotoRegisterPoleInfo';
 import PhotoRegisterNumberInput from './pages/mobile/PhotoRegisterNumberInput';
 import PhotoRegisterMemo from './pages/mobile/PhotoRegisterMemo';
@@ -130,6 +131,7 @@ function AppContent() {
         <Route path="/register-from-photo" element={<ResponsiveWrapper mobile={RegisterFromPhotoMobile} pc={RegisterFromPhotoPC} />} />
         <Route path="/register/duplicate-check" element={<RegisterDuplicateCheck />} />
         {/* 写真から登録専用フロー */}
+        <Route path="/register/photo/location" element={<PhotoRegisterLocation />} />
         <Route path="/register/photo/pole-info" element={<PhotoRegisterPoleInfo />} />
         <Route path="/register/photo/number-input" element={<PhotoRegisterNumberInput />} />
         <Route path="/register/photo/memo" element={<PhotoRegisterMemo />} />

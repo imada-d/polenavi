@@ -45,10 +45,10 @@ export default function RegisterDuplicateCheck() {
       const poles = await getNearbyPoles(gps.latitude, gps.longitude, 5);
 
       if (poles.length === 0) {
-        // 5m以内に電柱なし → 写真から登録専用の柱情報画面へ遷移
-        navigate('/register/photo/pole-info', {
+        // 5m以内に電柱なし → 写真から登録専用の位置確認画面へ遷移
+        navigate('/register/photo/location', {
           state: {
-            location: [gps.latitude, gps.longitude],
+            gpsLocation: [gps.latitude, gps.longitude],
             photos,
           },
         });
@@ -110,10 +110,10 @@ export default function RegisterDuplicateCheck() {
 
   // 「別の電柱です」を選択
   const handleDifferentPole = () => {
-    // 新規電柱として登録を続行（写真から登録専用の柱情報画面へ）
-    navigate('/register/photo/pole-info', {
+    // 新規電柱として登録を続行（写真から登録専用の位置確認画面へ）
+    navigate('/register/photo/location', {
       state: {
-        location: [gps.latitude, gps.longitude],
+        gpsLocation: [gps.latitude, gps.longitude],
         photos,
       },
     });
