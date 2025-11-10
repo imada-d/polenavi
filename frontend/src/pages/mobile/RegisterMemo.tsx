@@ -30,9 +30,18 @@ export default function RegisterMemo() {
 
   // スキップ（メモなしで次へ）
   const handleSkip = () => {
+    console.log('🔍 Memo handleSkip - state:', state);
+    console.log('🔍 Memo handleSkip - photos:', state.photos);
+
     navigate('/register/confirm', {
       state: {
-        ...state,
+        location: state.location,
+        poleType: state.poleType,
+        poleSubType: state.poleSubType,
+        plateCount: state.plateCount,
+        numbers: state.numbers,
+        photos: state.photos,
+        registrationMethod: state.registrationMethod,
         hashtags: [],
         memoText: '',
       },
@@ -46,9 +55,18 @@ export default function RegisterMemo() {
       tag.startsWith('#') ? tag : `#${tag}`
     );
 
+    console.log('🔍 Memo handleNext - state:', state);
+    console.log('🔍 Memo handleNext - photos:', state.photos);
+
     navigate('/register/confirm', {
       state: {
-        ...state,
+        location: state.location,
+        poleType: state.poleType,
+        poleSubType: state.poleSubType,
+        plateCount: state.plateCount,
+        numbers: state.numbers,
+        photos: state.photos,
+        registrationMethod: state.registrationMethod,
         hashtags: hashtagArray,
         memoText: memoText.trim(),
       },
