@@ -39,6 +39,11 @@ export default function PhotoRegisterMemo() {
 
   // スキップ（メモなしで次へ）
   const handleSkip = () => {
+    // 写真データを確認画面が期待する形式に変換
+    const photosData = Array.isArray(photos)
+      ? { plate: undefined, full: photos, detail: [] }
+      : photos;
+
     navigate('/register/confirm', {
       state: {
         location: pinLocation,
@@ -46,7 +51,7 @@ export default function PhotoRegisterMemo() {
         poleSubType,
         plateCount,
         numbers,
-        photos, // 写真データを確実に保持
+        photos: photosData,
         registrationMethod: 'photo-first',
         hashtags: [],
         memoText: '',
@@ -61,6 +66,11 @@ export default function PhotoRegisterMemo() {
       tag.startsWith('#') ? tag : `#${tag}`
     );
 
+    // 写真データを確認画面が期待する形式に変換
+    const photosData = Array.isArray(photos)
+      ? { plate: undefined, full: photos, detail: [] }
+      : photos;
+
     navigate('/register/confirm', {
       state: {
         location: pinLocation,
@@ -68,7 +78,7 @@ export default function PhotoRegisterMemo() {
         poleSubType,
         plateCount,
         numbers,
-        photos, // 写真データを確実に保持
+        photos: photosData,
         registrationMethod: 'photo-first',
         hashtags: hashtagArray,
         memoText: memoText.trim(),
