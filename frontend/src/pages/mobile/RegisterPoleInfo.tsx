@@ -10,12 +10,13 @@ export default function RegisterPoleInfo() {
   const stateData = location.state || {};
   let { location: pinLocation, photos, registrationMethod } = stateData;
 
-  // sessionStorage から写真データを復元（戻るボタン対策）
-  const savedData = sessionStorage.getItem('photoRegistrationData');
-  if (savedData && !photos) {
-    const parsed = JSON.parse(savedData);
-    photos = parsed.photos;
-    registrationMethod = parsed.registrationMethod;
+  // sessionStorage から registrationMethod フラグを復元（戻るボタン対策）
+  // 注意: 写真データは大きすぎるので sessionStorage に保存していない
+  if (!registrationMethod) {
+    const savedMethod = sessionStorage.getItem('registrationMethod');
+    if (savedMethod) {
+      registrationMethod = savedMethod as 'location-first' | 'photo-first';
+    }
   }
 
   // ステップ1: 柱の種類
@@ -46,7 +47,8 @@ export default function RegisterPoleInfo() {
     }
 
     // 写真から登録の場合は、写真分類画面をスキップして番号入力へ
-    if (photos && registrationMethod === 'photo-first') {
+    // ただし、写真データが失われている場合は通常フローに戻す
+    if (registrationMethod === 'photo-first' && photos) {
       navigate('/register/number-input', {
         state: {
           location: pinLocation,

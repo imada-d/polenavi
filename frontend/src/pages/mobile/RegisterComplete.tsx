@@ -20,8 +20,8 @@ export default function RegisterComplete() {
 
   // 統計情報を取得 & sessionStorage クリア
   useEffect(() => {
-    // 写真から登録のデータをクリア
-    sessionStorage.removeItem('photoRegistrationData');
+    // 写真から登録のフラグをクリア
+    sessionStorage.removeItem('registrationMethod');
 
     const fetchStats = async () => {
       try {
