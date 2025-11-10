@@ -103,8 +103,8 @@ app.use('/api/hashtags', hashtagsRouter);
 // SPA用のフォールバック（すべてのGETリクエストをindex.htmlに）
 // APIルートと静的ファイルは既に処理済みなので、残りはフロントエンドのルート
 app.get('*', (req, res): void => {
-  // APIリクエストまたは静的ファイルの場合は処理しない（next()で次のミドルウェアへ）
-  if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+  // APIリクエスト、静的ファイル、assetsの場合は処理しない
+  if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/') || req.path.startsWith('/assets/')) {
     res.status(404).json({
       success: false,
       error: {
