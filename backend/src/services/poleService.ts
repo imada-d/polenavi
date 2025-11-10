@@ -136,7 +136,7 @@ export async function getPoleById(poleId: number) {
       include: {
         poleNumbers: {
           include: {
-            createdBy: {
+            user: {
               select: {
                 id: true,
                 username: true,
@@ -144,14 +144,14 @@ export async function getPoleById(poleId: number) {
                 showUsername: true,
               },
             },
-          } as any,
+          },
         },
         photos: {
           where: {
             deletedAt: null,
           },
           include: {
-            uploadedBy: {
+            uploadedByUser: {
               select: {
                 id: true,
                 username: true,
@@ -159,14 +159,14 @@ export async function getPoleById(poleId: number) {
                 showUsername: true,
               },
             },
-          } as any,
+          },
         },
         memos: {
           orderBy: {
             createdAt: 'desc',
           },
           include: {
-            createdBy: {
+            createdByUser: {
               select: {
                 id: true,
                 username: true,
@@ -174,10 +174,10 @@ export async function getPoleById(poleId: number) {
                 showUsername: true,
               },
             },
-          } as any,
+          },
         },
       },
-    }) as any;
+    });
 
     if (!pole) {
       console.log(`❌ 電柱が見つかりません: poleId=${poleId}`);
@@ -188,7 +188,7 @@ export async function getPoleById(poleId: number) {
 
     // 最初の番号の登録者を電柱の登録者として扱う
     const firstNumber = pole.poleNumbers?.[0];
-    const createdBy = firstNumber?.createdBy;
+    const createdBy = firstNumber?.user;
 
     // showUsernameがfalseの場合は匿名にする
     let registeredByName = '匿名';
