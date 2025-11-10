@@ -153,6 +153,9 @@ model PolePhoto {
   groupId    Int?   @map("group_id")
   group      Group? @relation(fields: [groupId], references: [id])
 
+  // 登録方法 (location-first: 位置→写真, photo-first: 写真→位置)
+  registrationMethod String @default("location-first") @map("registration_method") @db.VarChar(20)
+
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([poleId])
