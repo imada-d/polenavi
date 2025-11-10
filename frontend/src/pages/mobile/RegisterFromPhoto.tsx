@@ -140,7 +140,8 @@ export default function RegisterFromPhoto() {
       });
     } catch (error) {
       console.error('Error processing photos:', error);
-      alert('写真の処理中にエラーが発生しました');
+      const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+      alert(`写真の処理中にエラーが発生しました\n\n詳細: ${errorMessage}`);
       setIsProcessing(false);
     }
   };

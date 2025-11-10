@@ -26,7 +26,15 @@ export async function extractGPSFromPhoto(
   photoDataUrl: string | Blob
 ): Promise<GPSCoordinates | null> {
   try {
+    console.log('📍 EXIF GPS抽出開始:', {
+      type: typeof photoDataUrl,
+      isBlob: photoDataUrl instanceof Blob,
+      isFile: photoDataUrl instanceof File,
+    });
+
     const exifData = await exifr.gps(photoDataUrl);
+
+    console.log('📍 EXIF GPS結果:', exifData);
 
     if (!exifData || !exifData.latitude || !exifData.longitude) {
       console.log('GPS data not found in photo EXIF');
@@ -38,8 +46,8 @@ export async function extractGPSFromPhoto(
       longitude: exifData.longitude,
     };
   } catch (error) {
-    console.error('Error extracting GPS from photo:', error);
-    return null;
+    console.error('❌ Error extracting GPS from photo:', error);
+    throw new Error(`EXIF GPS抽出失敗: ${error instanceof Error ? error.message : '不明なエラー'}`);
   }
 }
 
