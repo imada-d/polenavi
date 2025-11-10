@@ -3,7 +3,7 @@
  * 写真から抽出したGPS座標を表示して、ユーザーが微調整できる
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../../components/common/Map';
 import L from 'leaflet';
