@@ -132,18 +132,17 @@ export default function HelpSupport() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-700">現在のバージョン</span>
-              <span className="font-bold text-blue-600">v1.0.0</span>
+              <span className="font-bold text-blue-600">v1.1.0</span>
             </div>
             <div className="mt-4">
               <h3 className="font-semibold text-gray-800 mb-2">更新履歴</h3>
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="p-3 bg-blue-50 border-l-4 border-blue-600 rounded">
-                  <p className="font-semibold text-blue-800">v1.1.0 (2025-10-10予定)</p>
+                  <p className="font-semibold text-blue-800">v1.1.0 (2025-11-10)</p>
                   <ul className="list-disc list-inside mt-1">
                     <li>グループ機能の追加（複数人での電柱管理）</li>
-                    <li>電柱情報の一括エクスポート機能</li>
-                    <li>高度な検索フィルター（日付範囲、事業者など）</li>
-                    <li>プレミアムプラン対応（メモ・ハッシュタグ非公開機能）</li>
+                    <li>プライバシー設定の追加（ユーザー名公開/非公開）</li>
+                    <li>電柱登録者名の表示機能</li>
                   </ul>
                 </div>
                 <div className="p-3 bg-gray-50 rounded">
