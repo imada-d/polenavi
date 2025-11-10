@@ -51,8 +51,9 @@ import RegisterConfirm from './pages/mobile/RegisterConfirm';
 import RegisterComplete from './pages/mobile/RegisterComplete';
 import GroupDetail from './pages/mobile/GroupDetail';
 import HashtagManager from './pages/mobile/HashtagManager';
-
-
+import RegisterFromPhotoMobile from './pages/mobile/RegisterFromPhoto';
+import RegisterFromPhotoPC from './pages/pc/RegisterFromPhoto';
+import RegisterDuplicateCheck from './pages/RegisterDuplicateCheck';
 
 // レスポンシブラッパー：PC/モバイルで異なるコンポーネントを表示
 function ResponsiveWrapper({ mobile: Mobile, pc: PC }: { mobile: React.ComponentType; pc: React.ComponentType }) {
@@ -123,6 +124,8 @@ function AppContent() {
         <Route path="/email-verification-pending" element={<EmailVerificationPending />} />
         <Route path="/pole/:id" element={<PoleDetail />} />
         <Route path="/pole/:id/upload" element={<UploadPhoto />} />
+        <Route path="/register-from-photo" element={<ResponsiveWrapper mobile={RegisterFromPhotoMobile} pc={RegisterFromPhotoPC} />} />
+        <Route path="/register/duplicate-check" element={<RegisterDuplicateCheck />} />
         <Route path="/register/location" element={<RegisterLocation />} />
         <Route path="/register/pole-info" element={<RegisterPoleInfo />} />
         <Route path="/register/photo-classify" element={<RegisterPhotoClassify />} />

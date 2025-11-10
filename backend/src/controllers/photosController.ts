@@ -33,6 +33,7 @@ export async function uploadPhoto(req: Request, res: Response, next: NextFunctio
       photoType: req.body.photoType || 'full',
       uploadedBy: userId,
       uploadedByName: username || 'guest',
+      registrationMethod: req.body.registrationMethod || 'location-first',
     });
 
     res.status(201).json({

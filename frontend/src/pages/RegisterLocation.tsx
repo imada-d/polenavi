@@ -1,29 +1,44 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../components/common/Map';
 import L from 'leaflet';
 
 export default function RegisterLocation() {
   const navigate = useNavigate();
+  const location = useLocation();
   const mapInstanceRef = useRef<L.Map | null>(null);
   const draggablePinRef = useRef<L.Marker | null>(null);
   const currentLocationCircleRef = useRef<L.Circle | null>(null);
-  
+
   const [currentLocation, setCurrentLocation] = useState<[number, number] | null>(null);
   const [pinLocation, setPinLocation] = useState<[number, number] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [mapType, setMapType] = useState<'street' | 'hybrid'>('street'); // 地図種類の切り替え
+  const [isFromPhotoGPS, setIsFromPhotoGPS] = useState(false); // 写真からのGPS座標かどうか
 
-  // 画面表示時にGPS自動取得
+  // 前の画面から受け取ったデータ
+  const { location: photoLocation, photos, registrationMethod, fromPhotoGPS } = location.state || {};
+
+  // 画面表示時にGPS自動取得 or 写真からのGPS使用
   useEffect(() => {
+    // 写真からのGPS座標がある場合はそれを使う
+    if (fromPhotoGPS && photoLocation) {
+      setCurrentLocation(photoLocation);
+      setPinLocation(photoLocation);
+      setIsFromPhotoGPS(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // 通常の現在地取得
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          const location: [number, number] = [latitude, longitude];
-          
-          setCurrentLocation(location);
-          setPinLocation(location); // ピンも同じ位置に初期配置
+          const loc: [number, number] = [latitude, longitude];
+
+          setCurrentLocation(loc);
+          setPinLocation(loc); // ピンも同じ位置に初期配置
           setIsLoading(false);
         },
         (error) => {
@@ -36,7 +51,7 @@ export default function RegisterLocation() {
       alert('お使いのブラウザは位置情報に対応していません。');
       setIsLoading(false);
     }
-  }, []);
+  }, [fromPhotoGPS, photoLocation]);
 
   const handleMapReady = (map: L.Map) => {
     mapInstanceRef.current = map;
@@ -102,7 +117,13 @@ export default function RegisterLocation() {
   // 次へ進むボタン
   const handleNext = () => {
     if (pinLocation) {
-      navigate('/register/pole-info', { state: { location: pinLocation } });
+      navigate('/register/pole-info', {
+        state: {
+          location: pinLocation,
+          photos,
+          registrationMethod,
+        },
+      });
     }
   };
 
@@ -121,13 +142,18 @@ export default function RegisterLocation() {
     <div className="h-screen w-full flex flex-col">
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="p-2 hover:bg-gray-100 rounded"
         >
           ← 戻る
         </button>
-        <h1 className="text-lg font-bold">位置を確認</h1>
+        <div className="text-center">
+          <h1 className="text-lg font-bold">位置を確認</h1>
+          {isFromPhotoGPS && (
+            <p className="text-xs text-blue-600">📸 写真から取得</p>
+          )}
+        </div>
         <div className="w-10"></div> {/* 中央揃え用 */}
       </header>
 

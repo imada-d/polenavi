@@ -18,6 +18,7 @@ export interface UploadPhotoRequest {
   photoType?: 'plate' | 'full' | 'detail';
   uploadedBy?: number;
   uploadedByName?: string;
+  registrationMethod?: 'location-first' | 'photo-first';
 }
 
 /**
@@ -54,6 +55,7 @@ export async function uploadPhoto(data: UploadPhotoRequest) {
       uploadedByName: data.uploadedByName || 'guest',
       visibility: 'public', // グループ機能対応
       groupId: null,
+      registrationMethod: data.registrationMethod || 'location-first',
     },
   });
 

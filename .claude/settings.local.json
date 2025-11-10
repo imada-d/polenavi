@@ -29,7 +29,8 @@
       "Bash(pm2 list:*)",
       "Bash(if not exist \"backend\\public\\uploads\\poles\" mkdir \"backend\\public\\uploads\\poles\")",
       "Bash(npx prisma:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(docker-compose up:*)"
     ],
     "deny": [],
     "ask": []

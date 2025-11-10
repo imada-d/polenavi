@@ -54,6 +54,12 @@ export default function Header({ onSearchClick }: HeaderProps = {}) {
           >
             グループ
           </Link>
+          <Link
+            to="/register-from-photo"
+            className="text-gray-700 hover:text-blue-600 font-semibold transition-colors flex items-center gap-1"
+          >
+            📸 写真で登録
+          </Link>
         </nav>
       </div>
 
