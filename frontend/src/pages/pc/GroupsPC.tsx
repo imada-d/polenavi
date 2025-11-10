@@ -3,11 +3,13 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Header from '../../components/pc/Header';
 import { getUserGroups, createGroup, type Group } from '../../api/groups';
 
 export default function GroupsPC() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -17,6 +19,12 @@ export default function GroupsPC() {
 
   // グループ一覧を取得
   useEffect(() => {
+    // ログインしていない場合はスキップ
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+
     const fetchGroups = async () => {
       try {
         const data = await getUserGroups();
@@ -30,7 +38,7 @@ export default function GroupsPC() {
     };
 
     fetchGroups();
-  }, []);
+  }, [isAuthenticated]);
 
   // グループ作成
   const handleCreateGroup = async () => {
@@ -76,16 +84,45 @@ export default function GroupsPC() {
               チームや組織で電柱を管理し、情報を共有しましょう
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            ＋ 新規グループ作成
-          </button>
+          {isAuthenticated && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            >
+              ＋ 新規グループ作成
+            </button>
+          )}
         </div>
 
         {loading ? (
           <div className="text-center py-12 text-gray-500">読み込み中...</div>
+        ) : !isAuthenticated ? (
+          /* ログインしていない場合 */
+          <div className="max-w-2xl mx-auto bg-white rounded-xl p-12 text-center shadow-lg">
+            <div className="text-8xl mb-6">🔒</div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              グループ機能を利用するには
+              <br />
+              ログインが必要です
+            </h2>
+            <p className="text-gray-600 mb-8 text-lg">
+              チームや組織で電柱を管理し、情報を共有するための機能です
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-lg"
+              >
+                ログイン
+              </button>
+              <button
+                onClick={() => navigate('/signup')}
+                className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors text-lg"
+              >
+                新規会員登録
+              </button>
+            </div>
+          </div>
         ) : groups.length === 0 ? (
           /* 空の状態 - 警告なし */
           <></>

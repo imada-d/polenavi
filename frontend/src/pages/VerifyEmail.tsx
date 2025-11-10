@@ -92,6 +92,9 @@ export default function VerifyEmail() {
             <p className="text-gray-600 mb-6">
               アカウントの登録が完了しました。
               <br />
+              ログインして電柱の登録や地図の探索を始めましょう！
+              <br />
+              <br />
               3秒後にログイン画面に移動します...
             </p>
             <button
