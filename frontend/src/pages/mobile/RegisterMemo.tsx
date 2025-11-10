@@ -141,7 +141,7 @@ export default function RegisterMemo() {
       )}
 
       {/* ボタンエリア */}
-      <div className="p-4 bg-white border-t space-y-3">
+      <div className="p-4 pb-20 bg-white border-t space-y-3">
         <button
           onClick={handleNext}
           className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"

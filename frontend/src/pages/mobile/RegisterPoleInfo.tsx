@@ -291,7 +291,7 @@ export default function RegisterPoleInfo() {
 
       {/* 次へボタン（全ての選択が完了したら表示） */}
       {canProceed && (
-        <div className="p-4 bg-white border-t animate-fadeIn">
+        <div className="p-4 pb-20 bg-white border-t animate-fadeIn">
           <button
             onClick={handleNext}
             className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"

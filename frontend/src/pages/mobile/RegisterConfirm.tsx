@@ -204,7 +204,7 @@ export default function RegisterConfirm() {
       </main>
 
       {/* ボタンエリア */}
-      <div className="p-4 bg-white border-t space-y-3">
+      <div className="p-4 pb-20 bg-white border-t space-y-3">
         {uploadProgress && (
           <div className="text-center text-sm text-blue-600 font-medium">
             {uploadProgress}

@@ -246,7 +246,7 @@ export default function RegisterPhotoClassify() {
       </main>
 
       {/* 次へボタン（常に表示） */}
-      <div className="p-4 bg-white border-t">
+      <div className="p-4 pb-20 bg-white border-t">
         <button
           onClick={handleNext}
           className="w-full py-3 rounded-lg font-bold text-lg bg-white text-gray-700 border-2 border-gray-300 hover:border-gray-400"

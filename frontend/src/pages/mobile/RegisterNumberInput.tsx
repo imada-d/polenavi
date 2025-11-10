@@ -347,14 +347,14 @@ export default function RegisterNumberInput() {
       </main>
 
       {/* 下部ボタン */}
-      <div className="p-4 bg-white border-t space-y-2">
+      <div className="p-4 pb-20 bg-white border-t space-y-2">
         <button
           onClick={handleRegister}
           className="w-full py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-bold text-lg hover:border-gray-400"
         >
           登録する
         </button>
-        
+
         {/* モード切り替えボタン（番号札1枚以上の場合のみ表示） */}
         {plateCount > 0 && (
           <>
