@@ -54,14 +54,12 @@ export default function RegisterLocation() {
         icon: currentLocationIcon,
       }).addTo(map) as any;
 
-      // 赤いピン（ドラッグ可能）を追加
-      const redIcon = L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
+      // 赤いピン（ドラッグ可能）を追加（CSS-based divIcon）
+      const redIcon = L.divIcon({
+        html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+        className: 'custom-pin-icon',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
       });
 
       draggablePinRef.current = L.marker(pinLocation, {
@@ -172,14 +170,16 @@ export default function RegisterLocation() {
           >
             🌐 航空写真
           </button>
+        </div>
 
-          {/* 現在地に戻すボタン */}
+        {/* 現在地に戻すボタン（画面下部中央） */}
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-[1001]">
           <button
             onClick={handleResetToCurrentLocation}
-            className="bg-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-50 font-bold"
+            className="bg-white px-6 py-3 rounded-lg shadow-lg hover:bg-gray-50 font-bold"
             title="現在地に戻す"
           >
-            <span translate="no">📍 現在地</span>
+            <span translate="no">📍 現在地に戻す</span>
           </button>
         </div>
       </main>
