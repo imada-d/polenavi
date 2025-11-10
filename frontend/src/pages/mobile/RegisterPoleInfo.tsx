@@ -57,9 +57,24 @@ export default function RegisterPoleInfo() {
       return;
     }
 
+    // デバッグログ
+    console.log('🔍 PoleInfo handleNext - registrationMethod:', registrationMethod);
+    console.log('🔍 PoleInfo handleNext - photos:', photos);
+    console.log('🔍 PoleInfo handleNext - photosKeys:', photos ? Object.keys(photos) : null);
+
+    // デバッグ用アラート（開発中のみ）
+    const debugInfo = {
+      registrationMethod: registrationMethod || 'なし',
+      hasPhotos: !!photos,
+      photosKeys: photos ? Object.keys(photos) : null,
+      willGoToNumberInput: registrationMethod === 'photo-first' && !!photos,
+    };
+    alert('🐛 PoleInfo 次へボタン押下\n\n' + JSON.stringify(debugInfo, null, 2));
+
     // 写真から登録の場合は、写真分類画面をスキップして番号入力へ
     // ただし、写真データが失われている場合は通常フローに戻す
     if (registrationMethod === 'photo-first' && photos) {
+      console.log('✅ PoleInfo - 写真から登録ルートで NumberInput へ遷移');
       navigate('/register/number-input', {
         state: {
           location: pinLocation,
@@ -72,6 +87,8 @@ export default function RegisterPoleInfo() {
       });
       return;
     }
+
+    console.log('⚠️ PoleInfo - 通常ルート（写真分類画面へ）');
 
     // 通常の登録フロー：写真分類画面へ
     navigate('/register/photo-classify', {
