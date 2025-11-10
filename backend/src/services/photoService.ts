@@ -55,7 +55,6 @@ export async function uploadPhoto(data: UploadPhotoRequest) {
       uploadedByName: data.uploadedByName || 'guest',
       visibility: 'public', // グループ機能対応
       groupId: null,
-      registrationMethod: data.registrationMethod || 'location-first',
     },
   });
 

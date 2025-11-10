@@ -37,7 +37,8 @@ app.use(helmet({
         "blob:",
         "https://*.tile.openstreetmap.org",
         "https://*.openstreetmap.org",
-        "https://server.arcgisonline.com"
+        "https://server.arcgisonline.com",
+        "https://stamen-tiles.a.ssl.fastly.net"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
