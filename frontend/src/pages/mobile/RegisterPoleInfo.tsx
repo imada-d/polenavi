@@ -4,17 +4,26 @@ import { useNavigate, useLocation } from 'react-router-dom';
 export default function RegisterPoleInfo() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // 前の画面（位置確認）から受け取ったデータ
   // pinLocation は [緯度, 経度] の配列
-  const { location: pinLocation, photos, registrationMethod } = location.state || {};
-  
+  const stateData = location.state || {};
+  let { location: pinLocation, photos, registrationMethod } = stateData;
+
+  // sessionStorage から写真データを復元（戻るボタン対策）
+  const savedData = sessionStorage.getItem('photoRegistrationData');
+  if (savedData && !photos) {
+    const parsed = JSON.parse(savedData);
+    photos = parsed.photos;
+    registrationMethod = parsed.registrationMethod;
+  }
+
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
-  
+
   // ステップ2: その他の詳細（poleType が 'other' の場合のみ）
   const [poleSubType, setPoleSubType] = useState<'light' | 'sign' | 'traffic' | 'other' | null>(null);
-  
+
   // ステップ3: 番号札の枚数
   const [plateCount, setPlateCount] = useState<number | null>(null);
 

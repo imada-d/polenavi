@@ -125,6 +125,12 @@ export default function RegisterFromPhoto() {
         detail: photos.filter(p => p.type === 'detail').map(p => p.dataUrl),
       };
 
+      // 写真データを sessionStorage に保存（戻るボタン対策）
+      sessionStorage.setItem('photoRegistrationData', JSON.stringify({
+        photos: photosByType,
+        registrationMethod: 'photo-first',
+      }));
+
       navigate('/register/duplicate-check', {
         state: {
           gps,

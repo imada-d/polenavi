@@ -18,8 +18,11 @@ export default function RegisterComplete() {
   const [loading, setLoading] = useState(true);
 
 
-  // 統計情報を取得
+  // 統計情報を取得 & sessionStorage クリア
   useEffect(() => {
+    // 写真から登録のデータをクリア
+    sessionStorage.removeItem('photoRegistrationData');
+
     const fetchStats = async () => {
       try {
         const data = await getUserStats();
