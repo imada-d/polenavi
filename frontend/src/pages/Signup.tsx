@@ -92,7 +92,7 @@ export default function Signup() {
           <button onClick={() => navigate(-1)} className="text-gray-600 mr-3">
             ← 戻る
           </button>
-          <h1 className="text-lg font-bold">新規登録</h1>
+          <h1 className="text-lg font-bold">新規会員登録</h1>
         </div>
       </header>
 

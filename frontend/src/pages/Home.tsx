@@ -466,7 +466,7 @@ export default function Home() {
     }
   };
 
-  // 新規登録ボタンのクリック処理（レスポンシブ対応）
+  // 電柱登録ボタンのクリック処理（レスポンシブ対応）
   const handleQuickRegister = () => {
     if (window.innerWidth < 768) {
       // モバイル：既存の画面遷移
@@ -588,9 +588,9 @@ export default function Home() {
       icon: icon
     }).addTo(mapInstanceRef.current);
 
-    // 何を: ホバー時に「新規登録」と表示
+    // 何を: ホバー時に「電柱を登録」と表示
     // なぜ: 登録直後であることがわかるようにするため
-    marker.bindTooltip('新規登録', {
+    marker.bindTooltip('電柱を登録', {
       permanent: false,
       direction: 'top',
       offset: [0, -40]
@@ -725,15 +725,15 @@ export default function Home() {
             <span>検索</span>
           </button>
 
-          {/* PC版：新規登録ボタン（登録モード中・パネル表示中は非表示） */}
+          {/* PC版：電柱登録ボタン（登録モード中・パネル表示中は非表示） */}
           {!isRegisterMode && !showRegisterPanel && !showDetailPanel && (
             <button
               onClick={handleQuickRegister}
               className="hidden md:flex bg-blue-600 text-white px-4 py-3 rounded-lg shadow-lg hover:bg-blue-700 font-bold transition-colors items-center gap-2"
-              title="新規登録"
+              title="電柱を登録"
             >
               <span className="text-xl">＋</span>
-              <span>新規登録</span>
+              <span>電柱を登録</span>
             </button>
           )}
         </div>
@@ -819,13 +819,13 @@ export default function Home() {
         )}
       </main>
       
-      {/* 新規登録ボタン（登録モード中とパネル表示中は非表示、モバイルのみ表示） */}
+      {/* 電柱登録ボタン（登録モード中とパネル表示中は非表示、モバイルのみ表示） */}
       {!isRegisterMode && !showRegisterPanel && (
         <button
           onClick={handleQuickRegister}
           className="md:hidden absolute bottom-36 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 font-bold z-[2001]"
         >
-          ＋ 新規登録
+          ＋ 電柱を登録
         </button>
       )}
     </div>

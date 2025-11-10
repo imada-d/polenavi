@@ -105,7 +105,7 @@ export default function Login() {
               <p className="text-sm text-gray-600">
                 アカウントをお持ちでないですか？{' '}
                 <Link to="/signup" className="text-blue-600 font-semibold hover:text-blue-700">
-                  新規登録
+                  会員登録
                 </Link>
               </p>
             </div>

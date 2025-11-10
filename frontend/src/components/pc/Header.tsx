@@ -94,7 +94,7 @@ export default function Header({ onSearchClick }: HeaderProps = {}) {
               to="/signup"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              新規登録
+              会員登録
             </Link>
           </div>
         )}

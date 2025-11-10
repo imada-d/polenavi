@@ -115,7 +115,7 @@ export default function Groups() {
                 onClick={() => navigate('/signup')}
                 className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700"
               >
-                新規会員登録
+                会員登録
               </button>
             </div>
           </div>
