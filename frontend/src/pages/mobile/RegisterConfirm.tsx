@@ -40,6 +40,9 @@ export default function RegisterConfirm() {
     registrationMethod,
   });
 
+  // デバッグ情報を画面に表示するかどうか（開発中のみtrue）
+  const showDebugInfo = true;
+
   // 柱の種類名を取得
   const getPoleTypeName = () => {
     if (poleType === 'electric') return '電柱';
@@ -123,7 +126,19 @@ export default function RegisterConfirm() {
     } catch (error) {
       console.error('登録エラー:', error);
       setUploadProgress('');
-      alert('登録に失敗しました。もう一度お試しください。');
+
+      // エラー詳細を表示
+      const errorMessage = error instanceof Error ? error.message : '不明なエラー';
+      const errorDetails = JSON.stringify({
+        message: errorMessage,
+        pinLocation,
+        poleType,
+        plateCount,
+        hasNumbers: !!numbers,
+        hasPhotos: !!photos,
+      }, null, 2);
+
+      alert(`登録に失敗しました\n\nエラー: ${errorMessage}\n\n詳細:\n${errorDetails}`);
     }
   };
 
@@ -139,6 +154,26 @@ export default function RegisterConfirm() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
+        {/* デバッグ情報（開発中のみ表示） */}
+        {showDebugInfo && (
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+            <h2 className="text-lg font-bold mb-2 text-yellow-800">🐛 デバッグ情報</h2>
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap break-all">
+              {JSON.stringify({
+                pinLocation,
+                poleType,
+                poleSubType,
+                plateCount,
+                numbers,
+                photosKeys: photos ? Object.keys(photos) : null,
+                hashtagsCount: hashtags?.length || 0,
+                hasMemo: !!memoText,
+                registrationMethod,
+              }, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* 位置情報 */}
         <div className="bg-white rounded-lg p-4 mb-4 shadow">
           <h2 className="text-lg font-bold mb-2">📍 位置情報</h2>
