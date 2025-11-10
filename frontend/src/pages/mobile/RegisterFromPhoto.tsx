@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { extractGPSFromPhoto } from '../../utils/exifExtractor';
 
 // 写真の分類タイプ
