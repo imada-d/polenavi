@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, AlertCircle, ArrowLeft } from 'lucide-react';
 import { getNearbyPoles } from '../api/poles';
+import Map from '../components/common/Map';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -39,7 +40,6 @@ export default function RegisterDuplicateCheck() {
   const [loading, setLoading] = useState(true);
   const [selectedPole, setSelectedPole] = useState<Pole | null>(null);
   const mapRef = useRef<L.Map | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const markersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
@@ -51,22 +51,11 @@ export default function RegisterDuplicateCheck() {
     checkNearbyPoles();
   }, [gps]);
 
-  // 地図の初期化
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current || nearbyPoles.length === 0) return;
+  // 地図の準備ができたらマーカーを追加
+  const handleMapReady = (map: L.Map) => {
+    mapRef.current = map;
 
-    const map = L.map(containerRef.current, {
-      zoomControl: false,
-      attributionControl: false,
-    }).setView([gps.latitude, gps.longitude], 18);
-
-    L.control.zoom({ position: 'bottomleft' }).addTo(map);
-    L.control.attribution({ position: 'topright', prefix: false }).addTo(map);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(map);
+    if (nearbyPoles.length === 0) return;
 
     // GPS位置（赤いマーカー）
     L.marker([gps.latitude, gps.longitude], {
@@ -80,7 +69,7 @@ export default function RegisterDuplicateCheck() {
       })
     }).addTo(map).bindPopup('📸 写真の位置');
 
-    // 既存電柱のマーカー（青いマーカー）
+    // 重複チェック対象の電柱のマーカー（青いマーカー）
     nearbyPoles.forEach((pole) => {
       const marker = L.marker([pole.latitude, pole.longitude], {
         icon: L.icon({
@@ -93,6 +82,9 @@ export default function RegisterDuplicateCheck() {
         })
       }).addTo(map);
 
+      const numbers = pole.numbers?.map(n => n.number).join(', ') || '番号なし';
+      marker.bindPopup(`<strong>${numbers}</strong><br>${pole.poleTypeName || 'その他'}`);
+
       marker.on('click', () => {
         setSelectedPole(pole);
       });
@@ -100,15 +92,9 @@ export default function RegisterDuplicateCheck() {
       markersRef.current.push(marker);
     });
 
-    mapRef.current = map;
-
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-    };
-  }, [nearbyPoles]);
+    // 地図を写真の位置に設定
+    map.setView([gps.latitude, gps.longitude], 18);
+  };
 
   // 近くの電柱をチェック（5m以内）
   const checkNearbyPoles = async () => {
@@ -195,28 +181,35 @@ export default function RegisterDuplicateCheck() {
               <AlertCircle className="w-6 h-6" />
               <h1 className="text-xl font-bold">近くに同じ電柱が見つかりました</h1>
             </div>
-            <button
-              onClick={() => {
-                // 写真から登録の場合は写真選択画面に戻る
-                const method = sessionStorage.getItem('registrationMethod');
-                if (method === 'photo-first') {
-                  navigate('/register-from-photo');
-                } else {
-                  navigate('/');
-                }
-              }}
-              className="flex items-center gap-2 px-3 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-semibold">戻る</span>
-            </button>
           </div>
         </div>
+
+        {/* 戻るボタン（右上に固定配置） */}
+        <button
+          onClick={() => {
+            // 写真から登録の場合は写真選択画面に戻る
+            const method = sessionStorage.getItem('registrationMethod');
+            if (method === 'photo-first') {
+              navigate('/register-from-photo');
+            } else {
+              navigate('/');
+            }
+          }}
+          className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 bg-white text-gray-800 hover:bg-gray-100 rounded-lg shadow-lg transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-semibold">戻る</span>
+        </button>
 
         <div className="flex flex-1 overflow-hidden">
           {/* 地図エリア */}
           <div className="flex-1 relative">
-            <div ref={containerRef} className="absolute inset-0" />
+            <Map
+              center={[gps.latitude, gps.longitude]}
+              zoom={18}
+              mapType="street"
+              onMapReady={handleMapReady}
+            />
           </div>
 
           {/* 右側パネル */}
@@ -330,31 +323,31 @@ export default function RegisterDuplicateCheck() {
 
   // モバイル版: 既存のレイアウト
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-20 relative">
       {/* ヘッダー */}
       <div className="bg-yellow-500 text-white p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-6 h-6" />
-            <h1 className="text-xl font-bold">近くに電柱が見つかりました</h1>
-          </div>
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-6 h-6" />
+          <h1 className="text-xl font-bold">近くに電柱が見つかりました</h1>
         </div>
-        <button
-          onClick={() => {
-            // 写真から登録の場合は写真選択画面に戻る
-            const method = sessionStorage.getItem('registrationMethod');
-            if (method === 'photo-first') {
-              navigate('/register-from-photo');
-            } else {
-              navigate('/');
-            }
-          }}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors text-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="font-semibold">戻る</span>
-        </button>
       </div>
+
+      {/* 戻るボタン（右上に固定配置） */}
+      <button
+        onClick={() => {
+          // 写真から登録の場合は写真選択画面に戻る
+          const method = sessionStorage.getItem('registrationMethod');
+          if (method === 'photo-first') {
+            navigate('/register-from-photo');
+          } else {
+            navigate('/');
+          }
+        }}
+        className="absolute top-5 right-4 z-10 flex items-center gap-2 px-3 py-1.5 bg-white text-gray-800 hover:bg-gray-100 rounded-lg shadow-lg transition-colors text-sm"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span className="font-semibold">戻る</span>
+      </button>
 
       <div className="p-4 space-y-4">
         {/* 距離表示 */}
