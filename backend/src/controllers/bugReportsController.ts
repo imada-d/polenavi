@@ -104,13 +104,13 @@ export async function getBugReportById(req: Request, res: Response) {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: bugReport,
     });
   } catch (error: any) {
     console.error('❌ バグ報告詳細取得エラー:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: {
         code: 'INTERNAL_SERVER_ERROR',
