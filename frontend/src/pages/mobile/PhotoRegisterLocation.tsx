@@ -85,11 +85,21 @@ export default function PhotoRegisterLocation() {
   // 次へ進むボタン
   const handleNext = () => {
     if (pinLocation) {
+      const dataToSave = {
+        location: pinLocation,
+        photos,
+      };
+
+      // sessionStorage に保存（iPhoneで消える対策）
+      try {
+        sessionStorage.setItem('poleRegistrationData', JSON.stringify(dataToSave));
+        console.log('✅ sessionStorage に保存（Location）');
+      } catch (error) {
+        console.error('❌ sessionStorage 保存エラー:', error);
+      }
+
       navigate('/register/photo/pole-info', {
-        state: {
-          location: pinLocation,
-          photos,
-        },
+        state: dataToSave,
       });
     }
   };

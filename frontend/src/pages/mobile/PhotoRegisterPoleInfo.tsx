@@ -12,8 +12,23 @@ export default function PhotoRegisterPoleInfo() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 前の画面から受け取ったデータ
-  const { location: pinLocation, photos } = location.state || {};
+  // 前の画面から受け取ったデータ（location.state または sessionStorage）
+  let stateData = location.state || {};
+
+  // location.state が空の場合、sessionStorage から取得
+  if (!stateData.location || !stateData.photos) {
+    try {
+      const saved = sessionStorage.getItem('poleRegistrationData');
+      if (saved) {
+        stateData = JSON.parse(saved);
+        console.log('✅ sessionStorage からデータ復元（PoleInfo）');
+      }
+    } catch (error) {
+      console.error('❌ sessionStorage 読み込みエラー:', error);
+    }
+  }
+
+  const { location: pinLocation, photos } = stateData;
 
   // ステップ1: 柱の種類
   const [poleType, setPoleType] = useState<'electric' | 'other' | null>(null);
@@ -50,30 +65,34 @@ export default function PhotoRegisterPoleInfo() {
       return;
     }
 
+    // データを sessionStorage に保存（iPhoneで消える対策）
+    const dataToSave = {
+      location: pinLocation,
+      poleType,
+      poleSubType,
+      plateCount,
+      photos,
+      numbers: plateCount === 0 ? [] : undefined, // 0枚の場合のみ
+    };
+
+    try {
+      sessionStorage.setItem('poleRegistrationData', JSON.stringify(dataToSave));
+      console.log('✅ sessionStorage に保存（PoleInfo）');
+    } catch (error) {
+      console.error('❌ sessionStorage 保存エラー:', error);
+    }
+
     // 0枚の場合は番号入力をスキップしてメモ画面へ
     if (plateCount === 0) {
       navigate('/register/photo/memo', {
-        state: {
-          location: pinLocation,
-          poleType,
-          poleSubType,
-          plateCount,
-          numbers: [], // 空配列（自動生成される）
-          photos,
-        },
+        state: dataToSave,
       });
       return;
     }
 
     // 1枚以上の場合は番号入力画面へ
     navigate('/register/photo/number-input', {
-      state: {
-        location: pinLocation,
-        poleType,
-        poleSubType,
-        plateCount,
-        photos,
-      },
+      state: dataToSave,
     });
   };
 

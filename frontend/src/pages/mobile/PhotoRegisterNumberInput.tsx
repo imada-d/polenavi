@@ -25,14 +25,29 @@ export default function PhotoRegisterNumberInput() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 前の画面から受け取ったデータ
+  // 前の画面から受け取ったデータ（location.state または sessionStorage）
+  let stateData = location.state || {};
+
+  // location.state が空の場合、sessionStorage から取得
+  if (!stateData.location || !stateData.poleType) {
+    try {
+      const saved = sessionStorage.getItem('poleRegistrationData');
+      if (saved) {
+        stateData = JSON.parse(saved);
+        console.log('✅ sessionStorage からデータ復元（NumberInput）');
+      }
+    } catch (error) {
+      console.error('❌ sessionStorage 読み込みエラー:', error);
+    }
+  }
+
   const {
     location: pinLocation,
     poleType,
     poleSubType,
     plateCount,
     photos,
-  } = location.state || {};
+  } = stateData;
 
   // 入力された番号の配列
   const [numbers, setNumbers] = useState<string[]>([]);
@@ -177,16 +192,26 @@ export default function PhotoRegisterNumberInput() {
     };
     localStorage.setItem(LAST_REG_KEY, JSON.stringify(regData));
 
-    // 次の画面へ（メモ・ハッシュタグ）- 写真データを確実に渡す
+    // データを sessionStorage に保存（iPhoneで消える対策）
+    const dataToSave = {
+      location: pinLocation,
+      poleType,
+      poleSubType,
+      plateCount,
+      numbers: finalNumbers,
+      photos,
+    };
+
+    try {
+      sessionStorage.setItem('poleRegistrationData', JSON.stringify(dataToSave));
+      console.log('✅ sessionStorage に保存（NumberInput）');
+    } catch (error) {
+      console.error('❌ sessionStorage 保存エラー:', error);
+    }
+
+    // 次の画面へ（メモ・ハッシュタグ）
     navigate('/register/photo/memo', {
-      state: {
-        location: pinLocation,
-        poleType,
-        poleSubType,
-        plateCount,
-        numbers: finalNumbers,
-        photos, // 写真データを確実に保持
-      },
+      state: dataToSave,
     });
   };
 
