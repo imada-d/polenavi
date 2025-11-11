@@ -10,7 +10,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, X, Camera } from 'lucide-react';
+import { Upload, X, Camera, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { extractGPSFromPhoto } from '../../utils/exifExtractor';
 
 // 写真の分類タイプ
@@ -153,6 +153,15 @@ export default function RegisterFromPhotoPC() {
     <div className="max-w-4xl mx-auto p-6">
       {/* ヘッダー */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>戻る</span>
+          </button>
+        </div>
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           <Camera className="w-6 h-6" />
           写真から登録
@@ -160,6 +169,22 @@ export default function RegisterFromPhotoPC() {
         <p className="text-gray-600 mt-2">
           撮影済みの写真から位置情報を取得して電柱を登録できます（最大4枚）
         </p>
+      </div>
+
+      {/* EXIF情報についての重要な注意 */}
+      <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-bold text-red-800 mb-2">⚠️ 重要：位置情報について</p>
+            <ul className="space-y-1 text-red-700 text-sm">
+              <li>• <strong>EXIF データ</strong>から位置情報を取得します</li>
+              <li>• <strong>生写真（カメラで撮影したオリジナル）</strong>でないと位置情報が取れません</li>
+              <li>• スクリーンショット、編集済み、SNSからダウンロードした写真は位置情報が削除されています</li>
+              <li>• 位置情報が無い場合は、手動で位置を指定する必要があります</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* 制約ルール */}

@@ -8,7 +8,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, AlertCircle } from 'lucide-react';
+import { MapPin, AlertCircle, ArrowLeft } from 'lucide-react';
 import { getNearbyPoles } from '../api/poles';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -190,9 +190,18 @@ export default function RegisterDuplicateCheck() {
       <div className="h-screen flex flex-col bg-gray-50">
         {/* ヘッダー */}
         <div className="bg-yellow-500 text-white p-4">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-6 h-6" />
-            <h1 className="text-xl font-bold">近くに同じ電柱が見つかりました</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-6 h-6" />
+              <h1 className="text-xl font-bold">近くに同じ電柱が見つかりました</h1>
+            </div>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-white hover:text-yellow-100 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>戻る</span>
+            </button>
           </div>
         </div>
 
@@ -316,10 +325,19 @@ export default function RegisterDuplicateCheck() {
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* ヘッダー */}
       <div className="bg-yellow-500 text-white p-4">
-        <div className="flex items-center gap-2">
-          <AlertCircle className="w-6 h-6" />
-          <h1 className="text-xl font-bold">近くに電柱が見つかりました</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-6 h-6" />
+            <h1 className="text-xl font-bold">近くに電柱が見つかりました</h1>
+          </div>
         </div>
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-white hover:text-yellow-100 transition-colors text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>戻る</span>
+        </button>
       </div>
 
       <div className="p-4 space-y-4">
