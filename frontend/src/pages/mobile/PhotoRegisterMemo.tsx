@@ -22,16 +22,6 @@ export default function PhotoRegisterMemo() {
     photos,
   } = location.state || {};
 
-  // デバッグ用
-  console.log('📝 PhotoRegisterMemo - 受け取ったデータ:', {
-    pinLocation,
-    poleType,
-    poleSubType,
-    plateCount,
-    numbers,
-    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
-  });
-
   // メモ・ハッシュタグの状態
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [memoText, setMemoText] = useState<string>('');

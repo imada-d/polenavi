@@ -147,7 +147,6 @@ export default function RegisterNumberInput() {
     // 番号札0枚の場合：自動生成
     if (plateCount === 0) {
       finalNumbers = [generateAutoNumber()];
-      console.log('自動生成:', finalNumbers[0]);
     } else {
       // 番号札1枚以上の場合：バリデーション
       const trimmedNumbers = numbers.map((n) => n.trim());
