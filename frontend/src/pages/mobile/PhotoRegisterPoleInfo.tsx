@@ -77,18 +77,10 @@ export default function PhotoRegisterPoleInfo() {
     });
   };
 
-  // 「次へ」ボタンを表示する条件
+  // 「次へ」ボタンを有効にする条件
   const canProceed =
     (poleType === 'electric' && plateCount !== null) ||
     (poleType === 'other' && poleSubType !== null && plateCount !== null);
-
-  // デバッグ用ログ
-  console.log('🔍 PhotoRegisterPoleInfo 状態:', {
-    poleType,
-    poleSubType,
-    plateCount,
-    canProceed,
-  });
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50">
@@ -119,17 +111,20 @@ export default function PhotoRegisterPoleInfo() {
         )}
       </main>
 
-      {/* 次へボタン（全ての選択が完了したら表示） */}
-      {canProceed && (
-        <div className="p-4 pb-24 bg-white border-t shadow-lg">
-          <button
-            onClick={handleNext}
-            className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md"
-          >
-            {plateCount === 0 ? '次へ（メモ入力）' : '次へ（番号入力）'}
-          </button>
-        </div>
-      )}
+      {/* 次へボタン（常に表示、選択未完了時はグレーアウト） */}
+      <div className="p-4 pb-24 bg-white border-t shadow-lg">
+        <button
+          onClick={handleNext}
+          disabled={!canProceed}
+          className={`w-full py-3 rounded-lg font-bold text-lg shadow-md transition-all ${
+            canProceed
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {plateCount === 0 ? '次へ（メモ入力）' : '次へ（番号入力）'}
+        </button>
+      </div>
     </div>
   );
 }
