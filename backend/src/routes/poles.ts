@@ -4,14 +4,14 @@
 import express, { Request, Response, NextFunction } from 'express';
 import * as polesController from '../controllers/polesController';
 import { upload, handleUploadError } from '../middleware/upload';
-import { authenticateToken } from '../middleware/authMiddleware';
+import { authenticateToken, optionalAuth } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 // 何を: 柱を登録するエンドポイント
 // なぜ: フロントエンドから送信されたデータをDBに保存するため
-// 認証が必要（統計でカウントするため）
-router.post('/', authenticateToken, polesController.createPole);
+// 認証はオプショナル（ログイン済みの場合は統計でカウント、未ログインの場合はゲスト登録）
+router.post('/', optionalAuth, polesController.createPole);
 
 // 何を: 近くの柱を検索するエンドポイント
 // なぜ: マップ上で近くの柱を表示するため
