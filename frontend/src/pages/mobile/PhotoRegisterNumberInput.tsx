@@ -45,6 +45,14 @@ export default function PhotoRegisterNumberInput() {
 
   // 初回読み込み時にlocalStorageから前回値を取得し、入力欄を初期化
   useEffect(() => {
+    console.log('🔍 PhotoRegisterNumberInput 初期化:', {
+      plateCount,
+      pinLocation,
+      poleType,
+      poleSubType,
+      photos: photos?.length,
+    });
+
     const saved = localStorage.getItem(LAST_REG_KEY);
     if (saved) {
       try {
@@ -57,7 +65,9 @@ export default function PhotoRegisterNumberInput() {
 
     // 枚数分の空文字列配列を初期化
     if (plateCount > 0) {
-      setNumbers(new Array(plateCount).fill(''));
+      const initialNumbers = new Array(plateCount).fill('');
+      console.log('✅ 入力欄を初期化:', initialNumbers);
+      setNumbers(initialNumbers);
     }
   }, [plateCount]);
 
@@ -226,6 +236,18 @@ export default function PhotoRegisterNumberInput() {
                 <p className="text-sm text-gray-700">
                   📋 番号札を上から順番に入力してください<br />
                   <strong>1番目（一番上）は必須</strong>、2番目以降は任意です
+                </p>
+              </div>
+            </div>
+
+            {/* デバッグ表示 */}
+            <div className="mb-4 max-w-md mx-auto">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-xs text-gray-700">
+                  🐛 デバッグ情報:<br />
+                  plateCount: {plateCount}<br />
+                  numbers.length: {numbers.length}<br />
+                  numbers: [{numbers.join(', ')}]
                 </p>
               </div>
             </div>
