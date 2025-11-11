@@ -40,14 +40,22 @@ export async function createPole(data: CreatePoleRequest) {
         latitude: data.latitude,
         longitude: data.longitude,
         poleTypeName: getPoleTypeName(data.poleType, data.poleSubType),
-        numberCount: data.numbers.length,
+        numberCount: data.numbers.length > 0 ? data.numbers.length : 1, // 番号なしの場合は自動生成番号1つ
         photoCount: 0,
       },
     });
 
     // 2. 番号を登録
+    let numbersToRegister = data.numbers;
+
+    // 番号が空の場合は自動生成番号を作成
+    if (!numbersToRegister || numbersToRegister.length === 0) {
+      const autoNumber = generateAutoNumber();
+      numbersToRegister = [autoNumber];
+    }
+
     const poleNumbers = await Promise.all(
-      data.numbers.map(async (number) => {
+      numbersToRegister.map(async (number) => {
         if (!number || number.trim() === '') return null;
 
         // 番号を正規化
@@ -270,10 +278,23 @@ function validatePoleData(data: CreatePoleRequest): void {
     throw new ValidationError('番号札の枚数を選択してください');
   }
 
-  // 番号のチェック
-  if (!data.numbers || data.numbers.length === 0) {
+  // 番号のチェック（番号札が0枚の場合は不要）
+  if (data.plateCount > 0 && (!data.numbers || data.numbers.length === 0)) {
     throw new ValidationError('番号が必要です');
   }
+}
+
+/**
+ * 自動生成番号を作成
+ */
+function generateAutoNumber(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let randomStr = '';
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    randomStr += chars[randomIndex];
+  }
+  return `#NoID-${randomStr}`;
 }
 
 /**

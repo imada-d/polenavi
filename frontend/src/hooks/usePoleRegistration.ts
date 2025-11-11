@@ -65,6 +65,23 @@ export function usePoleRegistration() {
 
       return responseData;
     } catch (error: any) {
+      // エラーの詳細をログ出力
+      console.error('❌ 登録エラー詳細:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        requestData: {
+          latitude: data.location[0],
+          longitude: data.location[1],
+          poleType: data.poleType,
+          poleSubType: data.poleSubType,
+          plateCount: data.plateCount,
+          numbers: data.numbers,
+          memo: data.memo,
+          hashtag: data.hashtag,
+        }
+      });
+
       const errorMessage =
         error.response?.data?.error?.message || '登録に失敗しました';
 
