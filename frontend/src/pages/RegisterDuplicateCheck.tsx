@@ -8,7 +8,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapPin, AlertCircle, X } from 'lucide-react';
+import { MapPin, AlertCircle } from 'lucide-react';
 import { getNearbyPoles } from '../api/poles';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
