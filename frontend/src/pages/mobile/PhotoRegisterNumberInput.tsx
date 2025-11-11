@@ -241,6 +241,19 @@ export default function PhotoRegisterNumberInput() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
+        {/* デバッグ情報（最上部） */}
+        <div className="mb-4 max-w-md mx-auto">
+          <div className="bg-red-100 border-2 border-red-400 rounded-lg p-3 text-xs">
+            <p className="font-bold text-red-800 mb-2">🔍 NumberInput デバッグ</p>
+            <p className="text-red-900">plateCount: {plateCount ?? '❌undefined'}</p>
+            <p className="text-red-900">poleType: {poleType || '❌空'}</p>
+            <p className="text-red-900">pinLocation: {pinLocation ? 'あり' : '❌空'}</p>
+            <p className="text-red-900">photos: {photos ? 'あり' : '❌空'}</p>
+            <p className="text-red-900">numbers.length: {numbers.length}</p>
+            <p className="text-red-900">sessionStorage: {sessionStorage.getItem('poleRegistrationData') ? 'あり' : '❌空'}</p>
+          </div>
+        </div>
+
         {/* 番号札0枚の場合：説明のみ */}
         {plateCount === 0 && (
           <div className="mb-6 max-w-md mx-auto">
