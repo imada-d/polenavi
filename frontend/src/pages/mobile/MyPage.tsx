@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import BottomNav from '../../components/mobile/BottomNav';
 import { getUserStats } from '../../api/user';
 import type { UserStats } from '../../api/user';
+import { APP_VERSION, OPERATOR_NAME } from '../../config/version';
 
 export default function MyPage() {
   const navigate = useNavigate();
@@ -261,8 +262,9 @@ export default function MyPage() {
           </div>
 
           {/* バージョン情報 */}
-          <div className="text-center text-sm text-gray-400 py-4">
-            PoleNavi v1.0.0
+          <div className="text-center text-sm text-gray-400 py-4 space-y-1">
+            <p>PoleNavi {APP_VERSION}</p>
+            <p>運営: {OPERATOR_NAME}</p>
           </div>
         </div>
       </div>

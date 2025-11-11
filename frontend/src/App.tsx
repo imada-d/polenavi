@@ -30,6 +30,10 @@ import AdminReportDetailMobile from './pages/mobile/AdminReportDetail';
 import AdminReportDetailPC from './pages/pc/AdminReportDetailPC';
 import AdminPolesMobile from './pages/mobile/AdminPoles';
 import AdminPolesPC from './pages/pc/AdminPolesPC';
+import AdminBugReportsMobile from './pages/mobile/AdminBugReports';
+import AdminBugReportsPC from './pages/pc/AdminBugReportsPC';
+import AdminBugReportDetailMobile from './pages/mobile/AdminBugReportDetail';
+import AdminBugReportDetailPC from './pages/pc/AdminBugReportDetailPC';
 import SearchPC from './pages/pc/SearchPC';
 import ProtectedRoute from './components/ProtectedRoute';
 import GroupsPC from './pages/pc/GroupsPC';
@@ -58,6 +62,7 @@ import PhotoRegisterLocation from './pages/mobile/PhotoRegisterLocation';
 import PhotoRegisterPoleInfo from './pages/mobile/PhotoRegisterPoleInfo';
 import PhotoRegisterNumberInput from './pages/mobile/PhotoRegisterNumberInput';
 import PhotoRegisterMemo from './pages/mobile/PhotoRegisterMemo';
+import BugReport from './pages/BugReport';
 
 // レスポンシブラッパー：PC/モバイルで異なるコンポーネントを表示
 function ResponsiveWrapper({ mobile: Mobile, pc: PC }: { mobile: React.ComponentType; pc: React.ComponentType }) {
@@ -90,6 +95,7 @@ function AppContent() {
     location.pathname === '/privacy-settings' ||
     location.pathname === '/account-settings' ||
     location.pathname === '/help-support' ||
+    location.pathname === '/bug-report' ||
     location.pathname === '/terms' ||
     location.pathname === '/privacy' ||
     location.pathname.startsWith('/hashtag/') ||
@@ -112,6 +118,7 @@ function AppContent() {
         <Route path="/privacy-settings" element={<PrivacySettings />} />
         <Route path="/account-settings" element={<AccountSettings />} />
         <Route path="/help-support" element={<HelpSupport />} />
+        <Route path="/bug-report" element={<BugReport />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/hashtag/:tag" element={<ResponsiveWrapper mobile={HashtagPolesMobile} pc={HashtagPolesPC} />} />
@@ -122,6 +129,8 @@ function AppContent() {
         <Route path="/admin/reports" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminReportsMobile} pc={AdminReportsPC} /></ProtectedRoute>} />
         <Route path="/admin/reports/:id" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminReportDetailMobile} pc={AdminReportDetailPC} /></ProtectedRoute>} />
         <Route path="/admin/poles" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminPolesMobile} pc={AdminPolesPC} /></ProtectedRoute>} />
+        <Route path="/admin/bug-reports" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminBugReportsMobile} pc={AdminBugReportsPC} /></ProtectedRoute>} />
+        <Route path="/admin/bug-reports/:id" element={<ProtectedRoute requireAdmin><ResponsiveWrapper mobile={AdminBugReportDetailMobile} pc={AdminBugReportDetailPC} /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email" element={<VerifyEmail />} />

@@ -186,11 +186,13 @@ export default function RegisterPhotoClassify() {
             {photos.map((photo, index) => (
               <div key={index} className="bg-white rounded-lg border-2 border-gray-300 p-3">
                 {/* サムネイル */}
-                <img 
-                  src={photo.dataUrl} 
-                  alt={`写真${index + 1}`}
-                  className="w-full h-40 object-cover rounded mb-3"
-                />
+                <div className="w-full h-40 bg-gray-100 rounded mb-3 flex items-center justify-center">
+                  <img
+                    src={photo.dataUrl}
+                    alt={`写真${index + 1}`}
+                    className="max-w-full max-h-full object-contain rounded"
+                  />
+                </div>
                 
                 {/* 分類ボタン */}
                 <div className="space-y-2">

@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/pc/Header';
+import { APP_VERSION, OPERATOR_NAME } from '../config/version';
 
 export default function HelpSupport() {
   const navigate = useNavigate();
@@ -85,18 +86,31 @@ export default function HelpSupport() {
         <div className="bg-white rounded-xl shadow-sm border p-6 md:p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">お問い合わせ</h2>
           <p className="text-gray-700 mb-4">
-            ご質問やご不明な点がございましたら、以下のメールアドレスまでお気軽にお問い合わせください。
+            バグや問題を見つけた場合は、バグ報告フォームからご報告ください。その他のご質問は、メールでお問い合わせください。
           </p>
-          <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-            <span className="text-2xl">✉️</span>
-            <div>
-              <p className="text-sm text-gray-600">お問い合わせ先</p>
-              <a
-                href="mailto:support@polenavi.com"
-                className="text-blue-600 font-semibold hover:underline"
-              >
-                support@polenavi.com
-              </a>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/bug-report')}
+              className="w-full flex items-center gap-3 p-4 bg-red-50 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
+            >
+              <span className="text-2xl">🐛</span>
+              <div className="text-left flex-1">
+                <p className="text-sm text-gray-600">バグを報告する</p>
+                <p className="text-red-600 font-semibold">バグ報告フォーム</p>
+              </div>
+              <span className="text-gray-400">→</span>
+            </button>
+            <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <span className="text-2xl">✉️</span>
+              <div>
+                <p className="text-sm text-gray-600">お問い合わせ先</p>
+                <a
+                  href="mailto:support@polenavi.com"
+                  className="text-blue-600 font-semibold hover:underline"
+                >
+                  support@polenavi.com
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -132,7 +146,7 @@ export default function HelpSupport() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-700">現在のバージョン</span>
-              <span className="font-bold text-blue-600">v1.1.0</span>
+              <span className="font-bold text-blue-600">{APP_VERSION}</span>
             </div>
             <div className="mt-4">
               <h3 className="font-semibold text-gray-800 mb-2">更新履歴</h3>
@@ -161,7 +175,7 @@ export default function HelpSupport() {
 
         {/* 運営情報 */}
         <div className="text-center py-6">
-          <p className="text-sm text-gray-500">運営：imada-lab</p>
+          <p className="text-sm text-gray-500">運営：{OPERATOR_NAME}</p>
         </div>
       </div>
     </div>

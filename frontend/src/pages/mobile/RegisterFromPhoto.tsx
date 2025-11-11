@@ -198,11 +198,11 @@ export default function RegisterFromPhoto() {
               <div key={index} className="bg-white rounded-lg shadow p-3">
                 <div className="flex gap-3">
                   {/* 写真プレビュー */}
-                  <div className="relative w-24 h-24 flex-shrink-0">
+                  <div className="relative w-24 h-24 flex-shrink-0 bg-gray-100 rounded">
                     <img
                       src={photo.dataUrl}
                       alt={`写真 ${index + 1}`}
-                      className="w-full h-full object-cover rounded"
+                      className="w-full h-full object-contain rounded"
                     />
                     {/* 削除ボタン */}
                     <button

@@ -17,6 +17,7 @@ import groupsRouter from './routes/groups';
 import invitationsRouter from './routes/invitations';
 import hashtagsRouter from './routes/hashtags';
 import emailVerificationRouter from './routes/emailVerificationRoutes';
+import bugReportsRouter from './routes/bugReports';
 import { errorHandler } from './middlewares/errorHandler';
 
 // 環境変数を読み込み
@@ -102,6 +103,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/groups', groupsRouter);
 app.use('/api/invitations', invitationsRouter);
 app.use('/api/hashtags', hashtagsRouter);
+app.use('/api/bug-reports', bugReportsRouter);
 
 // SPA用のフォールバック（すべてのGETリクエストをindex.htmlに）
 // APIルートと静的ファイルは既に処理済みなので、残りはフロントエンドのルート

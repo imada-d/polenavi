@@ -388,3 +388,21 @@ model GroupInvitation {
   @@index([inviteeEmail])
   @@map("group_invitations")
 }
+
+// バグ報告テーブル
+model BugReport {
+  id           Int      @id @default(autoincrement())
+  title        String   @db.VarChar(200)
+  category     String   @db.VarChar(50) // map, registration, photo, search, ui, performance, other
+  description  String   @db.Text
+  steps        String?  @db.Text
+  environment  String?  @db.VarChar(200)
+  contactEmail String?  @map("contact_email") @db.VarChar(255)
+  status       String   @default("open") @db.VarChar(20) // open, in_progress, resolved, closed
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("bug_reports")
+}

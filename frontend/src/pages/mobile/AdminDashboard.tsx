@@ -92,6 +92,13 @@ export default function AdminDashboard() {
                 {stats.admin.pendingReports}
               </span>
             </button>
+            <button
+              onClick={() => navigate('/admin/bug-reports')}
+              className="w-full bg-red-50 text-red-700 py-3 rounded-lg font-semibold text-sm hover:bg-red-100 transition-colors flex items-center justify-between px-4"
+            >
+              <span>🐛 バグ報告管理</span>
+              <span className="text-red-600">→</span>
+            </button>
           </div>
         </div>
 
