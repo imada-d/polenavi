@@ -245,12 +245,16 @@ export default function PhotoRegisterNumberInput() {
         <div className="mb-4 max-w-md mx-auto">
           <div className="bg-red-100 border-2 border-red-400 rounded-lg p-3 text-xs">
             <p className="font-bold text-red-800 mb-2">🔍 NumberInput デバッグ</p>
-            <p className="text-red-900">plateCount: {plateCount ?? '❌undefined'}</p>
+            <p className="text-red-900">plateCount: {plateCount ?? '❌undefined'} (型: {typeof plateCount})</p>
             <p className="text-red-900">poleType: {poleType || '❌空'}</p>
             <p className="text-red-900">pinLocation: {pinLocation ? 'あり' : '❌空'}</p>
-            <p className="text-red-900">photos: {photos ? 'あり' : '❌空'}</p>
+            <p className="text-red-900">photos: {photos ? (Array.isArray(photos) ? `配列${photos.length}枚` : 'オブジェクト') : '❌空'}</p>
             <p className="text-red-900">numbers.length: {numbers.length}</p>
-            <p className="text-red-900">sessionStorage: {sessionStorage.getItem('poleRegistrationData') ? 'あり' : '❌空'}</p>
+            <p className="text-red-900">sessionStorage サイズ: {(() => {
+              const data = sessionStorage.getItem('poleRegistrationData');
+              return data ? `${(data.length / 1024).toFixed(1)}KB` : '空';
+            })()}</p>
+            <p className="text-red-900">location.state: {location.state ? 'あり' : '❌空'}</p>
           </div>
         </div>
 
