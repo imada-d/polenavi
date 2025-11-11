@@ -74,7 +74,7 @@ export default function AdminDashboardPC() {
           <h2 className="text-xl font-bold text-gray-800 mb-4">
             クイックアクション
           </h2>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => navigate('/admin/users')}
               className="bg-blue-50 text-blue-700 py-4 rounded-lg font-semibold hover:bg-blue-100 transition-colors flex items-center justify-between px-6"
@@ -97,6 +97,13 @@ export default function AdminDashboardPC() {
               <span className="bg-red-500 text-white text-sm px-3 py-1 rounded-full">
                 {stats.admin.pendingReports}
               </span>
+            </button>
+            <button
+              onClick={() => navigate('/admin/bug-reports')}
+              className="bg-red-50 text-red-700 py-4 rounded-lg font-semibold hover:bg-red-100 transition-colors flex items-center justify-between px-6"
+            >
+              <span className="text-lg">🐛 バグ報告管理</span>
+              <span className="text-red-600 text-2xl">→</span>
             </button>
           </div>
         </div>
