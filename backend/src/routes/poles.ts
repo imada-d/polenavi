@@ -4,7 +4,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import * as polesController from '../controllers/polesController';
 import { upload, handleUploadError } from '../middleware/upload';
-import { authenticateToken, optionalAuth } from '../middleware/authMiddleware';
+import { optionalAuth } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
