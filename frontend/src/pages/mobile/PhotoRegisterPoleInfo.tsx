@@ -82,6 +82,14 @@ export default function PhotoRegisterPoleInfo() {
     (poleType === 'electric' && plateCount !== null) ||
     (poleType === 'other' && poleSubType !== null && plateCount !== null);
 
+  // デバッグ用ログ
+  console.log('🔍 PhotoRegisterPoleInfo 状態:', {
+    poleType,
+    poleSubType,
+    plateCount,
+    canProceed,
+  });
+
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50">
       {/* ヘッダー */}
