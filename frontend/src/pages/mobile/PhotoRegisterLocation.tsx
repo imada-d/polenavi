@@ -16,12 +16,13 @@ export default function PhotoRegisterLocation() {
   const photoLocationMarkerRef = useRef<L.Marker | null>(null);
 
   // 前の画面から受け取ったデータ
-  const { gpsLocation, photos } = location.state || {};
+  const { gpsLocation, photos, manualLocation } = location.state || {};
 
   // デバッグ用
   console.log('📍 PhotoRegisterLocation - 受け取ったデータ:', {
     gpsLocation,
-    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
+    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし',
+    manualLocation
   });
 
   const [photoLocation] = useState<[number, number]>(gpsLocation); // 写真のGPS（固定）
@@ -32,17 +33,19 @@ export default function PhotoRegisterLocation() {
     mapInstanceRef.current = map;
 
     if (photoLocation && pinLocation) {
-      // 写真から取得した位置マーカー（緑色、固定）
-      const photoLocationIcon = L.divIcon({
-        html: '<div style="background-color: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📸 写真の位置</div>',
-        className: 'photo-location-label',
-        iconSize: [100, 24],
-        iconAnchor: [50, 12],
-      });
+      // 写真から取得した位置マーカー（緑色、固定）- 手動選択の場合は表示しない
+      if (!manualLocation) {
+        const photoLocationIcon = L.divIcon({
+          html: '<div style="background-color: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.3);" translate="no">📸 写真の位置</div>',
+          className: 'photo-location-label',
+          iconSize: [100, 24],
+          iconAnchor: [50, 12],
+        });
 
-      photoLocationMarkerRef.current = L.marker(photoLocation, {
-        icon: photoLocationIcon,
-      }).addTo(map) as any;
+        photoLocationMarkerRef.current = L.marker(photoLocation, {
+          icon: photoLocationIcon,
+        }).addTo(map) as any;
+      }
 
       // 赤いピン（ドラッグ可能）
       const redIcon = L.divIcon({
@@ -110,7 +113,9 @@ export default function PhotoRegisterLocation() {
         </button>
         <div className="text-center">
           <h1 className="text-lg font-bold">位置を確認</h1>
-          <p className="text-xs text-green-600">📸 写真から取得</p>
+          <p className="text-xs text-green-600">
+            {manualLocation ? '📍 手動選択' : '📸 写真から取得'}
+          </p>
         </div>
         <div className="w-10"></div> {/* 中央揃え用 */}
       </header>

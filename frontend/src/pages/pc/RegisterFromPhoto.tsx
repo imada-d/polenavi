@@ -108,12 +108,60 @@ export default function RegisterFromPhotoPC() {
         // GPS情報が無い場合
         setIsProcessing(false);
         const shouldManualRegister = window.confirm(
-          'この写真には位置情報が含まれていません。\n\n手動で登録しますか？'
+          'この写真には位置情報が含まれていません。\n\n手動で位置を選択しますか？'
         );
 
         if (shouldManualRegister) {
-          // 通常の登録フローへ遷移（位置選択から）
-          navigate('/register/location');
+          // 写真データを保持したまま、手動で位置を選択する画面へ
+          // 写真データを準備
+          const photosByType = {
+            plate: photos.find(p => p.type === 'plate')?.dataUrl || null,
+            full: photos.filter(p => p.type === 'full').map(p => p.dataUrl),
+            detail: photos.filter(p => p.type === 'detail').map(p => p.dataUrl),
+          };
+
+          // 写真から登録専用の位置確認画面へ（GPS座標なしで現在地を使用）
+          // 現在地を取得してから遷移
+          if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                const { latitude, longitude } = position.coords;
+                sessionStorage.setItem('registrationMethod', 'photo-first');
+                navigate('/register/photo/location', {
+                  state: {
+                    gpsLocation: [latitude, longitude],
+                    photos: photosByType,
+                    registrationMethod: 'photo-first',
+                    manualLocation: true, // 手動位置選択フラグ
+                  },
+                });
+              },
+              (error) => {
+                console.error('位置情報の取得に失敗:', error);
+                // 位置情報が取れない場合は日本の中心座標を使用
+                sessionStorage.setItem('registrationMethod', 'photo-first');
+                navigate('/register/photo/location', {
+                  state: {
+                    gpsLocation: [36.5, 138.0], // 日本の中心
+                    photos: photosByType,
+                    registrationMethod: 'photo-first',
+                    manualLocation: true,
+                  },
+                });
+              }
+            );
+          } else {
+            // Geolocationが使えない場合
+            sessionStorage.setItem('registrationMethod', 'photo-first');
+            navigate('/register/photo/location', {
+              state: {
+                gpsLocation: [36.5, 138.0],
+                photos: photosByType,
+                registrationMethod: 'photo-first',
+                manualLocation: true,
+              },
+            });
+          }
         }
         return;
       }
