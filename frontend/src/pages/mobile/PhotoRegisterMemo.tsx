@@ -160,7 +160,7 @@ export default function PhotoRegisterMemo() {
       )}
 
       {/* ボタンエリア */}
-      <div className="p-4 pb-20 bg-white border-t">
+      <div className="p-4 pb-24 bg-white border-t shadow-lg">
         <button
           onClick={handleNext}
           className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"

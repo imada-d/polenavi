@@ -137,10 +137,10 @@ export default function PhotoRegisterPoleInfo() {
 
       {/* 次へボタン（全ての選択が完了したら表示） */}
       {canProceed && (
-        <div className="p-4 pb-20 bg-white border-t animate-fadeIn">
+        <div className="p-4 pb-24 bg-white border-t shadow-lg">
           <button
             onClick={handleNext}
-            className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"
+            className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700 shadow-md"
           >
             {plateCount === 0 ? '次へ（メモ入力）' : '次へ（番号入力）'}
           </button>
