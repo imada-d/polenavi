@@ -256,7 +256,19 @@ export default function MyData() {
 
             {/* ハッシュタグタブ */}
             {activeTab === 'hashtags' && (
-              <div className="space-y-2">
+              <div className="space-y-3">
+                {/* ハッシュタグマスター作成ボタン */}
+                <button
+                  onClick={() => navigate('/hashtags')}
+                  className="w-full bg-blue-50 border-2 border-blue-300 rounded-lg p-4 flex items-center justify-between hover:bg-blue-100 transition-colors"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">🏷️</span>
+                    <span className="font-bold text-blue-700">ハッシュタグマスターを作成</span>
+                  </div>
+                  <span className="text-blue-600 text-xl">→</span>
+                </button>
+
                 {hashtags.length === 0 ? (
                   <div className="text-center py-8 text-gray-400">
                     使用したハッシュタグがありません

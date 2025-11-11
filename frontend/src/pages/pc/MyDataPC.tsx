@@ -260,30 +260,44 @@ export default function MyDataPC() {
 
               {/* ハッシュタグタブ */}
               {activeTab === 'hashtags' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {hashtags.length === 0 ? (
-                    <div className="col-span-full text-center py-16 text-gray-400 text-lg">
-                      使用したハッシュタグがありません
+                <div className="space-y-4">
+                  {/* ハッシュタグマスター作成ボタン */}
+                  <button
+                    onClick={() => navigate('/hashtags')}
+                    className="w-full bg-blue-50 border-2 border-blue-300 rounded-xl p-6 flex items-center justify-between hover:bg-blue-100 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">🏷️</span>
+                      <span className="font-bold text-blue-700 text-lg">ハッシュタグマスターを作成</span>
                     </div>
-                  ) : (
-                    hashtags.map((hashtag: any, idx: number) => (
-                      <button
-                        key={idx}
-                        onClick={() => navigate(`/hashtag/${hashtag.tag.replace('#', '')}?userId=${user?.id}`)}
-                        className="w-full bg-white rounded-xl shadow-sm border p-6 flex items-center justify-between hover:shadow-lg transition-shadow text-left"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <span className="text-xl font-semibold text-blue-600">#{hashtag.tag.replace('#', '')}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-gray-500">
-                            {hashtag.count}回使用
-                          </span>
-                          <span className="text-gray-400">→</span>
-                        </div>
-                      </button>
-                    ))
-                  )}
+                    <span className="text-blue-600 text-2xl">→</span>
+                  </button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {hashtags.length === 0 ? (
+                      <div className="col-span-full text-center py-16 text-gray-400 text-lg">
+                        使用したハッシュタグがありません
+                      </div>
+                    ) : (
+                      hashtags.map((hashtag: any, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => navigate(`/hashtag/${hashtag.tag.replace('#', '')}?userId=${user?.id}`)}
+                          className="w-full bg-white rounded-xl shadow-sm border p-6 flex items-center justify-between hover:shadow-lg transition-shadow text-left"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <span className="text-xl font-semibold text-blue-600">#{hashtag.tag.replace('#', '')}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-gray-500">
+                              {hashtag.count}回使用
+                            </span>
+                            <span className="text-gray-400">→</span>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
             </>
