@@ -67,7 +67,14 @@ export async function createPole(data: CreatePoleRequest) {
     const poleNumbers = await Promise.all(
       validNumbers.map(async (number) => {
         // 番号を正規化
-        const normalizedNumber = normalizePoleNumber(number.trim());
+        let normalizedNumber = normalizePoleNumber(number.trim());
+
+        // '?' の場合は電柱IDを付与してユニークにする
+        // （フロントエンドでは '?' とだけ表示される）
+        if (normalizedNumber === '?') {
+          normalizedNumber = `?-pole${pole.id}`;
+          console.log(`🔄 '?' を '${normalizedNumber}' に変換しました`);
+        }
 
         return tx.poleNumber.create({
           data: {
