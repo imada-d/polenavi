@@ -106,7 +106,7 @@ export default function PhotoRegisterLocation() {
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between z-10">
         <button
-          onClick={() => navigate('/register/from-photo')}
+          onClick={() => navigate('/register-from-photo')}
           className="p-2 hover:bg-gray-100 rounded"
         >
           ← 写真選択へ戻る

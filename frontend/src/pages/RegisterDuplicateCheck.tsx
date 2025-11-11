@@ -200,7 +200,7 @@ export default function RegisterDuplicateCheck() {
                 // 写真から登録の場合は写真選択画面に戻る
                 const method = sessionStorage.getItem('registrationMethod');
                 if (method === 'photo-first') {
-                  navigate('/register/from-photo');
+                  navigate('/register-from-photo');
                 } else {
                   navigate('/');
                 }
@@ -344,7 +344,7 @@ export default function RegisterDuplicateCheck() {
             // 写真から登録の場合は写真選択画面に戻る
             const method = sessionStorage.getItem('registrationMethod');
             if (method === 'photo-first') {
-              navigate('/register/from-photo');
+              navigate('/register-from-photo');
             } else {
               navigate('/');
             }
