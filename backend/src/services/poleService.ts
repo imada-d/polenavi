@@ -133,6 +133,43 @@ export async function findNearbyPoles(
 }
 
 /**
+ * 境界ボックス内の電柱を検索
+ *
+ * @param minLat 最小緯度（南西の緯度）
+ * @param maxLat 最大緯度（北東の緯度）
+ * @param minLng 最小経度（南西の経度）
+ * @param maxLng 最大経度（北東の経度）
+ */
+export async function findPolesInBounds(
+  minLat: number,
+  maxLat: number,
+  minLng: number,
+  maxLng: number
+) {
+  console.log(`🗺️ 境界ボックス検索: lat[${minLat}, ${maxLat}], lng[${minLng}, ${maxLng}]`);
+
+  const poles = await prisma.pole.findMany({
+    where: {
+      latitude: {
+        gte: minLat,
+        lte: maxLat,
+      },
+      longitude: {
+        gte: minLng,
+        lte: maxLng,
+      },
+    },
+    include: {
+      poleNumbers: true,
+    },
+  });
+
+  console.log(`✅ ${poles.length}本の電柱を取得`);
+
+  return poles;
+}
+
+/**
  * 電柱IDから詳細情報を取得
  */
 export async function getPoleById(poleId: number) {

@@ -241,12 +241,27 @@ export default function Home() {
 
     console.log('🔄 loadNearbyPoles: 電柱を再読み込み中...');
 
-    // 地図の中心座標を取得
-    const center = mapInstanceRef.current.getCenter();
+    // 地図の表示範囲（境界ボックス）を取得
+    const bounds = mapInstanceRef.current.getBounds();
+    const southWest = bounds.getSouthWest(); // 南西の座標
+    const northEast = bounds.getNorthEast(); // 北東の座標
+
+    console.log('🗺️ 表示範囲:', {
+      minLat: southWest.lat,
+      maxLat: northEast.lat,
+      minLng: southWest.lng,
+      maxLng: northEast.lng,
+    });
 
     try {
-      const poles = await getNearbyPoles(center.lat, center.lng, 50000);
-      console.log('📊 取得した電柱:', poles.map((p: any) => ({ id: p.id, lat: p.latitude, lng: p.longitude })));
+      // 境界ボックス内のすべての電柱を取得
+      const poles = await getNearbyPoles(
+        southWest.lat, // minLat
+        southWest.lng, // minLng
+        northEast.lat, // maxLat
+        northEast.lng  // maxLng
+      );
+      console.log('📊 取得した電柱:', poles.length, '本');
 
       // 何を: 既存のクラスタグループをクリア
       // なぜ: 古いマーカーを削除して新しいマーカーだけ表示するため

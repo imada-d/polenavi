@@ -65,16 +65,34 @@ export async function getPoleById(req: Request, res: Response, next: NextFunctio
  * 近くの電柱を検索
  *
  * GET /api/poles/nearby?lat=32.849066&lng=130.781983&radius=50
+ * または
+ * GET /api/poles/nearby?minLat=32.8&maxLat=32.9&minLng=130.7&maxLng=130.8
  */
 export async function getNearbyPoles(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const lat = parseFloat(req.query.lat as string);
-    const lng = parseFloat(req.query.lng as string);
-    const radius = req.query.radius ? parseInt(req.query.radius as string, 10) : undefined;
+    let poles: any[];
 
-    console.log(`🔍 電柱検索: lat=${lat}, lng=${lng}, radius=${radius}`);
+    // 境界ボックス検索（minLat, maxLat, minLng, maxLng）
+    if (req.query.minLat && req.query.maxLat && req.query.minLng && req.query.maxLng) {
+      const minLat = parseFloat(req.query.minLat as string);
+      const maxLat = parseFloat(req.query.maxLat as string);
+      const minLng = parseFloat(req.query.minLng as string);
+      const maxLng = parseFloat(req.query.maxLng as string);
 
-    const poles = await poleService.findNearbyPoles(lat, lng, radius as any);
+      console.log(`🗺️ 境界ボックス検索: lat[${minLat}, ${maxLat}], lng[${minLng}, ${maxLng}]`);
+
+      poles = await poleService.findPolesInBounds(minLat, maxLat, minLng, maxLng);
+    }
+    // 中心点 + 半径検索（従来の方法）
+    else {
+      const lat = parseFloat(req.query.lat as string);
+      const lng = parseFloat(req.query.lng as string);
+      const radius = req.query.radius ? parseInt(req.query.radius as string, 10) : undefined;
+
+      console.log(`🔍 電柱検索: lat=${lat}, lng=${lng}, radius=${radius}`);
+
+      poles = await poleService.findNearbyPoles(lat, lng, radius as any);
+    }
 
     console.log(`📊 検索結果: ${poles.length}件の電柱が見つかりました`);
 
