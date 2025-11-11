@@ -37,29 +37,7 @@ export default function PhotoRegisterMemo() {
   const [memoText, setMemoText] = useState<string>('');
   const [showHashtagSelector, setShowHashtagSelector] = useState(false);
 
-  // スキップ（メモなしで次へ）
-  const handleSkip = () => {
-    // 写真データを確認画面が期待する形式に変換
-    const photosData = Array.isArray(photos)
-      ? { plate: undefined, full: photos, detail: [] }
-      : photos;
-
-    navigate('/register/confirm', {
-      state: {
-        location: pinLocation,
-        poleType,
-        poleSubType,
-        plateCount,
-        numbers,
-        photos: photosData,
-        registrationMethod: 'photo-first',
-        hashtags: [],
-        memoText: '',
-      },
-    });
-  };
-
-  // 次へ（メモありで次へ）
+  // 次へ（メモ・ハッシュタグは任意）
   const handleNext = () => {
     // ハッシュタグ配列を#付きに変換
     const hashtagArray = selectedTags.map((tag) =>
@@ -167,7 +145,7 @@ export default function PhotoRegisterMemo() {
             <br />
             ・メモは個人的な管理用に使えます
             <br />
-            ・スキップもできます
+            ・メモ・ハッシュタグは任意です
           </p>
         </div>
       </main>
@@ -182,18 +160,12 @@ export default function PhotoRegisterMemo() {
       )}
 
       {/* ボタンエリア */}
-      <div className="p-4 pb-20 bg-white border-t space-y-3">
+      <div className="p-4 pb-20 bg-white border-t">
         <button
           onClick={handleNext}
           className="w-full py-3 rounded-lg font-bold text-lg bg-blue-600 text-white hover:bg-blue-700"
         >
           次へ（確認画面）
-        </button>
-        <button
-          onClick={handleSkip}
-          className="w-full py-3 rounded-lg font-bold text-lg bg-gray-200 text-gray-700 hover:bg-gray-300"
-        >
-          スキップ
         </button>
       </div>
     </div>

@@ -40,9 +40,9 @@ export default function RegisterComplete() {
     navigate('/');
   };
 
-  // 続けて登録
+  // 続けて登録（写真から登録へ）
   const handleContinue = () => {
-    navigate('/register/location');
+    navigate('/register-from-photo');
   };
 
   return (
