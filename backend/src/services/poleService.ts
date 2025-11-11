@@ -28,6 +28,11 @@ export interface CreatePoleRequest {
  * 電柱を新規登録
  */
 export async function createPole(data: CreatePoleRequest) {
+  console.log('🔍 [Service] data.registeredBy:', data.registeredBy);
+  console.log('🔍 [Service] data.registeredByName:', data.registeredByName);
+  console.log('🔍 [Service] data.memo:', data.memo);
+  console.log('🔍 [Service] data.hashtag:', data.hashtag);
+
   // バリデーション
   validatePoleData(data);
 
@@ -83,18 +88,30 @@ export async function createPole(data: CreatePoleRequest) {
     // 3. メモ・ハッシュタグを登録（もしあれば）
     let createdMemo = null;
     if ((data.memo && data.memo.trim()) || (data.hashtag && data.hashtag.length > 0)) {
+      // createdByNameを確実に文字列にする
+      const createdByName = (data.registeredByName && data.registeredByName.trim()) || 'guest';
+
+      console.log('🔍 [Service] poleMemo.create() 直前:');
+      console.log('  - poleId:', pole.id);
+      console.log('  - hashtags:', Array.isArray(data.hashtag) ? data.hashtag : []);
+      console.log('  - memoText:', data.memo || null);
+      console.log('  - createdBy:', data.registeredBy);
+      console.log('  - createdByName:', createdByName);
+
       createdMemo = await tx.poleMemo.create({
         data: {
           poleId: pole.id,
           hashtags: Array.isArray(data.hashtag) ? data.hashtag : [],
           memoText: data.memo || null,
           createdBy: data.registeredBy,
-          createdByName: data.registeredByName || 'guest',
+          createdByName: createdByName,
           isPublic: true,
           visibility: 'public',
           groupId: null,
         },
       });
+
+      console.log('✅ [Service] poleMemo 作成成功');
     }
 
     return {

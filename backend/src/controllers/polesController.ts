@@ -15,12 +15,17 @@ export async function createPole(req: Request, res: Response, next: NextFunction
     const userId = (req as any).user?.userId;
     const username = (req as any).user?.username;
 
+    console.log('🔍 [Controller] userId:', userId);
+    console.log('🔍 [Controller] username:', username);
+
     // ユーザー情報をリクエストボディに追加
     const poleData = {
       ...req.body,
       registeredBy: userId,
       registeredByName: username || 'guest'
     };
+
+    console.log('🔍 [Controller] poleData.registeredByName:', poleData.registeredByName);
 
     const result = await poleService.createPole(poleData);
 
