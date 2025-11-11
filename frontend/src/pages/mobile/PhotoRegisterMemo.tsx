@@ -39,18 +39,29 @@ export default function PhotoRegisterMemo() {
       ? { plate: undefined, full: photos, detail: [] }
       : photos;
 
+    const registrationData = {
+      location: pinLocation,
+      poleType,
+      poleSubType,
+      plateCount,
+      numbers,
+      photos: photosData,
+      registrationMethod: 'photo-first',
+      hashtags: hashtagArray,
+      memoText: memoText.trim(),
+    };
+
+    // sessionStorage に保存（iPhoneで location.state が消える対策）
+    try {
+      sessionStorage.setItem('poleRegistrationData', JSON.stringify(registrationData));
+      console.log('✅ 登録データを sessionStorage に保存しました');
+    } catch (error) {
+      console.error('❌ sessionStorage への保存に失敗:', error);
+    }
+
+    // location.state も念のため渡す
     navigate('/register/confirm', {
-      state: {
-        location: pinLocation,
-        poleType,
-        poleSubType,
-        plateCount,
-        numbers,
-        photos: photosData,
-        registrationMethod: 'photo-first',
-        hashtags: hashtagArray,
-        memoText: memoText.trim(),
-      },
+      state: registrationData,
     });
   };
 

@@ -12,8 +12,24 @@ export default function RegisterConfirm() {
   const { register, loading } = usePoleRegistration();
   const [uploadProgress, setUploadProgress] = useState<string>('');
 
-  // 前の画面から受け取ったデータ
-  const state = location.state || {};
+  // 前の画面から受け取ったデータ（location.state または sessionStorage）
+  let state = location.state || {};
+
+  // location.state が空の場合、sessionStorage から取得（iPhoneで消える対策）
+  if (!state.location || !state.poleType) {
+    try {
+      const savedData = sessionStorage.getItem('poleRegistrationData');
+      if (savedData) {
+        state = JSON.parse(savedData);
+        console.log('✅ sessionStorage から登録データを復元しました');
+      } else {
+        console.warn('⚠️ sessionStorage にデータがありません');
+      }
+    } catch (error) {
+      console.error('❌ sessionStorage からの読み込みに失敗:', error);
+    }
+  }
+
   const {
     location: pinLocation,
     poleType,
@@ -92,6 +108,10 @@ export default function RegisterConfirm() {
       }
 
       setUploadProgress('完了！');
+
+      // sessionStorage をクリア
+      sessionStorage.removeItem('poleRegistrationData');
+      console.log('✅ sessionStorage をクリアしました');
 
       // 3. 登録完了画面へ
       navigate('/register/complete', {
