@@ -149,9 +149,9 @@ export default function PhotoRegisterNumberInput() {
       finalNumbers = [generateAutoNumber()];
     } else {
       // 番号札1枚以上の場合：バリデーション
-      const trimmedNumbers = numbers.map((n) => n.trim());
+      const trimmedNumbers = numbers.map((n) => n.trim()).filter((n) => n !== '');
 
-      if (!trimmedNumbers[0]) {
+      if (trimmedNumbers.length === 0 || !trimmedNumbers[0]) {
         alert('1番目の番号を入力してください');
         return;
       }

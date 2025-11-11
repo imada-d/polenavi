@@ -20,6 +20,8 @@ export interface CreatePoleRequest {
   numbers: string[];
   registeredBy?: number;
   registeredByName?: string;
+  memo?: string;
+  hashtag?: string[];
 }
 
 /**
@@ -54,10 +56,11 @@ export async function createPole(data: CreatePoleRequest) {
       numbersToRegister = [autoNumber];
     }
 
-    const poleNumbers = await Promise.all(
-      numbersToRegister.map(async (number) => {
-        if (!number || number.trim() === '') return null;
+    // 空文字列を事前にフィルタリング
+    const validNumbers = numbersToRegister.filter(number => number && number.trim() !== '');
 
+    const poleNumbers = await Promise.all(
+      validNumbers.map(async (number) => {
         // 番号を正規化
         const normalizedNumber = normalizePoleNumber(number.trim());
 
@@ -75,12 +78,29 @@ export async function createPole(data: CreatePoleRequest) {
       })
     );
 
-    // nullを除外
-    const createdNumbers = poleNumbers.filter((n) => n !== null);
+    const createdNumbers = poleNumbers;
+
+    // 3. メモ・ハッシュタグを登録（もしあれば）
+    let createdMemo = null;
+    if ((data.memo && data.memo.trim()) || (data.hashtag && data.hashtag.length > 0)) {
+      createdMemo = await tx.poleMemo.create({
+        data: {
+          poleId: pole.id,
+          hashtags: Array.isArray(data.hashtag) ? data.hashtag : [],
+          memoText: data.memo || null,
+          createdBy: data.registeredBy,
+          createdByName: data.registeredByName || 'guest',
+          isPublic: true,
+          visibility: 'public',
+          groupId: null,
+        },
+      });
+    }
 
     return {
       pole,
       numbers: createdNumbers,
+      memo: createdMemo,
       nearbyPoles,
     };
   });
