@@ -196,7 +196,15 @@ export default function RegisterDuplicateCheck() {
               <h1 className="text-xl font-bold">近くに同じ電柱が見つかりました</h1>
             </div>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => {
+                // 写真から登録の場合は写真選択画面に戻る
+                const method = sessionStorage.getItem('registrationMethod');
+                if (method === 'photo-first') {
+                  navigate('/register/from-photo');
+                } else {
+                  navigate('/');
+                }
+              }}
               className="flex items-center gap-2 text-white hover:text-yellow-100 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -332,7 +340,15 @@ export default function RegisterDuplicateCheck() {
           </div>
         </div>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => {
+            // 写真から登録の場合は写真選択画面に戻る
+            const method = sessionStorage.getItem('registrationMethod');
+            if (method === 'photo-first') {
+              navigate('/register/from-photo');
+            } else {
+              navigate('/');
+            }
+          }}
           className="flex items-center gap-2 text-white hover:text-yellow-100 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" />

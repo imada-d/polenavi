@@ -103,10 +103,10 @@ export default function PhotoRegisterLocation() {
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between z-10">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="p-2 hover:bg-gray-100 rounded"
         >
-          ← 戻る
+          ← ホームへ戻る
         </button>
         <div className="text-center">
           <h1 className="text-lg font-bold">位置を確認</h1>
