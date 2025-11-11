@@ -205,10 +205,10 @@ export default function RegisterDuplicateCheck() {
                   navigate('/');
                 }
               }}
-              className="flex items-center gap-2 text-white hover:text-yellow-100 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>戻る</span>
+              <span className="font-semibold">戻る</span>
             </button>
           </div>
         </div>
@@ -349,10 +349,10 @@ export default function RegisterDuplicateCheck() {
               navigate('/');
             }
           }}
-          className="flex items-center gap-2 text-white hover:text-yellow-100 transition-colors text-sm"
+          className="flex items-center gap-2 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>戻る</span>
+          <span className="font-semibold">戻る</span>
         </button>
       </div>
 

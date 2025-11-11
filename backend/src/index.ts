@@ -38,7 +38,9 @@ app.use(helmet({
         "https://*.tile.openstreetmap.org",
         "https://*.openstreetmap.org",
         "https://server.arcgisonline.com",
-        "https://*.basemaps.cartocdn.com"
+        "https://*.basemaps.cartocdn.com",
+        "https://raw.githubusercontent.com",
+        "https://cdnjs.cloudflare.com"
       ],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "data:"],
