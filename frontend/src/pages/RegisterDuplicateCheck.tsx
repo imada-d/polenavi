@@ -100,7 +100,14 @@ export default function RegisterDuplicateCheck() {
   const checkNearbyPoles = async () => {
     try {
       setLoading(true);
-      const poles = await getNearbyPoles(gps.latitude, gps.longitude, 5);
+      // 5m = 約0.000045度
+      const radius = 0.000045;
+      const poles = await getNearbyPoles(
+        gps.latitude - radius,  // minLat
+        gps.longitude - radius, // minLng
+        gps.latitude + radius,  // maxLat
+        gps.longitude + radius  // maxLng
+      );
 
       if (poles.length === 0) {
         // 5m以内に電柱なし → 写真から登録専用の位置確認画面へ遷移
