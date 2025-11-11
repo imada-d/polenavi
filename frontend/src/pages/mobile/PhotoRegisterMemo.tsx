@@ -77,6 +77,16 @@ export default function PhotoRegisterMemo() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
+        {/* デバッグ情報（開発用） */}
+        <div className="bg-blue-100 border-2 border-blue-400 rounded-lg p-3 mb-4 text-xs">
+          <p className="font-bold text-blue-800 mb-2">🔍 受け取ったデータ</p>
+          <p className="text-blue-900">poleType: {poleType || '❌空'}</p>
+          <p className="text-blue-900">pinLocation: {pinLocation ? `[${pinLocation[0]}, ${pinLocation[1]}]` : '❌空'}</p>
+          <p className="text-blue-900">plateCount: {plateCount ?? '❌空'}</p>
+          <p className="text-blue-900">numbers: {numbers ? `${numbers.length}個` : '❌空'}</p>
+          <p className="text-blue-900">photos: {photos ? (Array.isArray(photos) ? `${photos.length}枚` : 'オブジェクト') : '❌空'}</p>
+        </div>
+
         {/* ハッシュタグ選択 */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
