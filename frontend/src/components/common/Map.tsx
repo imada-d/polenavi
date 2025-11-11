@@ -67,7 +67,6 @@ export default function Map({
     const map = L.map(containerRef.current, {
       zoomControl: false,  // デフォルトを無効化して位置を変更
       attributionControl: false,  // デフォルトを無効化して位置を変更
-      maxZoom: 18,  // 最大ズームレベルを18に制限
     }).setView(center, zoom);
 
     // ズームコントロールを左下に追加
@@ -79,7 +78,7 @@ export default function Map({
     // OpenStreetMap タイル（道路地図）
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
-      maxZoom: 18,
+      maxZoom: 19,
     });
 
     // Esri World Imagery タイル（航空写真）
@@ -97,7 +96,7 @@ export default function Map({
       'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png',
       {
         attribution: '© OpenStreetMap contributors, © CARTO',
-        maxZoom: 18,
+        maxZoom: 19,
       }
     );
 
@@ -106,9 +105,11 @@ export default function Map({
       // ハイブリッドモード（航空写真 + 地名）
       satelliteLayer.addTo(map);
       labelsLayer.addTo(map);
+      map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
       // 道路地図モード（デフォルト）
       streetLayer.addTo(map);
+      map.setMaxZoom(19); // 道路地図の最大ズームに合わせる
     }
 
     // ref に保存
@@ -157,9 +158,11 @@ export default function Map({
       // 航空写真 + 地名
       satelliteLayer.addTo(map);
       labelsLayer.addTo(map);
+      map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
       // 道路地図のみ
       streetLayer.addTo(map);
+      map.setMaxZoom(19); // 道路地図の最大ズームに合わせる
     }
   }, [mapType]);
 
