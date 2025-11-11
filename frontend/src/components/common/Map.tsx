@@ -97,6 +97,7 @@ export default function Map({
       {
         attribution: '© OpenStreetMap contributors, © CARTO',
         maxZoom: 19,
+        zIndex: 250, // タイルレイヤーのz-index（マーカーより下に配置）
       }
     );
 
