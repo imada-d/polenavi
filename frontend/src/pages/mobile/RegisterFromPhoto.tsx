@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X } from 'lucide-react';
 import { extractGPSFromPhoto } from '../../utils/exifExtractor';
+import { compressImage } from '../../utils/imageCompression';
 
 // 写真の分類タイプ
 type PhotoType = 'plate' | 'full' | 'detail';
@@ -45,7 +46,13 @@ export default function RegisterFromPhoto() {
 
     for (const file of filesToAdd) {
       const dataUrl = await fileToDataURL(file);
-      setPhotos(prev => [...prev, { file, dataUrl, type: null }]);
+      // 写真を圧縮（sessionStorage節約のため）
+      const compressedDataUrl = await compressImage(dataUrl, {
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 0.8,
+      });
+      setPhotos(prev => [...prev, { file, dataUrl: compressedDataUrl, type: null }]);
     }
   };
 
