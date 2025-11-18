@@ -122,15 +122,19 @@ export default function Map({
     if (mapType === 'hybrid') {
       // ハイブリッドモード（航空写真 + 地名）
       const currentZoom = map.getZoom();
+      console.log(`🗺️ 初期表示: ズーム=${currentZoom}, モード=hybrid`);
       if (currentZoom >= 14) {
+        console.log('✅ 初期表示: 国土地理院を追加');
         satelliteLayer.addTo(map);
       } else {
+        console.log('✅ 初期表示: Esriを追加');
         satelliteLayerEsri.addTo(map);
       }
       labelsLayer.addTo(map);
       map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
       // 道路地図モード（デフォルト）
+      console.log(`🗺️ 初期表示: モード=street`);
       streetLayer.addTo(map);
       map.setMaxZoom(19); // 道路地図の最大ズームに合わせる
     }
@@ -208,18 +212,23 @@ export default function Map({
     }
 
     // mapType に応じて必要なレイヤーを追加
+    console.log(`🔄 mapType切り替え: ${mapType}`);
     if (mapType === 'hybrid') {
       // 航空写真 + 地名（ズームレベルに応じて切り替え）
       const currentZoom = map.getZoom();
+      console.log(`📍 現在のズーム: ${currentZoom}`);
       if (currentZoom >= 14) {
+        console.log('✅ 国土地理院レイヤーを追加');
         satelliteLayer.addTo(map);
       } else {
+        console.log('✅ Esriレイヤーを追加');
         satelliteLayerEsri.addTo(map);
       }
       labelsLayer.addTo(map);
       map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
       // 道路地図のみ
+      console.log('✅ 道路地図レイヤーを追加');
       streetLayer.addTo(map);
       map.setMaxZoom(19); // 道路地図の最大ズームに合わせる
     }
