@@ -482,11 +482,17 @@ export async function searchPolesByMemo(searchQuery: string) {
   const trimmedQuery = searchQuery.trim();
 
   // 複数のハッシュタグが含まれている場合はスペースで分割
-  const keywords = trimmedQuery.split(/\s+/).filter(k => k.length > 0);
+  let keywords = trimmedQuery.split(/\s+/).filter(k => k.length > 0);
+
+  // キーワードに#が付いていない場合は自動で付ける（ハッシュタグ検索用）
+  // ただし、元のキーワードも検索対象に含める（メモテキスト検索用）
+  const keywordsWithHash = keywords.map(k => k.startsWith('#') ? k : `#${k}`);
+  const allKeywords = [...new Set([...keywords, ...keywordsWithHash])]; // 重複除去
 
   console.log('🔍 [searchPolesByMemo] 検索開始');
   console.log('  - 元のクエリ:', searchQuery);
   console.log('  - キーワード:', keywords);
+  console.log('  - ハッシュタグ付きキーワード:', allKeywords);
 
   // デバッグ: 全メモを確認
   const allPublicMemos = await prisma.poleMemo.findMany({
@@ -507,7 +513,7 @@ export async function searchPolesByMemo(searchQuery: string) {
   const allMemos: any[] = [];
   const seenIds = new Set<number>();
 
-  for (const keyword of keywords) {
+  for (const keyword of allKeywords) {
     try {
       console.log(`  - キーワード "${keyword}" で検索中...`);
 
