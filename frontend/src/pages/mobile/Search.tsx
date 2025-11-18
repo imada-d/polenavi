@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchPoleByNumber, searchPolesByMemo } from '../../api/poles';
 import BottomNav from '../../components/mobile/BottomNav';
+import HashtagSelector from '../../components/hashtag/HashtagSelector';
+import HashtagChip from '../../components/hashtag/HashtagChip';
 
 export default function Search() {
   const navigate = useNavigate();
@@ -15,6 +17,8 @@ export default function Search() {
   const [memoResults, setMemoResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHashtagSelector, setShowHashtagSelector] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleNumberSearch = async () => {
     if (!number.trim()) {
@@ -37,8 +41,13 @@ export default function Search() {
   };
 
   const handleMemoSearch = async () => {
-    if (!memoQuery.trim()) {
-      setError('検索キーワードを入力してください');
+    // 選択されたタグまたは手動入力されたキーワードを使用
+    const searchQuery = selectedTags.length > 0
+      ? selectedTags.join(' ')
+      : memoQuery;
+
+    if (!searchQuery.trim()) {
+      setError('検索キーワードまたはタグを選択してください');
       return;
     }
 
@@ -47,13 +56,27 @@ export default function Search() {
     setMemoResults([]);
 
     try {
-      const result = await searchPolesByMemo(memoQuery);
+      const result = await searchPolesByMemo(searchQuery);
       setMemoResults(result.poles || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // タグ選択時の処理
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+    // タグが選択されたら、手動入力欄にも反映
+    setMemoQuery(tags.join(' '));
+  };
+
+  // タグ削除
+  const handleRemoveTag = (tagToRemove: string) => {
+    const newTags = selectedTags.filter(tag => tag !== tagToRemove);
+    setSelectedTags(newTags);
+    setMemoQuery(newTags.join(' '));
   };
 
   const handleShowOnMap = (poleId: number) => {
@@ -136,10 +159,41 @@ export default function Search() {
           {/* メモ・タグ検索 */}
           {searchType === 'memo' && (
             <div className="space-y-3">
+              {/* マスターから選択ボタン */}
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-gray-700">
+                  🏷️ ハッシュタグで検索
+                </label>
+                <button
+                  onClick={() => setShowHashtagSelector(true)}
+                  className="text-blue-600 text-sm font-semibold hover:text-blue-700"
+                >
+                  マスターから選択
+                </button>
+              </div>
+
+              {/* 選択されたタグ */}
+              {selectedTags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedTags.map((tag) => (
+                    <HashtagChip
+                      key={tag}
+                      hashtag={tag}
+                      onRemove={() => handleRemoveTag(tag)}
+                      size="md"
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* 手動入力欄 */}
               <input
                 type="text"
                 value={memoQuery}
-                onChange={(e) => setMemoQuery(e.target.value)}
+                onChange={(e) => {
+                  setMemoQuery(e.target.value);
+                  setSelectedTags([]); // 手動入力時はタグ選択をクリア
+                }}
                 placeholder="キーワードやハッシュタグを入力（例: #修理完了）"
                 className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -152,9 +206,18 @@ export default function Search() {
                 {isSearching ? '検索中...' : '検索'}
               </button>
               <p className="text-sm text-gray-500 px-1">
-                💡 ヒント: ハッシュタグ（#付き）やメモ本文で検索できます
+                💡 ヒント: マスターから選択 or 手動入力できます
               </p>
             </div>
+          )}
+
+          {/* ハッシュタグ選択モーダル */}
+          {showHashtagSelector && (
+            <HashtagSelector
+              selectedTags={selectedTags}
+              onTagsChange={handleTagsChange}
+              onClose={() => setShowHashtagSelector(false)}
+            />
           )}
 
           {/* エラー表示 */}

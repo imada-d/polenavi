@@ -3,6 +3,8 @@
 
 import { useState } from 'react';
 import { searchPoleByNumber, searchPolesByMemo } from '../../api/poles';
+import HashtagSelector from '../hashtag/HashtagSelector';
+import HashtagChip from '../hashtag/HashtagChip';
 
 interface SearchPanelProps {
   onClose: () => void;
@@ -17,6 +19,8 @@ export default function SearchPanel({ onClose, onShowOnMap }: SearchPanelProps) 
   const [memoResults, setMemoResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHashtagSelector, setShowHashtagSelector] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const handleNumberSearch = async () => {
     if (!number.trim()) {
@@ -39,8 +43,13 @@ export default function SearchPanel({ onClose, onShowOnMap }: SearchPanelProps) 
   };
 
   const handleMemoSearch = async () => {
-    if (!memoQuery.trim()) {
-      setError('検索キーワードを入力してください');
+    // 選択されたタグまたは手動入力されたキーワードを使用
+    const searchQuery = selectedTags.length > 0
+      ? selectedTags.join(' ')
+      : memoQuery;
+
+    if (!searchQuery.trim()) {
+      setError('検索キーワードまたはタグを選択してください');
       return;
     }
 
@@ -49,13 +58,26 @@ export default function SearchPanel({ onClose, onShowOnMap }: SearchPanelProps) 
     setMemoResults([]);
 
     try {
-      const result = await searchPolesByMemo(memoQuery);
+      const result = await searchPolesByMemo(searchQuery);
       setMemoResults(result.poles || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // タグ選択時の処理
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+    setMemoQuery(tags.join(' '));
+  };
+
+  // タグ削除
+  const handleRemoveTag = (tagToRemove: string) => {
+    const newTags = selectedTags.filter(tag => tag !== tagToRemove);
+    setSelectedTags(newTags);
+    setMemoQuery(newTags.join(' '));
   };
 
   const handleShowOnMap = (poleId: number, lat: string | number, lng: string | number) => {
@@ -149,7 +171,32 @@ export default function SearchPanel({ onClose, onShowOnMap }: SearchPanelProps) 
           {searchType === 'memo' && (
             <>
               <div>
-                <label className="block text-sm font-medium mb-1">メモ・ハッシュタグ</label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium">🏷️ ハッシュタグで検索</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowHashtagSelector(true)}
+                    className="text-blue-600 text-sm font-semibold hover:text-blue-700"
+                  >
+                    マスターから選択
+                  </button>
+                </div>
+
+                {/* 選択されたタグ */}
+                {selectedTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {selectedTags.map((tag) => (
+                      <HashtagChip
+                        key={tag}
+                        hashtag={tag}
+                        onRemove={() => handleRemoveTag(tag)}
+                        size="md"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* 手動入力欄 */}
                 <input
                   type="text"
                   value={memoQuery}
@@ -163,9 +210,18 @@ export default function SearchPanel({ onClose, onShowOnMap }: SearchPanelProps) 
                   className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  メモのテキストまたはハッシュタグで検索
+                  💡 マスターから選択 or 手動入力できます
                 </p>
               </div>
+
+              {/* ハッシュタグ選択モーダル */}
+              {showHashtagSelector && (
+                <HashtagSelector
+                  selectedTags={selectedTags}
+                  onTagsChange={handleTagsChange}
+                  onClose={() => setShowHashtagSelector(false)}
+                />
+              )}
             </>
           )}
 
