@@ -134,12 +134,13 @@ export default function Map({
       if (inJapan && currentZoom >= 14) {
         console.log('✅ 初期表示: 国土地理院を追加');
         satelliteLayer.addTo(map);
+        map.setMaxZoom(18); // 国土地理院の最大ズーム
       } else {
         console.log('✅ 初期表示: Esriを追加');
         satelliteLayerEsri.addTo(map);
+        map.setMaxZoom(19); // Esriの最大ズーム
       }
       labelsLayer.addTo(map);
-      map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
       // 道路地図モード（デフォルト）
       console.log(`🗺️ 初期表示: モード=street`);
@@ -182,12 +183,14 @@ export default function Map({
         console.log('✅ 国土地理院に切り替え');
         if (hasEsri) map.removeLayer(satelliteLayerEsri);
         satelliteLayer.addTo(map);
+        map.setMaxZoom(18); // 国土地理院の最大ズーム
       }
       // それ以外：Esri
       else if ((!inJapan || zoom < 14) && !hasEsri) {
         console.log('✅ Esriに切り替え');
         if (hasGsi) map.removeLayer(satelliteLayer);
         satelliteLayerEsri.addTo(map);
+        map.setMaxZoom(19); // Esriの最大ズーム
       }
     });
 
@@ -247,12 +250,13 @@ export default function Map({
       if (inJapan && currentZoom >= 14) {
         console.log('✅ 国土地理院レイヤーを追加');
         satelliteLayer.addTo(map);
+        map.setMaxZoom(18); // 国土地理院の最大ズーム
       } else {
         console.log('✅ Esriレイヤーを追加');
         satelliteLayerEsri.addTo(map);
+        map.setMaxZoom(19); // Esriの最大ズーム
       }
       labelsLayer.addTo(map);
-      map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
       // 道路地図のみ
       console.log('✅ 道路地図レイヤーを追加');
