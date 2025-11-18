@@ -78,7 +78,7 @@ export default function AdminPoles() {
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/poles/bulk-delete`, {
-        method: 'DELETE',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
