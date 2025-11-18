@@ -567,7 +567,7 @@ export async function searchPolesByMemo(searchQuery: string) {
             'poleTypeName', p.pole_type_name,
             'numberCount', p.number_count
           ) as pole
-        FROM pole_memo pm
+        FROM pole_memos pm
         JOIN poles p ON pm.pole_id = p.id
         WHERE pm.is_public = true
         AND array_to_string(pm.hashtags, ' ') ILIKE ${`%${keyword}%`}
