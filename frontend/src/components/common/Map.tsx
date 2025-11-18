@@ -54,11 +54,17 @@ export default function Map({
 }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapTypeRef = useRef<'street' | 'hybrid'>(mapType); // mapTypeを参照用に保存
   // 各レイヤーを保存するための ref
   const streetLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerEsriRef = useRef<L.TileLayer | null>(null); // Esri航空写真（ズーム13以下用）
   const labelsLayerRef = useRef<L.TileLayer | null>(null);
+
+  // mapType が変更されたら ref を更新
+  useEffect(() => {
+    mapTypeRef.current = mapType;
+  }, [mapType]);
 
   // 地図の初期化（初回のみ）
   useEffect(() => {
@@ -138,18 +144,25 @@ export default function Map({
 
     // ズーム変更時に航空写真レイヤーを切り替え
     map.on('zoomend', () => {
-      if (mapType !== 'hybrid') return;
+      const currentMapType = mapTypeRef.current; // ref から取得
+      console.log('🔍 zoomend イベント: mapType =', currentMapType);
+
+      if (currentMapType !== 'hybrid') return;
 
       const zoom = map.getZoom();
       const hasGsi = map.hasLayer(satelliteLayer);
       const hasEsri = map.hasLayer(satelliteLayerEsri);
 
+      console.log(`📍 現在のズーム: ${zoom}, 国土地理院: ${hasGsi}, Esri: ${hasEsri}`);
+
       if (zoom >= 14 && !hasGsi) {
         // ズーム14以上：国土地理院に切り替え
+        console.log('✅ 国土地理院に切り替え');
         if (hasEsri) map.removeLayer(satelliteLayerEsri);
         satelliteLayer.addTo(map);
       } else if (zoom < 14 && !hasEsri) {
         // ズーム13以下：Esriに切り替え
+        console.log('✅ Esriに切り替え');
         if (hasGsi) map.removeLayer(satelliteLayer);
         satelliteLayerEsri.addTo(map);
       }
