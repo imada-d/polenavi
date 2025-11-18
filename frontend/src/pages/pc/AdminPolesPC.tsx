@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/pc/Header';
-import { getPoles } from '../../api/admin';
+import { getPoles, bulkDeletePoles } from '../../api/admin';
 import type { AdminPole } from '../../api/admin';
 
 export default function AdminPolesPC() {
@@ -106,29 +106,16 @@ export default function AdminPolesPC() {
 
     try {
       setIsDeleting(true);
-      const token = localStorage.getItem('token');
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/poles/remove-multiple`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ poleIds: Array.from(selectedPoles) }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('削除失敗の詳細:', response.status, errorData);
-        throw new Error(`削除に失敗しました (${response.status}): ${errorData.error?.message || '不明なエラー'}`);
-      }
+      // apiClientを使用（既存の削除機能と同じ）
+      await bulkDeletePoles(Array.from(selectedPoles));
 
       alert(`${selectedPoles.size}件の電柱を削除しました`);
       setSelectedPoles(new Set());
       loadPoles(); // リロード
     } catch (error: any) {
       console.error('一括削除エラー:', error);
-      alert(`削除に失敗しました\n\n${error.message || '不明なエラー'}`);
+      alert(`削除に失敗しました\n\n${error.response?.data?.message || error.message || '不明なエラー'}`);
     } finally {
       setIsDeleting(false);
     }

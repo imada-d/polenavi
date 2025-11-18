@@ -256,3 +256,11 @@ export async function deletePole(poleId: number) {
   const response = await apiClient.delete(`/admin/poles/${poleId}`);
   return response.data;
 }
+
+/**
+ * 複数の電柱を一括削除（管理者のみ）
+ */
+export async function bulkDeletePoles(poleIds: number[]) {
+  const response = await apiClient.post('/admin/poles/remove-multiple', { poleIds });
+  return response.data;
+}
