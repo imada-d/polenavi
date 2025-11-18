@@ -122,9 +122,20 @@ export async function createPole(data: CreatePoleRequest) {
       // createdByNameを確実に文字列にする
       const createdByName = (data.registeredByName && data.registeredByName.trim()) || 'guest';
 
+      // ハッシュタグを配列に変換（文字列の場合はスペースで分割）
+      let hashtagArray: string[] = [];
+      if (data.hashtag) {
+        if (Array.isArray(data.hashtag)) {
+          hashtagArray = data.hashtag;
+        } else if (typeof data.hashtag === 'string' && data.hashtag.trim()) {
+          // スペースで分割して、空文字列を除外
+          hashtagArray = data.hashtag.split(/\s+/).filter(tag => tag.trim().length > 0);
+        }
+      }
+
       console.log('🔍 [Service] poleMemo.create() 直前:');
       console.log('  - poleId:', pole.id);
-      console.log('  - hashtags:', Array.isArray(data.hashtag) ? data.hashtag : []);
+      console.log('  - hashtags:', hashtagArray);
       console.log('  - memoText:', data.memo || null);
       console.log('  - createdBy:', data.registeredBy);
       console.log('  - createdByName:', createdByName);
@@ -132,7 +143,7 @@ export async function createPole(data: CreatePoleRequest) {
       createdMemo = await tx.poleMemo.create({
         data: {
           poleId: pole.id,
-          hashtags: Array.isArray(data.hashtag) ? data.hashtag : [],
+          hashtags: hashtagArray,
           memoText: data.memo || null,
           createdBy: data.registeredBy,
           createdByName: createdByName,
