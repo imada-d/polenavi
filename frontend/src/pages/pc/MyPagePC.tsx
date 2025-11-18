@@ -107,17 +107,11 @@ export default function MyPagePC() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">登録日</p>
-                  <p className="font-semibold">
-                    {new Date(user.createdAt).toLocaleDateString('ja-JP')}
-                  </p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600">プラン</p>
-                  <p className="font-semibold capitalize">{user.planType || 'Free'}</p>
-                </div>
+              <div className="p-3 bg-gray-50 rounded-lg inline-block">
+                <p className="text-sm text-gray-600">登録日</p>
+                <p className="font-semibold">
+                  {new Date(user.createdAt).toLocaleDateString('ja-JP')}
+                </p>
               </div>
 
               {user.emailVerified && (
@@ -175,22 +169,18 @@ export default function MyPagePC() {
               </div>
             </button>
 
-            {/* プラン情報 */}
-            {user.planType && (
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold text-purple-900 mb-2">現在のプラン</h3>
-                    <p className="text-2xl font-bold text-purple-700 capitalize">{user.planType}</p>
-                  </div>
-                  {user.planType === 'free' && (
-                    <button className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
-                      プランをアップグレード →
-                    </button>
-                  )}
+            {/* プラン情報（準備中） */}
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-700 mb-2">📦 プラン</h3>
+                  <p className="text-gray-600">現在は無料で全機能をご利用いただけます</p>
                 </div>
+                <span className="bg-gray-300 text-gray-600 px-4 py-2 rounded-full text-sm font-semibold">
+                  準備中
+                </span>
               </div>
-            )}
+            </div>
           </div>
 
           {/* 右カラム - 設定メニュー */}

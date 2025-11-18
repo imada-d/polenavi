@@ -470,28 +470,30 @@ export async function searchPolesByMemo(query: string) {
 
   const trimmedQuery = query.trim();
 
-  // ハッシュタグ検索か、テキスト検索か判定
-  const isHashtagSearch = trimmedQuery.startsWith('#');
-  const searchTerm = isHashtagSearch ? trimmedQuery : trimmedQuery;
+  // 複数のハッシュタグが含まれている場合はスペースで分割
+  const keywords = trimmedQuery.split(/\s+/).filter(k => k.length > 0);
+
+  // 検索条件を構築
+  const searchConditions = keywords.flatMap(keyword => [
+    // ハッシュタグ配列内を検索（完全一致）
+    {
+      hashtags: {
+        has: keyword,
+      },
+    },
+    // メモテキスト内を検索（部分一致）
+    {
+      memoText: {
+        contains: keyword,
+        mode: 'insensitive' as const,
+      },
+    },
+  ]);
 
   // メモを検索
   const memos = await prisma.poleMemo.findMany({
     where: {
-      OR: [
-        // ハッシュタグ配列内を検索
-        {
-          hashtags: {
-            has: searchTerm,
-          },
-        },
-        // メモテキスト内を検索（部分一致）
-        {
-          memoText: {
-            contains: searchTerm,
-            mode: 'insensitive', // 大文字小文字を区別しない
-          },
-        },
-      ],
+      OR: searchConditions,
       isPublic: true,
     },
     include: {

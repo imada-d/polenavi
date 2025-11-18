@@ -172,22 +172,18 @@ export default function MyPage() {
             </div>
           </button>
 
-          {/* プラン情報 */}
-          {user.planType && (
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg shadow-sm border border-purple-200 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-purple-900">プラン</h3>
-                  <p className="text-sm text-purple-700 mt-1 capitalize">{user.planType}</p>
-                </div>
-                {user.planType === 'free' && (
-                  <button className="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-purple-700">
-                    アップグレード
-                  </button>
-                )}
+          {/* プラン情報（準備中） */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-gray-700">📦 プラン</h3>
+                <p className="text-sm text-gray-500 mt-1">現在は無料で全機能をご利用いただけます</p>
               </div>
+              <span className="bg-gray-300 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold">
+                準備中
+              </span>
             </div>
-          )}
+          </div>
 
           {/* 管理者メニュー（管理者・モデレーターのみ表示） */}
           {(user.role === 'admin' || user.role === 'moderator') && (
