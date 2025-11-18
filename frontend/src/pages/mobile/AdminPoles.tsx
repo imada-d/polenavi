@@ -13,6 +13,8 @@ export default function AdminPoles() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [selectedPoles, setSelectedPoles] = useState<Set<number>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadPoles();
@@ -47,6 +49,58 @@ export default function AdminPoles() {
     return poleNumbers.length > 3 ? `${display}...` : display;
   };
 
+  // チェックボックス選択
+  const handleSelectPole = (poleId: number, checked: boolean) => {
+    const newSelected = new Set(selectedPoles);
+    if (checked) {
+      newSelected.add(poleId);
+    } else {
+      newSelected.delete(poleId);
+    }
+    setSelectedPoles(newSelected);
+  };
+
+  // 一括削除
+  const handleBulkDelete = async () => {
+    if (selectedPoles.size === 0) {
+      alert('削除する電柱を選択してください');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `選択した${selectedPoles.size}件の電柱を削除しますか？\n\n⚠️ この操作は取り消せません。`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/poles/bulk-delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ poleIds: Array.from(selectedPoles) }),
+      });
+
+      if (!response.ok) {
+        throw new Error('削除に失敗しました');
+      }
+
+      alert(`${selectedPoles.size}件の電柱を削除しました`);
+      setSelectedPoles(new Set());
+      loadPoles(); // リロード
+    } catch (error) {
+      console.error('一括削除エラー:', error);
+      alert('削除に失敗しました');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
@@ -71,9 +125,18 @@ export default function AdminPoles() {
         />
       </div>
 
-      {/* 電柱数 */}
-      <div className="px-4 py-2 text-sm text-gray-600">
-        全{total}件の電柱
+      {/* 電柱数と一括削除ボタン */}
+      <div className="px-4 py-2 flex items-center justify-between">
+        <div className="text-sm text-gray-600">全{total}件の電柱</div>
+        {selectedPoles.size > 0 && (
+          <button
+            onClick={handleBulkDelete}
+            disabled={isDeleting}
+            className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 text-sm font-semibold"
+          >
+            {isDeleting ? '削除中...' : `🗑️ ${selectedPoles.size}件削除`}
+          </button>
+        )}
       </div>
 
       {/* コンテンツ */}
@@ -91,9 +154,27 @@ export default function AdminPoles() {
             {poles.map((pole) => (
               <div
                 key={pole.id}
-                onClick={() => navigate(`/pole/${pole.id}`)}
-                className="bg-white rounded-lg shadow-sm border p-4 cursor-pointer hover:bg-gray-50"
+                className="bg-white rounded-lg shadow-sm border p-4 relative"
               >
+                {/* チェックボックス（左上） */}
+                <div className="absolute top-3 left-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedPoles.has(pole.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleSelectPole(pole.id, e.target.checked);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-5 h-5 cursor-pointer"
+                  />
+                </div>
+
+                {/* クリック可能エリア */}
+                <div
+                  onClick={() => navigate(`/pole/${pole.id}`)}
+                  className="ml-8 cursor-pointer"
+                >
                 {/* 電柱番号 */}
                 <div className="font-semibold text-gray-800">
                   {formatPoleNumbers(pole.poleNumbers)}
@@ -133,6 +214,7 @@ export default function AdminPoles() {
                   <div className="mt-1">
                     登録日: {new Date(pole.createdAt).toLocaleDateString('ja-JP')}
                   </div>
+                </div>
                 </div>
               </div>
             ))}

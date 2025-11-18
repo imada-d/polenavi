@@ -16,6 +16,8 @@ export default function AdminPolesPC() {
   const [total, setTotal] = useState(0);
   const [sortBy, setSortBy] = useState<'createdAt' | 'photoCount' | 'numberCount' | 'updatedAt'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedPoles, setSelectedPoles] = useState<Set<number>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     loadPoles();
@@ -70,6 +72,66 @@ export default function AdminPolesPC() {
     return ' ⇅';
   };
 
+  // チェックボックス選択
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedPoles(new Set(poles.map(p => p.id)));
+    } else {
+      setSelectedPoles(new Set());
+    }
+  };
+
+  const handleSelectPole = (poleId: number, checked: boolean) => {
+    const newSelected = new Set(selectedPoles);
+    if (checked) {
+      newSelected.add(poleId);
+    } else {
+      newSelected.delete(poleId);
+    }
+    setSelectedPoles(newSelected);
+  };
+
+  // 一括削除
+  const handleBulkDelete = async () => {
+    if (selectedPoles.size === 0) {
+      alert('削除する電柱を選択してください');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `選択した${selectedPoles.size}件の電柱を削除しますか？\n\n⚠️ この操作は取り消せません。`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/poles/bulk-delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ poleIds: Array.from(selectedPoles) }),
+      });
+
+      if (!response.ok) {
+        throw new Error('削除に失敗しました');
+      }
+
+      alert(`${selectedPoles.size}件の電柱を削除しました`);
+      setSelectedPoles(new Set());
+      loadPoles(); // リロード
+    } catch (error) {
+      console.error('一括削除エラー:', error);
+      alert('削除に失敗しました');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -86,7 +148,18 @@ export default function AdminPolesPC() {
             </button>
             <h1 className="text-3xl font-bold text-gray-800">📍 電柱管理</h1>
           </div>
-          <div className="text-gray-600">全{total}件の電柱</div>
+          <div className="flex items-center gap-4">
+            {selectedPoles.size > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 font-semibold"
+              >
+                {isDeleting ? '削除中...' : `🗑️ ${selectedPoles.size}件を削除`}
+              </button>
+            )}
+            <div className="text-gray-600">全{total}件の電柱</div>
+          </div>
         </div>
 
         {/* 検索バー */}
@@ -116,6 +189,14 @@ export default function AdminPolesPC() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b">
                     <tr>
+                      <th className="px-4 py-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={poles.length > 0 && selectedPoles.size === poles.length}
+                          onChange={(e) => handleSelectAll(e.target.checked)}
+                          className="w-4 h-4 cursor-pointer"
+                        />
+                      </th>
                       <th
                         className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase cursor-pointer hover:bg-gray-100 transition-colors select-none"
                         onClick={() => handleSort('numberCount')}
@@ -162,43 +243,78 @@ export default function AdminPolesPC() {
                     {poles.map((pole) => (
                       <tr
                         key={pole.id}
-                        onClick={() => navigate(`/pole/${pole.id}`)}
-                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="hover:bg-gray-50 transition-colors"
                       >
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedPoles.has(pole.id)}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleSelectPole(pole.id, e.target.checked);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-4 h-4 cursor-pointer"
+                          />
+                        </td>
+                        <td
+                          className="px-6 py-4 cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           <div className="text-sm text-gray-800 font-medium">
                             {formatPoleNumbers(pole.poleNumbers)}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td
+                          className="px-6 py-4 cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           <div className="text-sm text-gray-800">
                             {pole.prefecture || '不明'}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td
+                          className="px-6 py-4 cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           <div className="text-xs text-gray-600 font-mono">
                             {pole.latitude.toFixed(6)}, {pole.longitude.toFixed(6)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td
+                          className="px-6 py-4 text-center cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           <span className="font-semibold text-blue-600">
                             {pole.photoCount}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td
+                          className="px-6 py-4 text-center cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           <span className="font-semibold text-green-600">
                             {pole.memoCount}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td
+                          className="px-6 py-4 cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           <div className="text-sm text-gray-800">
                             {pole.poleNumbers[0]?.registeredByName || '不明'}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
+                        <td
+                          className="px-6 py-4 text-sm text-gray-600 cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           {new Date(pole.createdAt).toLocaleDateString('ja-JP')}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
+                        <td
+                          className="px-6 py-4 text-sm text-gray-600 cursor-pointer"
+                          onClick={() => navigate(`/pole/${pole.id}`)}
+                        >
                           {new Date(pole.updatedAt).toLocaleDateString('ja-JP')}
                         </td>
                       </tr>

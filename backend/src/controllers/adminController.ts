@@ -221,6 +221,48 @@ export async function deletePole(
 }
 
 /**
+ * 複数の電柱を一括削除
+ */
+export async function bulkDeletePoles(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { poleIds } = req.body;
+
+    if (!Array.isArray(poleIds) || poleIds.length === 0) {
+      res.status(400).json({
+        success: false,
+        error: { message: '削除する電柱IDを指定してください' },
+      });
+      return;
+    }
+
+    // 各電柱を削除
+    const results = await Promise.allSettled(
+      poleIds.map((id) => adminService.deletePole(id))
+    );
+
+    // 成功・失敗をカウント
+    const successCount = results.filter((r) => r.status === 'fulfilled').length;
+    const failedCount = results.filter((r) => r.status === 'rejected').length;
+
+    res.json({
+      success: true,
+      message: `${successCount}件の電柱を削除しました`,
+      details: {
+        total: poleIds.length,
+        success: successCount,
+        failed: failedCount,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
  * ユーザーを削除（アカウントのみ、データは残す）
  */
 export async function deleteUser(
