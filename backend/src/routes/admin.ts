@@ -26,6 +26,7 @@ router.patch('/reports/:id', adminController.reviewReport);
 // 電柱管理
 router.get('/poles', adminController.getPoles);
 router.post('/poles/remove-multiple', adminController.bulkDeletePoles);
+router.get('/poles/batch-remove', adminController.bulkDeletePoles); // テスト用
 router.delete('/poles/:id', adminController.deletePole);
 
 export default router;

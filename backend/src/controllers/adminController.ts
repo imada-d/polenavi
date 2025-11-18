@@ -229,7 +229,10 @@ export async function bulkDeletePoles(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { poleIds } = req.body;
+    // POSTの場合はbody、GETの場合はquery
+    const poleIds = req.body.poleIds || (req.query.ids ? JSON.parse(req.query.ids as string) : null);
+
+    console.log('🗑️ 一括削除リクエスト受信:', { method: req.method, poleIds });
 
     if (!Array.isArray(poleIds) || poleIds.length === 0) {
       res.status(400).json({
