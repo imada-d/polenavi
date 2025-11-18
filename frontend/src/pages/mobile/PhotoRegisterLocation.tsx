@@ -160,7 +160,7 @@ export default function PhotoRegisterLocation() {
       </div>
 
       {/* 次へボタン */}
-      <div className="p-4 pb-24 bg-white border-t shadow-lg">
+      <div className="p-4 pb-32 bg-white border-t shadow-lg">
         <button
           onClick={handleNext}
           className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700"

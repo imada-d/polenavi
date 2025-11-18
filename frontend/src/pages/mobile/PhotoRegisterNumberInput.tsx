@@ -367,7 +367,7 @@ export default function PhotoRegisterNumberInput() {
       </main>
 
       {/* 下部ボタン */}
-      <div className="p-4 pb-24 bg-white border-t shadow-lg space-y-2">
+      <div className="p-4 pb-32 bg-white border-t shadow-lg space-y-2">
         <button
           onClick={handleRegister}
           className="w-full py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-bold text-lg hover:border-gray-400"

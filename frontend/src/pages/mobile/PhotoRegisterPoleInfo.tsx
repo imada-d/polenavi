@@ -131,7 +131,7 @@ export default function PhotoRegisterPoleInfo() {
       </main>
 
       {/* 次へボタン（常に表示、選択未完了時はグレーアウト） */}
-      <div className="p-4 pb-24 bg-white border-t shadow-lg">
+      <div className="p-4 pb-32 bg-white border-t shadow-lg">
         <button
           onClick={handleNext}
           disabled={!canProceed}
