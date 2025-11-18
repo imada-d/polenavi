@@ -148,18 +148,6 @@ export default function RegisterConfirm() {
 
       {/* メインコンテンツ */}
       <main className="flex-1 overflow-y-auto p-4">
-        {/* デバッグ情報（開発用） */}
-        <div className="bg-yellow-100 border-2 border-yellow-400 rounded-lg p-3 mb-4 text-xs">
-          <p className="font-bold text-yellow-800 mb-2">🔍 デバッグ情報</p>
-          <p className="text-yellow-900">location.state: {location.state ? 'あり' : '空'}</p>
-          <p className="text-yellow-900">poleType: {poleType || '❌空'}</p>
-          <p className="text-yellow-900">pinLocation: {pinLocation ? `[${pinLocation[0]}, ${pinLocation[1]}]` : '❌空'}</p>
-          <p className="text-yellow-900">plateCount: {plateCount ?? '❌空'}</p>
-          <p className="text-yellow-900">numbers: {numbers ? `${numbers.length}個` : '❌空'}</p>
-          <p className="text-yellow-900">photos: {photos ? 'あり' : '❌空'}</p>
-          <p className="text-yellow-900">sessionStorage: {sessionStorage.getItem('poleRegistrationData') ? 'あり' : '❌空'}</p>
-        </div>
-
         {/* 位置情報 */}
         <div className="bg-white rounded-lg p-4 mb-4 shadow">
           <h2 className="text-lg font-bold mb-2">📍 位置情報</h2>
