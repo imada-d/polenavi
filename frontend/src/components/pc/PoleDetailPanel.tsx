@@ -11,6 +11,8 @@ import { uploadPolePhoto, getPoleById, addPoleNumber, updatePoleLocation } from 
 import { createMemo, deleteMemo } from '../../api/memos';
 import { createDeleteRequest } from '../../api/reports';
 import { getFullImageUrl } from '../../utils/imageUrl';
+import HashtagSelector from '../hashtag/HashtagSelector';
+import HashtagChip from '../hashtag/HashtagChip';
 
 interface PoleDetailPanelProps {
   poleId: number;
@@ -47,6 +49,8 @@ export default function PoleDetailPanel({
   const [newMemoText, setNewMemoText] = useState('');
   const [newHashtags, setNewHashtags] = useState('');
   const [isAddingMemo, setIsAddingMemo] = useState(false);
+  const [showHashtagSelector, setShowHashtagSelector] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // 編集関連のstate
   const [isEditingNumber, setIsEditingNumber] = useState(false);
@@ -223,10 +227,35 @@ export default function PoleDetailPanel({
     setPhotoType('full');
   };
 
+  // 何を: ハッシュタグの選択変更を処理
+  // なぜ: ハッシュタグマスターから選択されたタグを反映するため
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+    // 手動入力をクリア
+    setNewHashtags('');
+  };
+
+  // 何を: ハッシュタグを削除
+  // なぜ: 選択したタグを個別に削除できるようにするため
+  const handleRemoveTag = (tagToRemove: string) => {
+    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
+  };
+
   // 何を: メモを追加
   // なぜ: ユーザーが電柱にメモとハッシュタグを追加できるようにするため
   const handleAddMemo = async () => {
-    if (!newMemoText.trim() && newHashtags.trim().length === 0) {
+    // マスターから選択したタグまたは手動入力のタグを使用
+    const tagsToUse = selectedTags.length > 0 ? selectedTags : (
+      newHashtags.trim().length > 0
+        ? newHashtags
+            .split(/[,\s　]+/)
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0)
+            .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`))
+        : []
+    );
+
+    if (!newMemoText.trim() && tagsToUse.length === 0) {
       alert('メモまたはハッシュタグを入力してください');
       return;
     }
@@ -234,13 +263,7 @@ export default function PoleDetailPanel({
     setIsAddingMemo(true);
 
     try {
-      const hashtags = newHashtags
-        .split(/[,\s　]+/)
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
-        .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`));
-
-      await createMemo(poleData.id, hashtags, newMemoText || undefined);
+      await createMemo(poleData.id, tagsToUse, newMemoText || undefined);
 
       // データを再取得して表示を更新
       const updatedData = await getPoleById(poleData.id);
@@ -249,6 +272,7 @@ export default function PoleDetailPanel({
       // フォームをリセット
       setNewMemoText('');
       setNewHashtags('');
+      setSelectedTags([]);
 
       alert('✅ メモを追加しました');
     } catch (error: any) {
@@ -732,20 +756,52 @@ export default function PoleDetailPanel({
             {/* メモ追加フォーム */}
             <div className="space-y-3 pt-4 border-t border-gray-200">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  ハッシュタグ
-                </label>
-                <input
-                  type="text"
-                  value={newHashtags}
-                  onChange={(e) => setNewHashtags(e.target.value)}
-                  placeholder="例: #修理済み #LED"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={isAddingMemo}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  カンマまたはスペースで区切って複数入力可能
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    🏷️ ハッシュタグ
+                  </label>
+                  <button
+                    onClick={() => setShowHashtagSelector(true)}
+                    className="text-blue-600 text-sm font-semibold hover:text-blue-700"
+                    disabled={isAddingMemo}
+                  >
+                    マスターから選択
+                  </button>
+                </div>
+
+                {/* 選択されたタグ */}
+                {selectedTags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {selectedTags.map((tag) => (
+                      <HashtagChip
+                        key={tag}
+                        hashtag={tag}
+                        onRemove={() => handleRemoveTag(tag)}
+                        size="md"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* 手動入力（マスターから選択していない場合のみ） */}
+                {selectedTags.length === 0 && (
+                  <>
+                    <input
+                      type="text"
+                      value={newHashtags}
+                      onChange={(e) => {
+                        setNewHashtags(e.target.value);
+                        setSelectedTags([]); // 手動入力時はタグ選択をクリア
+                      }}
+                      placeholder="例: #修理済み #LED"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      disabled={isAddingMemo}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      💡 マスターから選択 or 手動入力（カンマ/スペース区切り）
+                    </p>
+                  </>
+                )}
               </div>
 
               <div>
@@ -981,6 +1037,15 @@ export default function PoleDetailPanel({
           </Accordion>
         )}
       </div>
+
+      {/* ハッシュタグ選択モーダル */}
+      {showHashtagSelector && (
+        <HashtagSelector
+          selectedTags={selectedTags}
+          onTagsChange={handleTagsChange}
+          onClose={() => setShowHashtagSelector(false)}
+        />
+      )}
 
       {/* 写真プレビューモーダル */}
       {previewPhoto && (

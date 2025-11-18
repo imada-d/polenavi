@@ -31,7 +31,8 @@
       "Bash(npx prisma:*)",
       "Bash(bash:*)",
       "Bash(docker-compose up:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []

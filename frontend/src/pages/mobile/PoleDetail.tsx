@@ -11,6 +11,9 @@ import { deletePole } from '../../api/admin';
 import { calculateDistance } from '../../utils/distance';
 import { useAuth } from '../../contexts/AuthContext';
 import { getFullImageUrl } from '../../utils/imageUrl';
+import { createMemo, updateMemo } from '../../api/memos';
+import HashtagSelector from '../../components/hashtag/HashtagSelector';
+import HashtagChip from '../../components/hashtag/HashtagChip';
 
 export default function PoleDetail() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +27,13 @@ export default function PoleDetail() {
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+
+  // メモ・ハッシュタグ編集用の状態
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
+  const [showHashtagSelector, setShowHashtagSelector] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [memoText, setMemoText] = useState('');
+  const [isSavingMemo, setIsSavingMemo] = useState(false);
 
   // 管理者かどうか
   const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
@@ -96,6 +106,79 @@ export default function PoleDetail() {
   // なぜ: アップロードページに遷移するため
   const handlePhotoClick = () => {
     navigate(`/pole/${id}/upload`);
+  };
+
+  // 何を: メモ編集モードを開始
+  // なぜ: ユーザーがメモとハッシュタグを編集できるようにするため
+  const handleStartEditMemo = () => {
+    setMemoText(poleData.memo || '');
+    if (poleData.hashtag) {
+      setSelectedTags(poleData.hashtag.split(/\s+/).filter((tag: string) => tag.trim()));
+    } else {
+      setSelectedTags([]);
+    }
+    setIsEditingMemo(true);
+  };
+
+  // 何を: メモ編集をキャンセル
+  // なぜ: 変更を破棄して閲覧モードに戻すため
+  const handleCancelEditMemo = () => {
+    setIsEditingMemo(false);
+    setMemoText('');
+    setSelectedTags([]);
+  };
+
+  // 何を: ハッシュタグの選択変更を処理
+  // なぜ: ハッシュタグマスターから選択されたタグを反映するため
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+  };
+
+  // 何を: ハッシュタグを削除
+  // なぜ: 選択したタグを個別に削除できるようにするため
+  const handleRemoveTag = (tagToRemove: string) => {
+    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove));
+  };
+
+  // 何を: メモとハッシュタグを保存
+  // なぜ: 編集内容をバックエンドに保存するため
+  const handleSaveMemo = async () => {
+    if (!poleData || !id) return;
+
+    try {
+      setIsSavingMemo(true);
+
+      // メモIDを取得（既存のメモがある場合）
+      const existingMemoId = poleData.memos?.[0]?.id;
+
+      if (existingMemoId) {
+        // 既存のメモを更新
+        await updateMemo(existingMemoId, selectedTags, memoText || undefined);
+      } else {
+        // 新規メモを作成
+        await createMemo(
+          parseInt(id),
+          selectedTags,
+          memoText || undefined,
+          user?.displayName || user?.username || 'guest'
+        );
+      }
+
+      // データを再取得
+      const updatedData = await getPoleById(parseInt(id));
+      setPoleData(updatedData);
+
+      // 編集モードを終了
+      setIsEditingMemo(false);
+      setMemoText('');
+      setSelectedTags([]);
+      alert('保存しました！');
+    } catch (error) {
+      console.error('❌ メモの保存に失敗:', error);
+      alert('保存に失敗しました');
+    } finally {
+      setIsSavingMemo(false);
+    }
   };
 
   // 何を: 電柱データを取得
@@ -317,33 +400,125 @@ export default function PoleDetail() {
         {/* セクション3: メモ・ハッシュタグ */}
         <Accordion title="メモ・ハッシュタグ" icon="📝">
           <div className="space-y-3">
-            {/* メモ */}
-            <div>
-              <p className="text-sm text-gray-600 mb-1">メモ</p>
-              {poleData.memo ? (
-                <p className="whitespace-pre-wrap">{poleData.memo}</p>
-              ) : (
-                <p className="text-gray-400">メモなし</p>
-              )}
-            </div>
-
-            {/* ハッシュタグ */}
-            <div>
-              <p className="text-sm text-gray-600 mb-1">ハッシュタグ</p>
-              {poleData.hashtag ? (
-                <div className="flex flex-wrap gap-2">
-                  {poleData.hashtag.split(/\s+/).map((tag: string, index: number) => (
-                    <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
-                      {tag}
-                    </span>
-                  ))}
+            {!isEditingMemo ? (
+              <>
+                {/* 閲覧モード */}
+                {/* メモ */}
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">メモ</p>
+                  {poleData.memo ? (
+                    <p className="whitespace-pre-wrap">{poleData.memo}</p>
+                  ) : (
+                    <p className="text-gray-400">メモなし</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-gray-400">ハッシュタグなし</p>
-              )}
-            </div>
+
+                {/* ハッシュタグ */}
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">ハッシュタグ</p>
+                  {poleData.hashtag ? (
+                    <div className="flex flex-wrap gap-2">
+                      {poleData.hashtag.split(/\s+/).map((tag: string, index: number) => (
+                        <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">ハッシュタグなし</p>
+                  )}
+                </div>
+
+                {/* 編集ボタン */}
+                <button
+                  onClick={handleStartEditMemo}
+                  className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-semibold"
+                >
+                  ✏️ 編集する
+                </button>
+              </>
+            ) : (
+              <>
+                {/* 編集モード */}
+                {/* メモ入力 */}
+                <div>
+                  <label className="text-sm font-semibold text-gray-700 mb-1 block">
+                    メモ
+                  </label>
+                  <textarea
+                    value={memoText}
+                    onChange={(e) => setMemoText(e.target.value)}
+                    placeholder="メモを入力（任意）"
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* ハッシュタグ */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-semibold text-gray-700">
+                      🏷️ ハッシュタグ
+                    </label>
+                    <button
+                      onClick={() => setShowHashtagSelector(true)}
+                      className="text-blue-600 text-sm font-semibold hover:text-blue-700"
+                    >
+                      マスターから選択
+                    </button>
+                  </div>
+
+                  {/* 選択されたタグ */}
+                  {selectedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {selectedTags.map((tag) => (
+                        <HashtagChip
+                          key={tag}
+                          hashtag={tag}
+                          onRemove={() => handleRemoveTag(tag)}
+                          size="md"
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedTags.length === 0 && (
+                    <p className="text-sm text-gray-400 italic">
+                      「マスターから選択」ボタンでハッシュタグを追加できます
+                    </p>
+                  )}
+                </div>
+
+                {/* 保存・キャンセルボタン */}
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={handleCancelEditMemo}
+                    disabled={isSavingMemo}
+                    className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold disabled:opacity-50"
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    onClick={handleSaveMemo}
+                    disabled={isSavingMemo}
+                    className="flex-1 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold disabled:opacity-50"
+                  >
+                    {isSavingMemo ? '保存中...' : '保存'}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </Accordion>
+
+        {/* ハッシュタグ選択モーダル */}
+        {showHashtagSelector && (
+          <HashtagSelector
+            selectedTags={selectedTags}
+            onTagsChange={handleTagsChange}
+            onClose={() => setShowHashtagSelector(false)}
+          />
+        )}
 
         {/* セクション4: 検証情報 */}
         {FEATURES.VERIFICATION_ENABLED && (
