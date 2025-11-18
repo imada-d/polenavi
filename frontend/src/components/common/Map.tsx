@@ -81,11 +81,11 @@ export default function Map({
       maxZoom: 19,
     });
 
-    // Esri World Imagery タイル（航空写真）
+    // 国土地理院 航空写真タイル
     const satelliteLayer = L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
       {
-        attribution: 'Tiles © Esri',
+        attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
         maxZoom: 18,
       }
     );
