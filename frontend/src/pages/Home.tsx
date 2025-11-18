@@ -645,7 +645,10 @@ export default function Home() {
 
       {/* モバイル用ヘッダー */}
       <header className="md:hidden bg-white border-b px-4 py-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold">🗺️ PoleNavi</h1>
+        <div className="flex items-center gap-2">
+          <img src="/icons/polenavilogo.png" alt="PoleNavi" className="w-8 h-8" />
+          <h1 className="text-xl font-bold">PoleNavi</h1>
+        </div>
         <div className="flex gap-2">
           <button className="p-2 hover:bg-gray-100 rounded">🔔</button>
         </div>
