@@ -474,57 +474,52 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 /**
  * メモ・ハッシュタグで電柱を検索
  */
-export async function searchPolesByMemo(query: string) {
-  if (!query || query.trim().length === 0) {
+export async function searchPolesByMemo(searchQuery: string) {
+  if (!searchQuery || searchQuery.trim().length === 0) {
     throw new ValidationError('検索キーワードを入力してください');
   }
 
-  const trimmedQuery = query.trim();
+  const trimmedQuery = searchQuery.trim();
 
   // 複数のハッシュタグが含まれている場合はスペースで分割
   const keywords = trimmedQuery.split(/\s+/).filter(k => k.length > 0);
 
   console.log('🔍 [searchPolesByMemo] 検索開始');
-  console.log('  - 元のクエリ:', query);
+  console.log('  - 元のクエリ:', searchQuery);
   console.log('  - キーワード:', keywords);
 
-  // 検索条件を構築
-  const searchConditions = keywords.flatMap(keyword => [
-    // ハッシュタグ配列内を検索（完全一致）
-    {
-      hashtags: {
-        has: keyword,
-      },
-    },
-    // メモテキスト内を検索（部分一致）
-    {
-      memoText: {
-        contains: keyword,
-        mode: 'insensitive' as const,
-      },
-    },
-  ]);
+  // 生SQLで配列の部分一致検索を実行
+  // 各キーワードをパラメータとして安全に渡す
+  let sqlQuery = `
+    SELECT
+      pm.id,
+      pm."poleId",
+      pm.hashtags,
+      pm."memoText",
+      pm."createdByName",
+      pm."createdAt",
+      p.id as pole_id,
+      p.latitude,
+      p.longitude,
+      p."poleTypeName",
+      p."numberCount"
+    FROM "PoleMemo" pm
+    JOIN "Pole" p ON pm."poleId" = p.id
+    WHERE pm."isPublic" = true
+    AND (
+  `;
 
-  console.log('  - 検索条件数:', searchConditions.length);
+  const conditions = keywords.map((_, i) => `
+    (array_to_string(pm.hashtags, ' ') ILIKE $${i * 2 + 1}
+     OR pm."memoText" ILIKE $${i * 2 + 2})
+  `).join(' OR ');
 
-  // メモを検索
-  const memos = await prisma.poleMemo.findMany({
-    where: {
-      OR: searchConditions,
-      isPublic: true,
-    },
-    include: {
-      pole: {
-        include: {
-          poleNumbers: true,
-        },
-      },
-    },
-    take: 50, // 最大50件
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  sqlQuery += conditions + `) ORDER BY pm."createdAt" DESC LIMIT 50`;
+
+  // パラメータを準備（各キーワードを2回使用）
+  const params = keywords.flatMap(k => [`%${k}%`, `%${k}%`]);
+
+  const memos = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
 
   console.log('  - 検索結果:', memos.length, '件');
   if (memos.length > 0) {
@@ -533,18 +528,41 @@ export async function searchPolesByMemo(query: string) {
 
   // 重複する電柱を排除
   const uniquePoles = Array.from(
-    new Map(memos.map((memo: any) => [memo.pole.id, memo])).values()
+    new Map(memos.map((memo: any) => [memo.poleId, memo])).values()
   );
 
   console.log('  - ユニーク電柱数:', uniquePoles.length);
 
+  // 電柱番号を取得
+  const poleIds = uniquePoles.map(m => m.poleId);
+  const poleNumbers = await prisma.poleNumber.findMany({
+    where: {
+      poleId: {
+        in: poleIds,
+      },
+    },
+    select: {
+      poleId: true,
+      poleNumber: true,
+    },
+  });
+
+  // 電柱IDごとに番号をグループ化
+  const numbersByPoleId = new Map<number, string[]>();
+  poleNumbers.forEach(pn => {
+    if (!numbersByPoleId.has(pn.poleId)) {
+      numbersByPoleId.set(pn.poleId, []);
+    }
+    numbersByPoleId.get(pn.poleId)!.push(pn.poleNumber);
+  });
+
   return uniquePoles.map((memo: any) => ({
-    poleId: memo.pole.id,
-    latitude: memo.pole.latitude,
-    longitude: memo.pole.longitude,
-    poleTypeName: memo.pole.poleTypeName,
-    numberCount: memo.pole.numberCount,
-    numbers: memo.pole.poleNumbers.map((pn: any) => pn.poleNumber),
+    poleId: memo.poleId,
+    latitude: Number(memo.latitude),
+    longitude: Number(memo.longitude),
+    poleTypeName: memo.poleTypeName,
+    numberCount: memo.numberCount,
+    numbers: numbersByPoleId.get(memo.poleId) || [],
     memoText: memo.memoText,
     hashtags: memo.hashtags,
     createdByName: memo.createdByName,
