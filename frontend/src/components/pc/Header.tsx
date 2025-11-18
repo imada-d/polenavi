@@ -22,7 +22,7 @@ export default function Header({ onSearchClick }: HeaderProps = {}) {
       {/* ロゴとナビゲーション */}
       <div className="flex items-center gap-8">
         <Link to="/" className="flex items-center gap-2">
-          <span className="text-2xl">🗺️</span>
+          <img src="/icons/polenavilogo.png" alt="PoleNavi" className="w-8 h-8" />
           <h1 className="text-xl font-bold text-gray-800">PoleNavi</h1>
         </Link>
 

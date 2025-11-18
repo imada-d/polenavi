@@ -484,6 +484,10 @@ export async function searchPolesByMemo(query: string) {
   // 複数のハッシュタグが含まれている場合はスペースで分割
   const keywords = trimmedQuery.split(/\s+/).filter(k => k.length > 0);
 
+  console.log('🔍 [searchPolesByMemo] 検索開始');
+  console.log('  - 元のクエリ:', query);
+  console.log('  - キーワード:', keywords);
+
   // 検索条件を構築
   const searchConditions = keywords.flatMap(keyword => [
     // ハッシュタグ配列内を検索（完全一致）
@@ -500,6 +504,8 @@ export async function searchPolesByMemo(query: string) {
       },
     },
   ]);
+
+  console.log('  - 検索条件数:', searchConditions.length);
 
   // メモを検索
   const memos = await prisma.poleMemo.findMany({
@@ -520,10 +526,17 @@ export async function searchPolesByMemo(query: string) {
     },
   });
 
+  console.log('  - 検索結果:', memos.length, '件');
+  if (memos.length > 0) {
+    console.log('  - 最初の結果のハッシュタグ:', memos[0].hashtags);
+  }
+
   // 重複する電柱を排除
   const uniquePoles = Array.from(
     new Map(memos.map((memo: any) => [memo.pole.id, memo])).values()
   );
+
+  console.log('  - ユニーク電柱数:', uniquePoles.length);
 
   return uniquePoles.map((memo: any) => ({
     poleId: memo.pole.id,
