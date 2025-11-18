@@ -103,7 +103,7 @@ export default function Map({
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       {
         attribution: '© Esri',
-        maxZoom: 19,
+        maxZoom: 18,
       }
     );
 
@@ -138,7 +138,7 @@ export default function Map({
       } else {
         console.log('✅ 初期表示: Esriを追加');
         satelliteLayerEsri.addTo(map);
-        map.setMaxZoom(19); // Esriの最大ズーム
+        map.setMaxZoom(18); // Esriの最大ズーム
       }
       labelsLayer.addTo(map);
     } else {
@@ -190,7 +190,7 @@ export default function Map({
         console.log('✅ Esriに切り替え');
         if (hasGsi) map.removeLayer(satelliteLayer);
         satelliteLayerEsri.addTo(map);
-        map.setMaxZoom(19); // Esriの最大ズーム
+        map.setMaxZoom(18); // Esriの最大ズーム
       }
     });
 
@@ -254,7 +254,7 @@ export default function Map({
       } else {
         console.log('✅ Esriレイヤーを追加');
         satelliteLayerEsri.addTo(map);
-        map.setMaxZoom(19); // Esriの最大ズーム
+        map.setMaxZoom(18); // Esriの最大ズーム
       }
       labelsLayer.addTo(map);
     } else {
