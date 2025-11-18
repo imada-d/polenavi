@@ -57,6 +57,7 @@ export default function Map({
   // 各レイヤーを保存するための ref
   const streetLayerRef = useRef<L.TileLayer | null>(null);
   const satelliteLayerRef = useRef<L.TileLayer | null>(null);
+  const satelliteLayerEsriRef = useRef<L.TileLayer | null>(null); // Esri航空写真（ズーム13以下用）
   const labelsLayerRef = useRef<L.TileLayer | null>(null);
 
   // 地図の初期化（初回のみ）
@@ -81,12 +82,22 @@ export default function Map({
       maxZoom: 19,
     });
 
-    // 国土地理院 航空写真タイル
+    // 国土地理院 航空写真タイル（ズーム14以上で表示）
     const satelliteLayer = L.tileLayer(
       'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
       {
         attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
         maxZoom: 18,
+        minZoom: 14,
+      }
+    );
+
+    // Esri 航空写真タイル（ズーム13以下で表示）
+    const satelliteLayerEsri = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: '© Esri',
+        maxZoom: 13,
       }
     );
 
@@ -104,7 +115,12 @@ export default function Map({
     // 初期表示は mapType に応じて決定
     if (mapType === 'hybrid') {
       // ハイブリッドモード（航空写真 + 地名）
-      satelliteLayer.addTo(map);
+      const currentZoom = map.getZoom();
+      if (currentZoom >= 14) {
+        satelliteLayer.addTo(map);
+      } else {
+        satelliteLayerEsri.addTo(map);
+      }
       labelsLayer.addTo(map);
       map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
@@ -117,7 +133,27 @@ export default function Map({
     mapRef.current = map;
     streetLayerRef.current = streetLayer;
     satelliteLayerRef.current = satelliteLayer;
+    satelliteLayerEsriRef.current = satelliteLayerEsri;
     labelsLayerRef.current = labelsLayer;
+
+    // ズーム変更時に航空写真レイヤーを切り替え
+    map.on('zoomend', () => {
+      if (mapType !== 'hybrid') return;
+
+      const zoom = map.getZoom();
+      const hasGsi = map.hasLayer(satelliteLayer);
+      const hasEsri = map.hasLayer(satelliteLayerEsri);
+
+      if (zoom >= 14 && !hasGsi) {
+        // ズーム14以上：国土地理院に切り替え
+        if (hasEsri) map.removeLayer(satelliteLayerEsri);
+        satelliteLayer.addTo(map);
+      } else if (zoom < 14 && !hasEsri) {
+        // ズーム13以下：Esriに切り替え
+        if (hasGsi) map.removeLayer(satelliteLayer);
+        satelliteLayerEsri.addTo(map);
+      }
+    });
 
     // サイズの再計算
     setTimeout(() => {
@@ -136,11 +172,12 @@ export default function Map({
 
   // mapType が変わったらレイヤーを切り替え
   useEffect(() => {
-    if (!mapRef.current || !streetLayerRef.current || !satelliteLayerRef.current || !labelsLayerRef.current) return;
+    if (!mapRef.current || !streetLayerRef.current || !satelliteLayerRef.current || !satelliteLayerEsriRef.current || !labelsLayerRef.current) return;
 
     const map = mapRef.current;
     const streetLayer = streetLayerRef.current;
     const satelliteLayer = satelliteLayerRef.current;
+    const satelliteLayerEsri = satelliteLayerEsriRef.current;
     const labelsLayer = labelsLayerRef.current;
 
     // まず全てのレイヤーを削除
@@ -150,14 +187,22 @@ export default function Map({
     if (map.hasLayer(satelliteLayer)) {
       map.removeLayer(satelliteLayer);
     }
+    if (map.hasLayer(satelliteLayerEsri)) {
+      map.removeLayer(satelliteLayerEsri);
+    }
     if (map.hasLayer(labelsLayer)) {
       map.removeLayer(labelsLayer);
     }
 
     // mapType に応じて必要なレイヤーを追加
     if (mapType === 'hybrid') {
-      // 航空写真 + 地名
-      satelliteLayer.addTo(map);
+      // 航空写真 + 地名（ズームレベルに応じて切り替え）
+      const currentZoom = map.getZoom();
+      if (currentZoom >= 14) {
+        satelliteLayer.addTo(map);
+      } else {
+        satelliteLayerEsri.addTo(map);
+      }
       labelsLayer.addTo(map);
       map.setMaxZoom(18); // 航空写真の最大ズームに合わせる
     } else {
