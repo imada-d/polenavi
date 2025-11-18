@@ -30,7 +30,13 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://static.cloudflareinsights.com"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'", // Google Analytics requires inline scripts
+        "https://static.cloudflareinsights.com",
+        "https://www.googletagmanager.com",
+        "https://www.google-analytics.com"
+      ],
       styleSrc: ["'self'", "'unsafe-inline'"], // Leaflet requires inline styles
       imgSrc: [
         "'self'",
@@ -41,9 +47,15 @@ app.use(helmet({
         "https://server.arcgisonline.com",
         "https://*.basemaps.cartocdn.com",
         "https://raw.githubusercontent.com",
-        "https://cdnjs.cloudflare.com"
+        "https://cdnjs.cloudflare.com",
+        "https://www.google-analytics.com"
       ],
-      connectSrc: ["'self'"],
+      connectSrc: [
+        "'self'",
+        "https://www.google-analytics.com",
+        "https://www.googletagmanager.com",
+        "https://analytics.google.com"
+      ],
       fontSrc: ["'self'", "data:"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
