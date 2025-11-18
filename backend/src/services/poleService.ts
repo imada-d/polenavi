@@ -488,38 +488,80 @@ export async function searchPolesByMemo(searchQuery: string) {
   console.log('  - 元のクエリ:', searchQuery);
   console.log('  - キーワード:', keywords);
 
-  // 生SQLで配列の部分一致検索を実行
-  // 各キーワードをパラメータとして安全に渡す
-  let sqlQuery = `
-    SELECT
-      pm.id,
-      pm."poleId",
-      pm.hashtags,
-      pm."memoText",
-      pm."createdByName",
-      pm."createdAt",
-      p.id as pole_id,
-      p.latitude,
-      p.longitude,
-      p."poleTypeName",
-      p."numberCount"
-    FROM "PoleMemo" pm
-    JOIN "Pole" p ON pm."poleId" = p.id
-    WHERE pm."isPublic" = true
-    AND (
-  `;
+  // 各キーワードごとに検索を実行し、結果をマージ
+  const allMemos: any[] = [];
+  const seenIds = new Set<number>();
 
-  const conditions = keywords.map((_, i) => `
-    (array_to_string(pm.hashtags, ' ') ILIKE $${i * 2 + 1}
-     OR pm."memoText" ILIKE $${i * 2 + 2})
-  `).join(' OR ');
+  for (const keyword of keywords) {
+    try {
+      // 完全一致検索（配列内）
+      const exactMemos = await prisma.poleMemo.findMany({
+        where: {
+          isPublic: true,
+          hashtags: {
+            has: keyword,
+          },
+        },
+        include: {
+          pole: {
+            include: {
+              poleNumbers: true,
+            },
+          },
+        },
+        take: 50,
+      });
 
-  sqlQuery += conditions + `) ORDER BY pm."createdAt" DESC LIMIT 50`;
+      // メモテキストでの部分一致検索
+      const textMemos = await prisma.poleMemo.findMany({
+        where: {
+          isPublic: true,
+          memoText: {
+            contains: keyword,
+            mode: 'insensitive',
+          },
+        },
+        include: {
+          pole: {
+            include: {
+              poleNumbers: true,
+            },
+          },
+        },
+        take: 50,
+      });
 
-  // パラメータを準備（各キーワードを2回使用）
-  const params = keywords.flatMap(k => [`%${k}%`, `%${k}%`]);
+      // ハッシュタグ配列を文字列に変換して部分一致検索（生SQL）
+      const partialMemos = await prisma.$queryRaw<any[]>`
+        SELECT
+          pm.*,
+          json_build_object(
+            'id', p.id,
+            'latitude', p.latitude,
+            'longitude', p.longitude,
+            'poleTypeName', p."poleTypeName",
+            'numberCount', p."numberCount"
+          ) as pole
+        FROM "PoleMemo" pm
+        JOIN "Pole" p ON pm."poleId" = p.id
+        WHERE pm."isPublic" = true
+        AND array_to_string(pm.hashtags, ' ') ILIKE ${`%${keyword}%`}
+        LIMIT 50
+      `;
 
-  const memos = await prisma.$queryRawUnsafe<any[]>(sqlQuery, ...params);
+      // 結果をマージ（重複排除）
+      [...exactMemos, ...textMemos, ...partialMemos].forEach((memo: any) => {
+        if (!seenIds.has(memo.id)) {
+          seenIds.add(memo.id);
+          allMemos.push(memo);
+        }
+      });
+    } catch (error) {
+      console.error(`キーワード "${keyword}" の検索エラー:`, error);
+    }
+  }
+
+  const memos = allMemos.slice(0, 50); // 最大50件に制限
 
   console.log('  - 検索結果:', memos.length, '件');
   if (memos.length > 0) {
@@ -528,46 +570,43 @@ export async function searchPolesByMemo(searchQuery: string) {
 
   // 重複する電柱を排除
   const uniquePoles = Array.from(
-    new Map(memos.map((memo: any) => [memo.poleId, memo])).values()
+    new Map(memos.map((memo: any) => [memo.pole?.id || memo.poleId, memo])).values()
   );
 
   console.log('  - ユニーク電柱数:', uniquePoles.length);
 
-  // 電柱番号を取得
-  const poleIds = uniquePoles.map(m => m.poleId);
-  const poleNumbers = await prisma.poleNumber.findMany({
-    where: {
-      poleId: {
-        in: poleIds,
-      },
-    },
-    select: {
-      poleId: true,
-      poleNumber: true,
-    },
-  });
-
-  // 電柱IDごとに番号をグループ化
-  const numbersByPoleId = new Map<number, string[]>();
-  poleNumbers.forEach(pn => {
-    if (!numbersByPoleId.has(pn.poleId)) {
-      numbersByPoleId.set(pn.poleId, []);
+  return uniquePoles.map((memo: any) => {
+    // Prismaの結果の場合
+    if (memo.pole && memo.pole.poleNumbers) {
+      return {
+        poleId: memo.pole.id,
+        latitude: memo.pole.latitude,
+        longitude: memo.pole.longitude,
+        poleTypeName: memo.pole.poleTypeName,
+        numberCount: memo.pole.numberCount,
+        numbers: memo.pole.poleNumbers.map((pn: any) => pn.poleNumber),
+        memoText: memo.memoText,
+        hashtags: memo.hashtags,
+        createdByName: memo.createdByName,
+        createdAt: memo.createdAt,
+      };
     }
-    numbersByPoleId.get(pn.poleId)!.push(pn.poleNumber);
+    // 生SQLの結果の場合
+    else {
+      return {
+        poleId: memo.poleId,
+        latitude: Number(memo.pole?.latitude || memo.latitude),
+        longitude: Number(memo.pole?.longitude || memo.longitude),
+        poleTypeName: memo.pole?.poleTypeName || memo.poleTypeName,
+        numberCount: memo.pole?.numberCount || memo.numberCount,
+        numbers: [], // 生SQLの場合は後で番号を取得
+        memoText: memo.memoText,
+        hashtags: memo.hashtags,
+        createdByName: memo.createdByName,
+        createdAt: memo.createdAt,
+      };
+    }
   });
-
-  return uniquePoles.map((memo: any) => ({
-    poleId: memo.poleId,
-    latitude: Number(memo.latitude),
-    longitude: Number(memo.longitude),
-    poleTypeName: memo.poleTypeName,
-    numberCount: memo.numberCount,
-    numbers: numbersByPoleId.get(memo.poleId) || [],
-    memoText: memo.memoText,
-    hashtags: memo.hashtags,
-    createdByName: memo.createdByName,
-    createdAt: memo.createdAt,
-  }));
 }
 
 /**
