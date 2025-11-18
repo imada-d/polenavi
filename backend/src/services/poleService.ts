@@ -488,12 +488,29 @@ export async function searchPolesByMemo(searchQuery: string) {
   console.log('  - 元のクエリ:', searchQuery);
   console.log('  - キーワード:', keywords);
 
+  // デバッグ: 全メモを確認
+  const allPublicMemos = await prisma.poleMemo.findMany({
+    where: { isPublic: true },
+    select: {
+      id: true,
+      hashtags: true,
+      memoText: true,
+    },
+    take: 10,
+  });
+  console.log('  - 全メモ（最初の10件）:');
+  allPublicMemos.forEach(m => {
+    console.log(`    ID:${m.id}, ハッシュタグ:`, m.hashtags, `, メモ:${m.memoText?.substring(0, 20)}`);
+  });
+
   // 各キーワードごとに検索を実行し、結果をマージ
   const allMemos: any[] = [];
   const seenIds = new Set<number>();
 
   for (const keyword of keywords) {
     try {
+      console.log(`  - キーワード "${keyword}" で検索中...`);
+
       // 完全一致検索（配列内）
       const exactMemos = await prisma.poleMemo.findMany({
         where: {
@@ -511,6 +528,7 @@ export async function searchPolesByMemo(searchQuery: string) {
         },
         take: 50,
       });
+      console.log(`    - 完全一致: ${exactMemos.length}件`);
 
       // メモテキストでの部分一致検索
       const textMemos = await prisma.poleMemo.findMany({
@@ -530,6 +548,7 @@ export async function searchPolesByMemo(searchQuery: string) {
         },
         take: 50,
       });
+      console.log(`    - メモテキスト: ${textMemos.length}件`);
 
       // ハッシュタグ配列を文字列に変換して部分一致検索（生SQL）
       const partialMemos = await prisma.$queryRaw<any[]>`
@@ -548,6 +567,7 @@ export async function searchPolesByMemo(searchQuery: string) {
         AND array_to_string(pm.hashtags, ' ') ILIKE ${`%${keyword}%`}
         LIMIT 50
       `;
+      console.log(`    - 部分一致: ${partialMemos.length}件`);
 
       // 結果をマージ（重複排除）
       [...exactMemos, ...textMemos, ...partialMemos].forEach((memo: any) => {
