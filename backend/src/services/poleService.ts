@@ -21,7 +21,7 @@ export interface CreatePoleRequest {
   registeredBy?: number;
   registeredByName?: string;
   memo?: string;
-  hashtag?: string[];
+  hashtag?: string | string[]; // 文字列または配列を受け付ける
 }
 
 /**
