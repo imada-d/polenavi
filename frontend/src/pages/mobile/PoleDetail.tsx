@@ -111,12 +111,9 @@ export default function PoleDetail() {
   // 何を: メモ編集モードを開始
   // なぜ: ユーザーがメモとハッシュタグを編集できるようにするため
   const handleStartEditMemo = () => {
-    setMemoText(poleData.memo || '');
-    if (poleData.hashtag) {
-      setSelectedTags(poleData.hashtag.split(/\s+/).filter((tag: string) => tag.trim()));
-    } else {
-      setSelectedTags([]);
-    }
+    const firstMemo = poleData.memos?.[0];
+    setMemoText(firstMemo?.memoText || '');
+    setSelectedTags(firstMemo?.hashtags || []);
     setIsEditingMemo(true);
   };
 
@@ -403,39 +400,63 @@ export default function PoleDetail() {
             {!isEditingMemo ? (
               <>
                 {/* 閲覧モード */}
-                {/* メモ */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">メモ</p>
-                  {poleData.memo ? (
-                    <p className="whitespace-pre-wrap">{poleData.memo}</p>
-                  ) : (
-                    <p className="text-gray-400">メモなし</p>
-                  )}
-                </div>
-
-                {/* ハッシュタグ */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">ハッシュタグ</p>
-                  {poleData.hashtag ? (
-                    <div className="flex flex-wrap gap-2">
-                      {poleData.hashtag.split(/\s+/).map((tag: string, index: number) => (
-                        <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
-                          {tag}
-                        </span>
-                      ))}
+                {poleData.memos && poleData.memos.length > 0 ? (
+                  <>
+                    {/* メモ */}
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">メモ</p>
+                      {poleData.memos[0].memoText ? (
+                        <p className="whitespace-pre-wrap">{poleData.memos[0].memoText}</p>
+                      ) : (
+                        <p className="text-gray-400">メモなし</p>
+                      )}
                     </div>
-                  ) : (
-                    <p className="text-gray-400">ハッシュタグなし</p>
-                  )}
-                </div>
 
-                {/* 編集ボタン */}
-                <button
-                  onClick={handleStartEditMemo}
-                  className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-semibold"
-                >
-                  ✏️ 編集する
-                </button>
+                    {/* ハッシュタグ */}
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">ハッシュタグ</p>
+                      {poleData.memos[0].hashtags && poleData.memos[0].hashtags.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {poleData.memos[0].hashtags.map((tag: string, index: number) => (
+                            <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-sm">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-400">ハッシュタグなし</p>
+                      )}
+                    </div>
+
+                    {/* 編集ボタン */}
+                    <button
+                      onClick={handleStartEditMemo}
+                      className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-semibold"
+                    >
+                      ✏️ 編集する
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* メモがない場合 */}
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">メモ</p>
+                      <p className="text-gray-400">メモなし</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">ハッシュタグ</p>
+                      <p className="text-gray-400">ハッシュタグなし</p>
+                    </div>
+
+                    {/* 追加ボタン */}
+                    <button
+                      onClick={handleStartEditMemo}
+                      className="w-full py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-semibold"
+                    >
+                      ➕ 追加する
+                    </button>
+                  </>
+                )}
               </>
             ) : (
               <>
