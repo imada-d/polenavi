@@ -30,7 +30,8 @@
       "Bash(if not exist \"backend\\public\\uploads\\poles\" mkdir \"backend\\public\\uploads\\poles\")",
       "Bash(npx prisma:*)",
       "Bash(bash:*)",
-      "Bash(docker-compose up:*)"
+      "Bash(docker-compose up:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

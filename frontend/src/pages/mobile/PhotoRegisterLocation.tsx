@@ -6,6 +6,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Map from '../../components/common/Map';
+import { X } from 'lucide-react';
 import L from 'leaflet';
 
 export default function PhotoRegisterLocation() {
@@ -108,19 +109,19 @@ export default function PhotoRegisterLocation() {
     <div className="h-screen w-full flex flex-col">
       {/* ヘッダー */}
       <header className="bg-white border-b px-4 py-3 flex items-center justify-between z-10">
-        <button
-          onClick={() => navigate('/register-from-photo')}
-          className="p-2 hover:bg-gray-100 rounded"
-        >
-          ← 写真選択へ戻る
-        </button>
-        <div className="text-center">
+        <div className="text-center flex-1">
           <h1 className="text-lg font-bold">位置を確認</h1>
           <p className="text-xs text-green-600">
             {manualLocation ? '📍 手動選択' : '📸 写真から取得'}
           </p>
         </div>
-        <div className="w-10"></div> {/* 中央揃え用 */}
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 hover:bg-gray-100 rounded-full"
+          title="マップに戻る"
+        >
+          <X size={24} className="text-gray-600" />
+        </button>
       </header>
 
       {/* 地図エリア */}

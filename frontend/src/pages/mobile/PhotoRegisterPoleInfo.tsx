@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
 import PoleTypeSelector from '../../components/register/PoleTypeSelector';
 import PlateCountSelector from '../../components/register/PlateCountSelector';
 
@@ -104,11 +105,15 @@ export default function PhotoRegisterPoleInfo() {
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50">
       {/* ヘッダー */}
-      <header className="bg-white border-b px-4 py-3 flex items-center">
-        <button onClick={() => navigate(-1)} className="text-2xl mr-3">
-          ←
+      <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <h1 className="text-xl font-bold flex-1">電柱登録（写真から）</h1>
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 hover:bg-gray-100 rounded-full"
+          title="マップに戻る"
+        >
+          <X size={24} className="text-gray-600" />
         </button>
-        <h1 className="text-xl font-bold">電柱登録（写真から）</h1>
       </header>
 
       {/* メインコンテンツ */}

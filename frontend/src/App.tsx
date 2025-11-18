@@ -80,8 +80,7 @@ function ResponsiveWrapper({ mobile: Mobile, pc: PC }: { mobile: React.Component
 function AppContent() {
   const location = useLocation();
 
-  // 詳細画面、認証画面、設定画面ではボトムナビを非表示
-  // 登録画面は表示する（ナビゲーションしやすくするため）
+  // 詳細画面、認証画面、設定画面、登録画面ではボトムナビを非表示
   const hideBottomNav =
     location.pathname.startsWith('/pole/') ||
     location.pathname.startsWith('/groups/') ||
@@ -101,7 +100,8 @@ function AppContent() {
     location.pathname.startsWith('/hashtag/') ||
     location.pathname === '/hashtags' ||
     location.pathname === '/stats' ||
-    location.pathname.startsWith('/admin');
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/register'); // 登録フロー全体で非表示
 
   return (
     <div className="relative">

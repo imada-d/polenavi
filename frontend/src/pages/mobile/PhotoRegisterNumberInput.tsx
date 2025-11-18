@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
 
 // LocalStorageのキー
 const LAST_REG_KEY = 'lastRegistration';
@@ -230,13 +231,17 @@ export default function PhotoRegisterNumberInput() {
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50">
       {/* ヘッダー */}
-      <header className="bg-white border-b px-4 py-3 flex items-center">
-        <button onClick={() => navigate(-1)} className="text-2xl mr-3">
-          ←
-        </button>
-        <h1 className="text-xl font-bold">
+      <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <h1 className="text-xl font-bold flex-1">
           {poleType === 'electric' ? '⚡ 電柱番号を入力' : `💡 ${getSubTypeDisplay()}の番号`}
         </h1>
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 hover:bg-gray-100 rounded-full"
+          title="マップに戻る"
+        >
+          <X size={24} className="text-gray-600" />
+        </button>
       </header>
 
       {/* メインコンテンツ */}
