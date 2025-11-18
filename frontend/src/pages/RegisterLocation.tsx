@@ -124,7 +124,21 @@ export default function RegisterLocation() {
 
   return (
     <div className="h-screen w-full flex flex-col">
-      {/* 地図エリア（フルスクリーン） */}
+      {/* ヘッダー */}
+      <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 hover:bg-gray-100 rounded"
+        >
+          ← 戻る
+        </button>
+        <div className="text-center">
+          <h1 className="text-lg font-bold">位置を確認</h1>
+        </div>
+        <div className="w-10"></div> {/* 中央揃え用 */}
+      </header>
+
+      {/* 地図エリア */}
       <main className="flex-1 relative">
         {currentLocation && pinLocation && (
           <Map 
