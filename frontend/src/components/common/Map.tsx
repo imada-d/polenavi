@@ -118,12 +118,20 @@ export default function Map({
       }
     );
 
+    // 何を: 日本の範囲内かどうかを判定する関数（初期表示用）
+    const isInJapanInitial = (lat: number, lng: number): boolean => {
+      return lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154;
+    };
+
     // 初期表示は mapType に応じて決定
     if (mapType === 'hybrid') {
       // ハイブリッドモード（航空写真 + 地名）
       const currentZoom = map.getZoom();
-      console.log(`🗺️ 初期表示: ズーム=${currentZoom}, モード=hybrid`);
-      if (currentZoom >= 14) {
+      const mapCenter = map.getCenter();
+      const inJapan = isInJapanInitial(mapCenter.lat, mapCenter.lng);
+      console.log(`🗺️ 初期表示: ズーム=${currentZoom}, モード=hybrid, 日本内=${inJapan}`);
+
+      if (inJapan && currentZoom >= 14) {
         console.log('✅ 初期表示: 国土地理院を追加');
         satelliteLayer.addTo(map);
       } else {
@@ -146,6 +154,14 @@ export default function Map({
     satelliteLayerEsriRef.current = satelliteLayerEsri;
     labelsLayerRef.current = labelsLayer;
 
+    // 何を: 日本の範囲内かどうかを判定する関数
+    // なぜ: 国土地理院タイルは日本のみ対応のため
+    const isInJapan = (lat: number, lng: number): boolean => {
+      // 日本の緯度経度範囲（おおよそ）
+      // 北海道から沖縄まで
+      return lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154;
+    };
+
     // ズーム変更時に航空写真レイヤーを切り替え
     map.on('zoomend', () => {
       const currentMapType = mapTypeRef.current; // ref から取得
@@ -154,18 +170,21 @@ export default function Map({
       if (currentMapType !== 'hybrid') return;
 
       const zoom = map.getZoom();
+      const center = map.getCenter();
+      const inJapan = isInJapan(center.lat, center.lng);
       const hasGsi = map.hasLayer(satelliteLayer);
       const hasEsri = map.hasLayer(satelliteLayerEsri);
 
-      console.log(`📍 現在のズーム: ${zoom}, 国土地理院: ${hasGsi}, Esri: ${hasEsri}`);
+      console.log(`📍 現在のズーム: ${zoom}, 日本内: ${inJapan}, 国土地理院: ${hasGsi}, Esri: ${hasEsri}`);
 
-      if (zoom >= 14 && !hasGsi) {
-        // ズーム14以上：国土地理院に切り替え
+      // 日本内かつズーム14以上：国土地理院
+      if (inJapan && zoom >= 14 && !hasGsi) {
         console.log('✅ 国土地理院に切り替え');
         if (hasEsri) map.removeLayer(satelliteLayerEsri);
         satelliteLayer.addTo(map);
-      } else if (zoom < 14 && !hasEsri) {
-        // ズーム13以下：Esriに切り替え
+      }
+      // それ以外：Esri
+      else if ((!inJapan || zoom < 14) && !hasEsri) {
         console.log('✅ Esriに切り替え');
         if (hasGsi) map.removeLayer(satelliteLayer);
         satelliteLayerEsri.addTo(map);
@@ -211,13 +230,21 @@ export default function Map({
       map.removeLayer(labelsLayer);
     }
 
+    // 何を: 日本の範囲内かどうかを判定する関数（mapType切り替え用）
+    const isInJapanSwitch = (lat: number, lng: number): boolean => {
+      return lat >= 24 && lat <= 46 && lng >= 122 && lng <= 154;
+    };
+
     // mapType に応じて必要なレイヤーを追加
     console.log(`🔄 mapType切り替え: ${mapType}`);
     if (mapType === 'hybrid') {
-      // 航空写真 + 地名（ズームレベルに応じて切り替え）
+      // 航空写真 + 地名（ズームレベルと地域に応じて切り替え）
       const currentZoom = map.getZoom();
-      console.log(`📍 現在のズーム: ${currentZoom}`);
-      if (currentZoom >= 14) {
+      const mapCenter = map.getCenter();
+      const inJapan = isInJapanSwitch(mapCenter.lat, mapCenter.lng);
+      console.log(`📍 現在のズーム: ${currentZoom}, 日本内: ${inJapan}`);
+
+      if (inJapan && currentZoom >= 14) {
         console.log('✅ 国土地理院レイヤーを追加');
         satelliteLayer.addTo(map);
       } else {
