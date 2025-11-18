@@ -98,12 +98,12 @@ export default function Map({
       }
     );
 
-    // Esri 航空写真タイル（ズーム13以下で表示）
+    // Esri 航空写真タイル（日本外 or ズーム13以下で表示）
     const satelliteLayerEsri = L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       {
         attribution: '© Esri',
-        maxZoom: 13,
+        maxZoom: 19,
       }
     );
 
