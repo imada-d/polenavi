@@ -277,11 +277,11 @@ export default function MyData() {
                   hashtags.map((hashtag: any, idx: number) => (
                     <button
                       key={idx}
-                      onClick={() => navigate(`/hashtag/${hashtag.tag.replace('#', '')}?userId=${user?.id}`)}
+                      onClick={() => navigate(`/hashtag/${encodeURIComponent(hashtag.tag)}?userId=${user?.id}`)}
                       className="w-full bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg text-blue-600">#{hashtag.tag.replace('#', '')}</span>
+                        <span className="text-lg text-blue-600">{hashtag.tag}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-500">

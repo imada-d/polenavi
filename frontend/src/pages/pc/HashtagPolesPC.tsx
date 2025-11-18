@@ -37,16 +37,23 @@ export default function HashtagPolesPC() {
   const [poles, setPoles] = useState<Pole[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // URLデコードされたタグを取得
+  const decodedTag = tag ? decodeURIComponent(tag) : '';
+
   useEffect(() => {
-    loadPoles();
-  }, [tag, userId]);
+    if (decodedTag) {
+      loadPoles();
+    }
+  }, [decodedTag, userId]);
 
   const loadPoles = async () => {
     try {
       setLoading(true);
+      // バックエンドにはエンコードされた値を送る
+      const encodedTag = encodeURIComponent(decodedTag);
       const url = userId
-        ? `/poles/hashtag/${tag}?userId=${userId}`
-        : `/poles/hashtag/${tag}`;
+        ? `/poles/hashtag/${encodedTag}?userId=${userId}`
+        : `/poles/hashtag/${encodedTag}`;
       const response = await apiClient.get(url);
       console.log('✅ ハッシュタグ電柱取得:', response.data);
       setPoles(response.data.data);
@@ -67,7 +74,7 @@ export default function HashtagPolesPC() {
           <button onClick={() => navigate(-1)} className="mr-4 text-gray-600 hover:text-gray-800">
             ← 戻る
           </button>
-          <h1 className="text-3xl font-bold text-gray-800">#{tag}</h1>
+          <h1 className="text-3xl font-bold text-gray-800">{decodedTag}</h1>
         </div>
 
         {/* コンテンツ */}
