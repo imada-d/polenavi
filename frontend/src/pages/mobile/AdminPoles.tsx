@@ -87,15 +87,17 @@ export default function AdminPoles() {
       });
 
       if (!response.ok) {
-        throw new Error('削除に失敗しました');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('削除失敗の詳細:', response.status, errorData);
+        throw new Error(`削除に失敗しました (${response.status}): ${errorData.error?.message || '不明なエラー'}`);
       }
 
       alert(`${selectedPoles.size}件の電柱を削除しました`);
       setSelectedPoles(new Set());
       loadPoles(); // リロード
-    } catch (error) {
+    } catch (error: any) {
       console.error('一括削除エラー:', error);
-      alert('削除に失敗しました');
+      alert(`削除に失敗しました\n\n${error.message || '不明なエラー'}`);
     } finally {
       setIsDeleting(false);
     }
