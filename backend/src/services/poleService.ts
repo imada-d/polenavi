@@ -539,12 +539,12 @@ export async function searchPolesByMemo(searchQuery: string) {
             'id', p.id,
             'latitude', p.latitude,
             'longitude', p.longitude,
-            'poleTypeName', p."poleTypeName",
-            'numberCount', p."numberCount"
+            'poleTypeName', p.pole_type_name,
+            'numberCount', p.number_count
           ) as pole
-        FROM "PoleMemo" pm
-        JOIN "Pole" p ON pm."poleId" = p.id
-        WHERE pm."isPublic" = true
+        FROM pole_memo pm
+        JOIN poles p ON pm.pole_id = p.id
+        WHERE pm.is_public = true
         AND array_to_string(pm.hashtags, ' ') ILIKE ${`%${keyword}%`}
         LIMIT 50
       `;
