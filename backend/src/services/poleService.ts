@@ -64,18 +64,42 @@ export async function createPole(data: CreatePoleRequest) {
     // 空文字列を事前にフィルタリング
     const validNumbers = numbersToRegister.filter(number => number && number.trim() !== '');
 
+    // 正規化した番号のリストを作成
+    const normalizedNumbers = validNumbers.map(number => {
+      const normalized = normalizePoleNumber(number.trim());
+      return normalized === '?' ? `?-pole${pole.id}` : normalized;
+    });
+
+    // ✅ 既存の番号をチェック（重複検出）
+    const existingNumbers = await tx.poleNumber.findMany({
+      where: {
+        poleNumber: {
+          in: normalizedNumbers,
+        },
+      },
+      select: {
+        poleNumber: true,
+      },
+    });
+
+    if (existingNumbers.length > 0) {
+      // 既に登録されている番号を取得
+      const duplicateNumber = existingNumbers[0].poleNumber;
+      // 元の番号に戻す（表示用）
+      const originalNumber = validNumbers.find(
+        num => normalizePoleNumber(num.trim()) === duplicateNumber
+      ) || duplicateNumber;
+      throw new ValidationError(`番号「${originalNumber}」は既に他の電柱で使用されています`);
+    }
+
+    // ✅ 同じ番号が複数入力されていないかチェック
+    const uniqueCheck = new Set(normalizedNumbers);
+    if (uniqueCheck.size !== normalizedNumbers.length) {
+      throw new ValidationError('同じ番号が複数入力されています。異なる番号を入力してください');
+    }
+
     const poleNumbers = await Promise.all(
-      validNumbers.map(async (number) => {
-        // 番号を正規化
-        let normalizedNumber = normalizePoleNumber(number.trim());
-
-        // '?' の場合は電柱IDを付与してユニークにする
-        // （フロントエンドでは '?' とだけ表示される）
-        if (normalizedNumber === '?') {
-          normalizedNumber = `?-pole${pole.id}`;
-          console.log(`🔄 '?' を '${normalizedNumber}' に変換しました`);
-        }
-
+      normalizedNumbers.map(async (normalizedNumber) => {
         return tx.poleNumber.create({
           data: {
             poleId: pole.id,

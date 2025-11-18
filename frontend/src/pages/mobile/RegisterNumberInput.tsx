@@ -157,6 +157,19 @@ export default function RegisterNumberInput() {
         return;
       }
 
+      // 同じ番号が複数入力されていないかチェック
+      const nonEmptyNumbers = trimmedNumbers.filter(n => n !== '');
+      const uniqueNumbers = new Set(nonEmptyNumbers);
+
+      if (nonEmptyNumbers.length !== uniqueNumbers.size) {
+        // 重複している番号を見つける
+        const duplicates = nonEmptyNumbers.filter((num, index) =>
+          nonEmptyNumbers.indexOf(num) !== index
+        );
+        alert(`⚠️ 同じ番号が複数入力されています\n\n重複: ${duplicates[0]}\n\n異なる番号を入力してください`);
+        return;
+      }
+
       finalNumbers = trimmedNumbers;
     }
 

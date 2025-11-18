@@ -54,11 +54,19 @@ function handlePrismaError(err: any, res: Response): void {
   switch (err.code) {
     // 重複エラー
     case 'P2002':
+      // フィールド名から適切なメッセージを生成
+      const field = err.meta?.target?.[0];
+      let duplicateMessage = 'この番号は既に登録されています';
+
+      if (field === 'pole_number' || field === 'poleNumber') {
+        duplicateMessage = '入力した番号は既に他の電柱で使用されています';
+      }
+
       res.status(409).json({
         success: false,
         error: {
           code: 'DUPLICATE',
-          message: 'この番号は既に登録されています',
+          message: duplicateMessage,
           field: err.meta?.target,
         },
       });
