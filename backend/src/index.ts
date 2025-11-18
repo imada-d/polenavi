@@ -46,6 +46,7 @@ app.use(helmet({
         "https://*.openstreetmap.org",
         "https://server.arcgisonline.com",
         "https://*.basemaps.cartocdn.com",
+        "https://cyberjapandata.gsi.go.jp", // 国土地理院タイル
         "https://raw.githubusercontent.com",
         "https://cdnjs.cloudflare.com",
         "https://www.google-analytics.com"
