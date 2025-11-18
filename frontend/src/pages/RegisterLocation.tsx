@@ -124,21 +124,7 @@ export default function RegisterLocation() {
 
   return (
     <div className="h-screen w-full flex flex-col">
-      {/* ヘッダー */}
-      <header className="bg-white border-b px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => navigate('/')}
-          className="p-2 hover:bg-gray-100 rounded"
-        >
-          ← 戻る
-        </button>
-        <div className="text-center">
-          <h1 className="text-lg font-bold">位置を確認</h1>
-        </div>
-        <div className="w-10"></div> {/* 中央揃え用 */}
-      </header>
-
-      {/* 地図エリア */}
+      {/* 地図エリア（フルスクリーン） */}
       <main className="flex-1 relative">
         {currentLocation && pinLocation && (
           <Map 
@@ -191,13 +177,13 @@ export default function RegisterLocation() {
         </div>
       </main>
 
-      {/* 次へボタン - z-indexをBottomNav(2000)より高く設定 */}
-      <div className="bg-white border-t px-4 py-4 relative z-[2001]">
+      {/* 次へボタン - 下部に固定 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-4 z-[2001]">
         <button
           onClick={handleNext}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg"
         >
-          ✅ この位置で次へ
+          ✅ この位置で登録
         </button>
       </div>
     </div>
