@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow sensitive areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+
+# Sitemap
+Sitemap: https://polenavi.com/sitemap.xml

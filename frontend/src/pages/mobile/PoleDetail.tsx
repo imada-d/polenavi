@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import L from 'leaflet';
 import Accordion from '../../components/common/Accordion';
 import { FEATURES } from '../../config/features';
@@ -281,10 +282,23 @@ export default function PoleDetail() {
     );
   }
 
+  const poleTypeName = poleData?.poleTypeName || '柱';
+  const pageTitle = `${poleTypeName} #${id} - PoleNavi`;
+  const pageDescription = `${poleTypeName}の詳細情報。位置: 緯度${poleData?.latitude?.toFixed(6)}, 経度${poleData?.longitude?.toFixed(6)}。${poleData?.numbers?.[0]?.plateNumber ? `番号札: ${poleData.numbers[0].plateNumber}` : ''}`;
+
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="article" />
+        <link rel="canonical" href={`https://polenavi.com/poles/${id}`} />
+      </Helmet>
+      <div className="min-h-screen flex flex-col bg-gray-50">
         {/* ヘッダー */}
-      <header className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-50">
+        <header className="bg-white border-b px-4 py-3 flex items-center gap-3 sticky top-0 z-50">
         <button
           onClick={() => navigate(-1)}
           className="text-2xl text-gray-600"
@@ -625,6 +639,7 @@ export default function PoleDetail() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Map, { poleIcons } from '../components/common/Map';
 import RegisterPanel from './pc/RegisterPanel';
 import PoleDetailPanel from '../components/pc/PoleDetailPanel';
@@ -639,9 +640,18 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col">
-      {/* PC用ヘッダー */}
-      <Header onSearchClick={() => setShowSearchPanel(true)} />
+    <>
+      <Helmet>
+        <title>PoleNavi - 電柱・柱の位置情報共有プラットフォーム</title>
+        <meta name="description" content="電柱、照明柱、標識柱、信号柱などの柱の位置情報を地図上で共有・検索できるプラットフォーム。写真、番号札、メモ、ハッシュタグで柱を記録・管理できます。" />
+        <meta property="og:title" content="PoleNavi - 電柱・柱の位置情報共有プラットフォーム" />
+        <meta property="og:description" content="電柱、照明柱、標識柱、信号柱などの柱の位置情報を地図上で共有・検索できるプラットフォーム。写真、番号札、メモ、ハッシュタグで柱を記録・管理できます。" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://polenavi.com/" />
+      </Helmet>
+      <div className="h-screen w-full flex flex-col">
+        {/* PC用ヘッダー */}
+        <Header onSearchClick={() => setShowSearchPanel(true)} />
 
       {/* モバイル用ヘッダー */}
       <header className="md:hidden bg-white border-b px-4 py-3 flex items-center justify-between">
@@ -847,6 +857,7 @@ export default function Home() {
           ＋ 電柱を登録
         </button>
       )}
-    </div>
+      </div>
+    </>
   );
 }

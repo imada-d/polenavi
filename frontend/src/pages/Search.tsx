@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { searchPoleByNumber } from '../api/poles';
 
 export default function Search() {
@@ -45,8 +46,16 @@ export default function Search() {
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">🔍 検索</h1>
+    <>
+      <Helmet>
+        <title>検索 - PoleNavi</title>
+        <meta name="description" content="電柱番号やハッシュタグで柱を検索。番号札の番号、キーワード、ハッシュタグから柱の位置情報を素早く見つけられます。" />
+        <meta property="og:title" content="検索 - PoleNavi" />
+        <meta property="og:description" content="電柱番号やハッシュタグで柱を検索。番号札の番号、キーワード、ハッシュタグから柱の位置情報を素早く見つけられます。" />
+        <link rel="canonical" href="https://polenavi.com/search" />
+      </Helmet>
+      <div className="p-4 max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">🔍 検索</h1>
 
       <div className="space-y-4">
         {/* 番号検索 */}
@@ -157,6 +166,7 @@ export default function Search() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
