@@ -50,6 +50,9 @@ docker-compose.override.yml
 # アップロード画像
 /backend/public/uploads/
 
+# テスト環境設定
+docker-compose.test.yml
+
 # TypeScript
 *.tsbuildinfo
 
