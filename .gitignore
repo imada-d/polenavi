@@ -47,6 +47,9 @@ docker-compose.override.yml
 /backend/photos/originals/*
 !/backend/photos/originals/.gitkeep
 
+# アップロード画像
+/backend/public/uploads/
+
 # TypeScript
 *.tsbuildinfo
 
