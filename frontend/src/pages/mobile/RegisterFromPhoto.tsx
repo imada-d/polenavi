@@ -382,15 +382,6 @@ export default function RegisterFromPhoto() {
           </label>
         )}
 
-        {/* 制約ルールの表示 */}
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm">
-          <p className="font-bold text-yellow-800">📋 選択ルール</p>
-          <ul className="mt-2 space-y-1 text-yellow-700">
-            <li>• 番号札: 必ず1枚（位置情報取得のため）</li>
-            <li>• 残り3枚: 全体・詳細は自由に組み合わせ可</li>
-          </ul>
-        </div>
-
         {/* 写真プレビュー・分類選択 */}
         {photos.length > 0 && (
           <div className="space-y-4">
@@ -616,6 +607,31 @@ export default function RegisterFromPhoto() {
               </p>
             )}
           </div>
+        )}
+
+        {/* 注意事項（一番下に表示） */}
+        {photos.length === 0 && (
+          <>
+            {/* 制約ルールの表示 */}
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-sm mt-4">
+              <p className="font-bold text-yellow-800">📋 選択ルール</p>
+              <ul className="mt-2 space-y-1 text-yellow-700">
+                <li>• 番号札: 必ず1枚（位置情報取得のため）</li>
+                <li>• 残り3枚: 全体・詳細は自由に組み合わせ可</li>
+              </ul>
+            </div>
+
+            {/* 位置情報についての注意 */}
+            <div className="bg-red-50 border-l-4 border-red-400 p-3 text-sm mt-4">
+              <p className="font-bold text-red-800 mb-2">⚠️ 重要：位置情報について</p>
+              <ul className="space-y-1 text-red-700 text-xs">
+                <li>• <strong>EXIF データ</strong>から位置情報を取得します</li>
+                <li>• <strong>生写真（カメラで撮影したオリジナル）</strong>でないと位置情報が取れません</li>
+                <li>• スクリーンショット、編集済み、SNSからダウンロードした写真は位置情報が削除されています</li>
+                <li>• 位置情報が無い場合は、手動で位置を指定する必要があります</li>
+              </ul>
+            </div>
+          </>
         )}
       </div>
     </div>
