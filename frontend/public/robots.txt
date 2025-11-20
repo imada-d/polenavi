@@ -1,12 +1,3 @@
-# https://www.robotstxt.org/robotstxt.html
+# テスト環境 - 検索エンジンにインデックスさせない
 User-agent: *
-Allow: /
-
-# Disallow sensitive areas
-Disallow: /api/
-Disallow: /admin/
-Disallow: /login
-Disallow: /register
-
-# Sitemap
-Sitemap: https://polenavi.com/sitemap.xml
+Disallow: /
