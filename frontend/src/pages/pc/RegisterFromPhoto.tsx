@@ -47,6 +47,9 @@ export default function RegisterFromPhotoPC() {
   const [isContinuousMode, setIsContinuousMode] = useState(false);
   const [lastReg, setLastReg] = useState<LastRegistration | null>(null);
 
+  // 写真拡大表示用
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   // 番号札として分類された写真
   const platePhotos = photos.filter(p => p.type === 'plate');
 
@@ -373,6 +376,29 @@ export default function RegisterFromPhotoPC() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      {/* 写真拡大モーダル */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-full max-h-full">
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-white text-black rounded-full p-2 shadow-lg hover:bg-gray-200 z-10"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <img
+              src={selectedImage}
+              alt="拡大表示"
+              className="max-w-[90vw] max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
       {/* ヘッダー */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex items-center gap-4 mb-4">
@@ -562,11 +588,12 @@ export default function RegisterFromPhotoPC() {
                   {/* 番号札写真のサムネイル */}
                   {platePhotos[index] && (
                     <div className="bg-gray-100 rounded-lg p-2">
-                      <p className="text-xs text-gray-600 mb-1">番号札 {index + 1}</p>
+                      <p className="text-xs text-gray-600 mb-1">番号札 {index + 1} 📷 クリックで拡大</p>
                       <img
                         src={platePhotos[index].dataUrl}
                         alt={`番号札 ${index + 1}`}
-                        className="w-full h-40 object-contain rounded"
+                        className="w-full h-40 object-contain rounded cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setSelectedImage(platePhotos[index].dataUrl)}
                       />
                     </div>
                   )}
