@@ -59,7 +59,6 @@ import RegisterFromPhotoMobile from './pages/mobile/RegisterFromPhoto';
 import RegisterFromPhotoPC from './pages/pc/RegisterFromPhoto';
 import RegisterDuplicateCheck from './pages/RegisterDuplicateCheck';
 import PhotoRegisterLocation from './pages/mobile/PhotoRegisterLocation';
-import PhotoRegisterPoleInfo from './pages/mobile/PhotoRegisterPoleInfo';
 import PhotoRegisterMemo from './pages/mobile/PhotoRegisterMemo';
 import BugReport from './pages/BugReport';
 
@@ -140,7 +139,6 @@ function AppContent() {
         <Route path="/register/duplicate-check" element={<RegisterDuplicateCheck />} />
         {/* 写真から登録専用フロー */}
         <Route path="/register/photo/location" element={<PhotoRegisterLocation />} />
-        <Route path="/register/photo/pole-info" element={<PhotoRegisterPoleInfo />} />
         <Route path="/register/photo/memo" element={<PhotoRegisterMemo />} />
         {/* 手動入力フロー */}
         <Route path="/register/location" element={<RegisterLocation />} />
