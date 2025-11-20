@@ -422,7 +422,7 @@ export default function RegisterFromPhotoPC() {
       {/* 左右分割レイアウト */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 左側: 写真取り込み + 分類選択 */}
-        <div className="space-y-6">
+        <div className="space-y-6 h-[calc(100vh-400px)] overflow-y-auto pr-2">
           {/* 写真選択ボタン */}
           {photos.length < 4 && (
             <label className="block">
@@ -521,7 +521,7 @@ export default function RegisterFromPhotoPC() {
         </div>
 
         {/* 右側: 電柱種類選択 + 番号札枚数選択 + 番号入力 */}
-        <div className="space-y-6">
+        <div className="space-y-6 h-[calc(100vh-400px)] overflow-y-auto pr-2">
           {photos.length > 0 && hasPlatePhoto && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <PoleTypeSelector
