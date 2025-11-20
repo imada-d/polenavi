@@ -287,12 +287,26 @@ export default function RegisterFromPhoto() {
         // GPS情報が無い場合
         setIsProcessing(false);
         const shouldManualRegister = window.confirm(
-          'この写真には位置情報が含まれていません。\n\n手動で登録しますか？'
+          'この写真には位置情報が含まれていません。\n\n位置を手動で選択しますか？'
         );
 
         if (shouldManualRegister) {
-          // 通常の登録フローへ遷移（位置選択から）
-          navigate('/register/location');
+          // 写真データを保持したまま、手動位置選択画面へ
+          const photosByType = {
+            plate: photos.find(p => p.type === 'plate')?.dataUrl || null,
+            full: photos.filter(p => p.type === 'full').map(p => p.dataUrl),
+            detail: photos.filter(p => p.type === 'detail').map(p => p.dataUrl),
+          };
+
+          navigate('/register/photo/manual-location', {
+            state: {
+              photos: photosByType,
+              poleType,
+              poleSubType,
+              plateCount,
+              numbers: finalNumbers,
+            },
+          });
         }
         return;
       }

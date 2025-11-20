@@ -280,64 +280,22 @@ export default function RegisterFromPhotoPC() {
         );
 
         if (shouldManualRegister) {
-          // 写真データを保持したまま、手動で位置を選択する画面へ
+          // 写真データを保持したまま、手動位置選択画面へ
           const photosByType = {
             plate: photos.find(p => p.type === 'plate')?.dataUrl || null,
             full: photos.filter(p => p.type === 'full').map(p => p.dataUrl),
             detail: photos.filter(p => p.type === 'detail').map(p => p.dataUrl),
           };
 
-          // 現在地を取得してから遷移
-          if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const { latitude, longitude } = position.coords;
-                sessionStorage.setItem('registrationMethod', 'photo-first');
-                navigate('/register/photo/location', {
-                  state: {
-                    gpsLocation: [latitude, longitude],
-                    photos: photosByType,
-                    poleType,
-                    poleSubType,
-                    plateCount,
-                    numbers: finalNumbers,
-                    registrationMethod: 'photo-first',
-                    manualLocation: true,
-                  },
-                });
-              },
-              (error) => {
-                console.error('位置情報の取得に失敗:', error);
-                sessionStorage.setItem('registrationMethod', 'photo-first');
-                navigate('/register/photo/location', {
-                  state: {
-                    gpsLocation: [36.5, 138.0],
-                    photos: photosByType,
-                    poleType,
-                    poleSubType,
-                    plateCount,
-                    numbers: finalNumbers,
-                    registrationMethod: 'photo-first',
-                    manualLocation: true,
-                  },
-                });
-              }
-            );
-          } else {
-            sessionStorage.setItem('registrationMethod', 'photo-first');
-            navigate('/register/photo/location', {
-              state: {
-                gpsLocation: [36.5, 138.0],
-                photos: photosByType,
-                poleType,
-                poleSubType,
-                plateCount,
-                numbers: finalNumbers,
-                registrationMethod: 'photo-first',
-                manualLocation: true,
-              },
-            });
-          }
+          navigate('/register/photo/manual-location', {
+            state: {
+              photos: photosByType,
+              poleType,
+              poleSubType,
+              plateCount,
+              numbers: finalNumbers,
+            },
+          });
         }
         return;
       }
