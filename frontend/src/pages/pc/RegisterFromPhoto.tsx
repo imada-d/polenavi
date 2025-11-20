@@ -419,32 +419,6 @@ export default function RegisterFromPhotoPC() {
         </p>
       </div>
 
-      {/* EXIF情報についての重要な注意 */}
-      <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded">
-        <div className="flex items-start gap-2">
-          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-bold text-red-800 mb-2">⚠️ 重要：位置情報について</p>
-            <ul className="space-y-1 text-red-700 text-sm">
-              <li>• <strong>EXIF データ</strong>から位置情報を取得します</li>
-              <li>• <strong>生写真（カメラで撮影したオリジナル）</strong>でないと位置情報が取れません</li>
-              <li>• スクリーンショット、編集済み、SNSからダウンロードした写真は位置情報が削除されています</li>
-              <li>• 位置情報が無い場合は、手動で位置を指定する必要があります</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* 制約ルール */}
-      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
-        <p className="font-bold text-yellow-800 mb-2">📋 選択ルール</p>
-        <ul className="space-y-1 text-yellow-700">
-          <li>• <strong>番号札:</strong> 必ず1枚（位置情報取得のため必須）</li>
-          <li>• <strong>残り3枚:</strong> 全体・詳細は自由に組み合わせ可能</li>
-          <li>• <strong>合計:</strong> 最大4枚まで選択できます</li>
-        </ul>
-      </div>
-
       {/* 左右分割レイアウト */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 左側: 写真取り込み + 分類選択 */}
@@ -697,6 +671,37 @@ export default function RegisterFromPhotoPC() {
             </p>
           )}
         </div>
+      )}
+
+      {/* 注意事項（一番下に表示） */}
+      {photos.length === 0 && (
+        <>
+          {/* 制約ルール */}
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded mt-6">
+            <p className="font-bold text-yellow-800 mb-2">📋 選択ルール</p>
+            <ul className="space-y-1 text-yellow-700">
+              <li>• <strong>番号札:</strong> 必ず1枚（位置情報取得のため必須）</li>
+              <li>• <strong>残り3枚:</strong> 全体・詳細は自由に組み合わせ可能</li>
+              <li>• <strong>合計:</strong> 最大4枚まで選択できます</li>
+            </ul>
+          </div>
+
+          {/* EXIF情報についての重要な注意 */}
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-bold text-red-800 mb-2">⚠️ 重要：位置情報について</p>
+                <ul className="space-y-1 text-red-700 text-sm">
+                  <li>• <strong>EXIF データ</strong>から位置情報を取得します</li>
+                  <li>• <strong>生写真（カメラで撮影したオリジナル）</strong>でないと位置情報が取れません</li>
+                  <li>• スクリーンショット、編集済み、SNSからダウンロードした写真は位置情報が削除されています</li>
+                  <li>• 位置情報が無い場合は、手動で位置を指定する必要があります</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
