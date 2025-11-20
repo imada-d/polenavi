@@ -284,7 +284,7 @@ export default function PoleDetail() {
 
   const poleTypeName = poleData?.poleTypeName || '柱';
   const pageTitle = `${poleTypeName} #${id} - PoleNavi`;
-  const pageDescription = `${poleTypeName}の詳細情報。位置: 緯度${poleData?.latitude?.toFixed(6)}, 経度${poleData?.longitude?.toFixed(6)}。${poleData?.numbers?.[0]?.plateNumber ? `番号札: ${poleData.numbers[0].plateNumber}` : ''}`;
+  const pageDescription = `${poleTypeName}の詳細情報。位置: 緯度${Number(poleData?.latitude || 0).toFixed(6)}, 経度${Number(poleData?.longitude || 0).toFixed(6)}。${poleData?.numbers?.[0]?.plateNumber ? `番号札: ${poleData.numbers[0].plateNumber}` : ''}`;
 
   return (
     <>

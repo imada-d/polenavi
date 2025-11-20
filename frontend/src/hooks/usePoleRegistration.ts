@@ -11,7 +11,7 @@ interface PoleRegistrationData {
   plateCount: number;
   numbers: string[];
   memo?: string;
-  hashtag?: string;
+  hashtag?: string | string[]; // 文字列または配列を許可
 }
 
 interface RegistrationState {
@@ -42,6 +42,11 @@ export function usePoleRegistration() {
     setState({ loading: true, error: null, success: false, data: null });
 
     try {
+      // hashtagを配列から文字列に変換（配列の場合はカンマ区切りに）
+      const hashtagString = Array.isArray(data.hashtag)
+        ? data.hashtag.join(',')
+        : data.hashtag || '';
+
       const response = await apiClient.post('/poles', {
         latitude: data.location[0],
         longitude: data.location[1],
@@ -50,7 +55,7 @@ export function usePoleRegistration() {
         plateCount: data.plateCount,
         numbers: data.numbers,
         memo: data.memo,
-        hashtag: data.hashtag,
+        hashtag: hashtagString,
       });
 
       // バックエンドのレスポンス形式: { success: true, message: "...", data: {...} }

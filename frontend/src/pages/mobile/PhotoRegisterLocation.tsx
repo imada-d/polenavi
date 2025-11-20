@@ -17,7 +17,7 @@ export default function PhotoRegisterLocation() {
   const photoLocationMarkerRef = useRef<L.Marker | null>(null);
 
   // 前の画面から受け取ったデータ
-  const { gpsLocation, photos, manualLocation } = location.state || {};
+  const { gpsLocation, photos, manualLocation, poleType, poleSubType, plateCount, numbers } = location.state || {};
 
   const [photoLocation] = useState<[number, number]>(gpsLocation); // 写真のGPS（固定）
   const [pinLocation, setPinLocation] = useState<[number, number]>(gpsLocation); // 調整可能なピン位置
@@ -89,6 +89,10 @@ export default function PhotoRegisterLocation() {
       const dataToSave = {
         location: pinLocation,
         photos,
+        poleType,
+        poleSubType,
+        plateCount,
+        numbers,
       };
 
       // sessionStorage に保存（iPhoneで消える対策）
@@ -99,7 +103,8 @@ export default function PhotoRegisterLocation() {
         console.error('❌ sessionStorage 保存エラー:', error);
       }
 
-      navigate('/register/photo/pole-info', {
+      // メモ画面に直接遷移（電柱情報・番号入力は写真分類画面で完了済み）
+      navigate('/register/photo/memo', {
         state: dataToSave,
       });
     }
@@ -166,7 +171,7 @@ export default function PhotoRegisterLocation() {
           onClick={handleNext}
           className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700"
         >
-          次へ（柱の情報入力）
+          次へ（メモ入力）
         </button>
       </div>
     </div>

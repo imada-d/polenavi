@@ -28,12 +28,15 @@ export default function RegisterDuplicateCheck() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { gps, photos } = location.state || {};
+  const { gps, photos, poleType, poleSubType, plateCount, numbers } = location.state || {};
 
   // デバッグ用
   console.log('⚠️ RegisterDuplicateCheck - 受け取ったデータ:', {
     gps,
-    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし'
+    photos: photos ? `✅あり (${Array.isArray(photos) ? photos.length : 'object'})` : '❌なし',
+    poleType,
+    plateCount,
+    numbers
   });
 
   const [nearbyPoles, setNearbyPoles] = useState<Pole[]>([]);
@@ -115,6 +118,10 @@ export default function RegisterDuplicateCheck() {
           state: {
             gpsLocation: [gps.latitude, gps.longitude],
             photos,
+            poleType,
+            poleSubType,
+            plateCount,
+            numbers,
           },
         });
         return;
@@ -150,6 +157,10 @@ export default function RegisterDuplicateCheck() {
       state: {
         gpsLocation: [gps.latitude, gps.longitude],
         photos,
+        poleType,
+        poleSubType,
+        plateCount,
+        numbers,
       },
     });
   };
